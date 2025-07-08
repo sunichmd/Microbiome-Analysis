@@ -1,0 +1,249 @@
+# R去计算物种水平的count值
+
+方便后续计算alpha、beta等分析
+
+1。需要的文件：一个otutab.txt;另一个是taxomy.txt
+2. 把相同注释的asv的count值累加，拿到该注释的count值
+```{r}
+# cran包的安装方式：install.packages("dplyr")
+# Biocondator包的安装方式：BiocManager::install("clusterProfiler")
+library(dplyr)
+
+# 读入数据
+otutab = read.table("result/otutab.txt",row.names = 1, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE,comment.char = "",header = T)
+tax = read.table("result/taxonomy.txt",row.names = 1, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE,comment.char = "",header = T)
+
+# 按照otu表的asv的顺序排序，方便后面合并
+tax = tax[rownames(otutab),]
+
+# 从taxonomy.txt把界的信息提取出来
+grp <- tax[rownames(tax), "Kingdom", drop=F]
+
+# 按ASV合并outab.txt和taxonomy.txt中界的信息
+merge = cbind(otutab, grp)
+
+# 把相同注释的asv的count值累加，拿到该注释的count值
+HA_Kingdom = merge %>% group_by(Kingdom) %>% summarise_all(sum)
+write.table(HA_Kingdom,"result/k_count_table.txt",sep = "\t",quote = F,row.names = F)
+
+# 按Phylum合并
+# 从taxonomy.txt把门的信息提取出来
+grp <- tax[rownames(tax), "Phylum", drop=F]
+
+# 按ASV合并outab.txt和taxonomy.txt中界的信息
+merge = cbind(otutab, grp)
+
+# 把相同注释的asv的count值累加，拿到该注释的count值
+HA_Kingdom = merge %>% group_by(Phylum) %>% summarise_all(sum)
+write.table(HA_Kingdom,"result/p_count_table.txt",sep = "\t",quote = F,row.names = F)
+
+  # 按Class合并
+# 从taxonomy.txt把门的信息提取出来
+grp <- tax[rownames(tax), "Class", drop=F]
+
+# 按ASV合并outab.txt和taxonomy.txt中界的信息
+merge = cbind(otutab, grp)
+
+# 把相同注释的asv的count值累加，拿到该注释的count值
+HA_Kingdom = merge %>% group_by(Class) %>% summarise_all(sum)
+write.table(HA_Kingdom,"result/c_count_table.txt",sep = "\t",quote = F,row.names = F)
+
+  # 按Order合并
+grp <- tax[rownames(tax), "Order", drop=F]
+
+# 按ASV合并outab.txt和taxonomy.txt中界的信息
+merge = cbind(otutab, grp)
+
+# 把相同注释的asv的count值累加，拿到该注释的count值
+HA_Kingdom = merge %>% group_by(Order) %>% summarise_all(sum)
+write.table(HA_Kingdom,"result/o_count_table.txt",sep = "\t",quote = F,row.names = F)
+
+  # 按Family合并
+grp <- tax[rownames(tax), "Family", drop=F]
+
+# 按ASV合并outab.txt和taxonomy.txt中界的信息
+merge = cbind(otutab, grp)
+
+# 把相同注释的asv的count值累加，拿到该注释的count值
+HA_Kingdom = merge %>% group_by(Family) %>% summarise_all(sum)
+write.table(HA_Kingdom,"result/f_count_table.txt",sep = "\t",quote = F,row.names = F)
+
+  # 按Genus合并
+grp <- tax[rownames(tax), "Genus", drop=F]
+
+# 按ASV合并outab.txt和taxonomy.txt中界的信息
+merge = cbind(otutab, grp)
+
+# 把相同注释的asv的count值累加，拿到该注释的count值
+HA_Kingdom = merge %>% group_by(Genus) %>% summarise_all(sum)
+write.table(HA_Kingdom,"result/g_count_table.txt",sep = "\t",quote = F,row.names = F)
+```
+
+### 5.3 等量抽样标准化
+
+    # Normlize by subsample
+
+    #使用vegan包进行等量重抽样，输入reads count格式Feature表result/otutab.txt
+    #可指定输入文件、抽样量和随机数，输出抽平表result/otutab_rare.txt和多样性alpha/vegan.txt
+    mkdir -p result/alpha
+    Rscript ${db}/script/otutab_rare.R --input result/g_count_table.txt \
+      --depth 0 --seed 1 \
+      --normalize result/g_otutab_rare.txt \
+      --output result/alpha/g_vegan.txt
+    usearch -otutab_stats result/g_otutab_rare.txt \
+      -output result/g_otutab_rare.stat
+    cat result/g_otutab_rare.stat
+
+
+## 6. α多样性 alpha diversity
+
+### 6.1. 计算α多样性 calculate alpha diversity
+
+    # 使用USEARCH计算14种alpha多样性指数(Chao1有错勿用)
+    #details in http://www.drive5.com/usearch/manual/alpha_metrics.html
+    usearch -alpha_div result/g_otutab_rare.txt \
+      -output result/alpha/g_alpha.txt
+
+### 6.2. 计算稀释丰富度 calculate rarefaction richness
+
+    #稀释曲线：取1%-100%的序列中OTUs数量，每次无放回抽样
+    #Rarefaction from 1%, 2% .. 100% in richness (observed OTUs)-method without_replacement https://drive5.com/usearch/manual/cmd_otutab_subsample.html
+    usearch -alpha_div_rare result/g_otutab_rare.txt \
+      -output result/alpha/g_alpha_rare.txt \
+      -method without_replacement
+    #预览结果
+    head -n2 result/alpha/g_alpha_rare.txt
+    #样本测序量低出现非数值"-"的处理，详见常见问题8
+    sed -i "s/-/\t0.0/g" result/alpha/g_alpha_rare.txt
+
+### 6.3. 筛选高丰度菌 Filter by abundance
+
+    #计算各特征的均值，有组再求分组均值，需根据实验设计metadata.txt修改组列名
+    #输入文件为feautre表result/otutab.txt，实验设计metadata.txt
+    #输出为特征表按组的均值-一个实验可能有多种分组方式
+    #-h显示脚本帮助(参数说明)
+    Rscript ${db}/script/otu_mean.R -h
+    #scale是否标准化，zoom标准化总和，all输出全部样本均值，type计算类型mean或sum
+    Rscript ${db}/script/otu_mean.R --input result/g_count_table.txt \
+      --metadata result/metadata.txt \
+      --group Group --thre 0 \
+      --scale TRUE --zoom 100 --all TRUE --type mean \
+      --output result/g_otutab_mean.txt
+    # 结果为全部和各组均值
+    head -n3 result/g_otutab_mean.txt
+
+    #如以平均丰度>0.1%筛选，可选0.5或0.05，得到每个组的OTU组合
+    awk 'BEGIN{OFS=FS="\t"}{if(FNR==1) {for(i=2;i<=NF;i++) a[i]=$i;} \
+        else {for(i=2;i<=NF;i++) if($i>0.05) print $1, a[i];}}' \
+        result/g_otutab_mean.txt > result/alpha/g_otu_group_exist.txt
+    head result/alpha/g_otu_group_exist.txt
+    wc -l result/alpha/g_otu_group_exist.txt
+    # 试一试：不同丰度下各组有多少OTU/ASV
+    # 可在http://ehbio.com/test/venn/中绘图并显示各组共有和特有维恩或网络图
+    # 也可在http://www.ehbio.com/ImageGP绘制Venn、upSetView和Sanky
+
+## 7. β多样性 Beta diversity
+
+    #结果有多个文件，需要目录
+    mkdir -p result/beta/
+    # 因为没有属的fasta文件，就没法建树和计算unifrac距离
+    #基于OTU构建进化树 Make OTU tree, 4s
+    #usearch -cluster_agg result/otus.fa -treeout result/otus.tree
+    #生成5种距离矩阵：bray_curtis, euclidean, jaccard, manhatten, unifrac
+    usearch -beta_div result/g_otutab_rare.txt \
+      -filename_prefix result/beta/g_ -metrics bray_curtis,euclidean,jaccard,manhatten
+
+# R语言多样性和物种组成分析
+
+## 1. Alpha多样性
+
+### 1.1 Alpha多样性箱线图
+
+    # 查看帮助
+    Rscript ${db}/script/alpha_boxplot.R -h
+    # 完整参数，多样性指数可选richness chao1 ACE shannon simpson invsimpson
+    Rscript ${db}/script/alpha_boxplot.R --alpha_index richness \
+      --input result/alpha/g_vegan.txt --design result/metadata.txt \
+      --group Group --output result/alpha/g_ \
+      --width 89 --height 59
+    # 使用循环绘制6种常用指数
+    for i in `head -n1 result/alpha/vegan.txt|cut -f 2-`;do
+      Rscript ${db}/script/alpha_boxplot.R --alpha_index ${i} \
+        --input result/alpha/g_vegan.txt --design result/metadata.txt \
+        --group Group --output result/alpha/g_ \
+        --width 89 --height 59
+    done
+
+    # Alpha多样性柱状图+标准差
+    Rscript ${db}/script/alpha_barplot.R --alpha_index richness \
+      --input result/alpha/g_vegan.txt --design result/metadata.txt \
+      --group Group --output result/alpha/g_ \
+      --width 89 --height 59
+
+### 1.2 稀释曲线
+
+    Rscript ${db}/script/alpha_rare_curve.R \
+      --input result/alpha/g_alpha_rare.txt --design result/metadata.txt \
+      --group Group --output result/alpha/g_ \
+      --width 120 --height 59
+
+### 1.3 多样性维恩图
+
+    # 三组比较:-f输入文件,-a/b/c/d/g分组名,-w/u为宽高英寸,-p输出文件名后缀
+    bash ${db}/script/sp_vennDiagram.sh \
+      -f result/alpha/g_otu_group_exist.txt \
+      -a WT -b KO -c OE \
+      -w 3 -u 3 \
+      -p WT_KO_OE
+    # 四组比较，图和代码见输入文件目录，运行目录为当前项目根目录
+    bash ${db}/script/sp_vennDiagram.sh \
+      -f result/alpha/g_otu_group_exist.txt \
+      -a WT -b KO -c OE -d All \
+      -w 3 -u 3 \
+      -p WT_KO_OE_All
+
+## 2. Beta多样性
+
+### 2.1 距离矩阵热图pheatmap
+
+    # 以bray_curtis为例，-f输入文件,-h是否聚类TRUE/FALSE,-u/v为宽高英寸
+    bash ${db}/script/sp_pheatmap.sh \
+      -f result/beta/g_bray_curtis.txt \
+      -H 'TRUE' -u 6 -v 5
+    # 添加分组注释，如2，4列的基因型和地点
+    cut -f 1-2 result/metadata.txt > temp/group.txt
+    # -P添加行注释文件，-Q添加列注释
+    bash ${db}/script/sp_pheatmap.sh \
+      -f result/beta/g_bray_curtis.txt \
+      -H 'TRUE' -u 6.9 -v 5.6 \
+      -P temp/group.txt -Q temp/group.txt
+    # 距离矩阵与相关类似，可尝试corrplot或ggcorrplot绘制更多样式
+    # - [绘图相关系数矩阵corrplot](http://mp.weixin.qq.com/s/H4_2_vb2w_njxPziDzV4HQ)
+    # - [相关矩阵可视化ggcorrplot](http://mp.weixin.qq.com/s/AEfPqWO3S0mRnDZ_Ws9fnw)
+
+### 2.2 主坐标分析PCoA
+
+    # 输入文件，选择分组，输出文件，图片尺寸mm，统计见beta_pcoa_stat.txt
+    Rscript ${db}/script/beta_pcoa.R \
+      --input result/beta/g_bray_curtis.txt --design result/metadata.txt \
+      --group Group --label FALSE --width 89 --height 59 \
+      --output result/beta/g_bray_curtis.pcoa.pdf
+    # 添加样本标签 --label TRUE
+    Rscript ${db}/script/beta_pcoa.R \
+      --input result/beta/g_bray_curtis.txt --design result/metadata.txt \
+      --group Group --label TRUE --width 89 --height 59 \
+      --output result/beta/g_bray_curtis.pcoa.label.pdf
+      
+
+### 2.3 限制性主坐标分析CPCoA
+
+    Rscript ${db}/script/beta_cpcoa.R \
+      --input result/beta/g_bray_curtis.txt --design result/metadata.txt \
+      --group Group --output result/beta/g_bray_curtis.cpcoa.pdf \
+      --width 89 --height 59
+    # 添加样本标签 --label TRUE
+    Rscript ${db}/script/beta_cpcoa.R \
+      --input result/beta/g_bray_curtis.txt --design result/metadata.txt \
+      --group Group --label TRUE --width 89 --height 59 \
+      --output result/beta/g_bray_curtis.cpcoa.label.pdf
+      

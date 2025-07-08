@@ -1,0 +1,1013 @@
+# 多分组对所有物种丰度影响（OTU和taxonomy水平）
+
+# 时间序列配对分析
+mkdir -p result/compare
+
+## 差异分析
+```{r}
+library(vegan)
+library(cowplot)
+library(ggplot2)
+library(tidyverse)
+library(ggpubr)
+library(stringr)
+library(ggrepel)
+
+metadata = read.table("result/metadata_AA.txt",header=T,sep='\t')
+rownames(metadata)=metadata$Sample
+metadata$pair = metadata$Person
+metadata$group = metadata$Time
+
+library(tidyr)
+# name_from 列名的值，并且，所以下列操作，否则直接删除NA
+metadata_wide = pivot_wider(metadata[,c("Sample","group","pair")],
+													 names_from = group, values_from = Sample)
+View(metadata_wide)
+
+pairdata = read.table("result/feature-table.txt",header=T,sep='\t',row.names = 1,comment.char = "")
+#----交叉筛选#----
+idx = metadata$Sample %in% colnames(pairdata)
+metadata = metadata[idx,,drop=F]
+pairdata = pairdata[, metadata$Sample]
+
+# OTU表对于每个人每组重复的计算均值
+pairdata1 = pairdata
+
+#----丰度过滤#----
+# 标准化为百分比
+if(T){
+	norm = t(t(pairdata)/colSums(pairdata,na=T)*100)
+	# 按丰度筛选标准化特征表和原始值
+	idx = rowMeans(norm) > 0
+	norm = norm[idx, ]
+	colSums(norm)
+	pairdata = pairdata[idx, ]
+	
+	norm1_rm = t(t(pairdata1)/colSums(pairdata1,na=T)*100)
+	# 按丰度筛选标准化特征表和原始值
+	idx = rowMeans(norm1_rm) > 0
+	norm1_rm = norm1_rm[idx, ]
+	colSums(norm1_rm)
+	pairdata1 = pairdata1[idx, ]
+}else{
+	norm = pairdata
+	norm1_rm = pairdata1
+}
+```
+### 多组的所有样本的方差分析
+```{r}
+nrDAF = data.frame(list=rownames(norm), row.names =rownames(norm) )
+for(i in 1:nrow(nrDAF)){
+	#print(i)
+	nrDAF[i,2]=mad(norm[i,])
+	nrDAF[i,3]=log2(max(c(norm[i,]))*10000)
+	analydata = data.frame(Subject = metadata$pair,
+												 Time = metadata$Time,
+												 Value = norm[i,metadata$Sample])
+	colnames(analydata)[3]="Value"
+	# 执行配对样本方差分析
+	library(nlme) # 需要加载 nlme 包
+	repeated_anova <- aov(Value ~ Time, data = analydata)
+	#print(summary(repeated_anova))
+	nrDAF[i,4] = summary(repeated_anova)[[1]]$`Pr(>F)`[1]
+}
+nrDAF=nrDAF[,-1]
+colnames(nrDAF)=c("mad","logCPM", "PValue")
+nrDAF$FDR = p.adjust(nrDAF$PValue, method="fdr", dim(nrDAF)[1])
+nrDAF$logCPM=round(nrDAF$logCPM,3)
+pvalue = 0.05
+fdr = 1
+nrDAF$level = ifelse(nrDAF$PValue<pvalue & nrDAF$FDR<fdr, "Sig",
+                     "NotSig")
+# nrDAF$level=factor(nrDAF$level,levels = c("Enriched","Depleted","NotSig"))
+print(table(nrDAF$level))
+#----添加均值#----
+# Add MeanA and MeanB in percentage
+# calculate groupA mean
+group_list = c("0m","6m","12m")
+A_list = subset(metadata, Time %in% group_list[1])
+A_norm = norm[, rownames(A_list)]
+A_mean = as.data.frame(rowMeans(A_norm))
+colnames(A_mean)=group_list[1]
+# calculate groupB mean
+B_list = subset(metadata, group %in% group_list[2])
+B_norm = norm[, rownames(B_list)]
+B_mean = as.data.frame(rowMeans(B_norm))
+colnames(B_mean)=group_list[2]
+# calculate groupA mean
+C_list = subset(metadata, Time %in% group_list[3])
+C_norm = norm[, rownames(C_list)]
+C_mean = as.data.frame(rowMeans(C_norm))
+colnames(C_mean)=group_list[3]
+
+# merge and reorder
+Mean = round(cbind(A_mean, B_mean, C_mean,
+									 A_norm, B_norm,C_norm), 3) #
+Mean = Mean[rownames(nrDAF),]
+# 修正列名
+colnames(nrDAF)[2] = "log2CPM"
+output=cbind(nrDAF,Mean)
+write.table(output,"result/compare/three-stage-compare-unpair.txt",
+						sep="\t",row.names = T,col.names = NA,quote=F)
+# 按照mad值排序
+output=output[order(output$mad,decreasing = T),]
+if(nrow(subset(output,level=="Sig"))<30){
+  n=nrow(subset(output,level=="Sig"))
+}else{
+  n=30
+}
+plot_mad10 = subset(output,level=="Sig")[1:n,c(group_list)]
+plot_mad10$sample = rownames(plot_mad10)
+plot_mad10_1 = reshape2::melt(plot_mad10,id.vars="sample")
+
+# 绘制mad值前30的ASV的变化曲线
+p = ggplot(plot_mad10_1, aes(x = variable, y = value, group = sample, color = sample)) +
+  geom_line() +
+  theme_bw() +
+  labs(x = "Stage", y = "Normalized Abundance") +
+  guides(color = guide_legend(ncol = 1))
+p
+ggsave(paste0("result/compare/three-stage-compare-unpair-line-plot-mad",n,".pdf"),p,width = 10)
+
+# 绘制mad值前30的ASV的丰度热图
+plot_mad10 = subset(output,level=="Sig")[1:n,c(group_list)]
+library(pheatmap)
+#View(output[rownames(plot_mad10),10:57])
+annotation_col_color = data.frame(group = metadata[colnames(output)[9:ncol(output)],"Time"],
+																	row.names = colnames(output)[9:ncol(output)])
+pheatmap(output[rownames(plot_mad10),9:ncol(output)],
+				 scale = "none",annotation_col = annotation_col_color)
+pheatmap(output[rownames(plot_mad10),9:ncol(output)],
+				 scale = "none",annotation_col = annotation_col_color,
+				 filename = paste0("result/compare/three-stage-compare-unpair-heatmap-mad",n,".pdf"),width = 20)
+pheatmap(output[rownames(plot_mad10),6:8],
+				 scale = "none",cluster_cols = F,)
+pheatmap(output[rownames(plot_mad10),6:8],
+				 scale = "none",cluster_cols = F,cluster_rows = T,
+				 filename = paste0("result/compare/three-stage-compare-unpair-heatmap-group-mad",n,".pdf"),width = 5)
+
+```
+
+### 多组的配对样本的方差分析
+```{r}
+# 筛选同一个人，四类数据的样本都有的数据
+## 转成宽矩阵，删除NA行或NULL
+library(tidyr)
+# name_from 列名的值，并且，所以下列操作，否则直接删除NA
+metadata_wide = pivot_wider(metadata[,c("Sample","group","pair")],
+													 names_from = group, values_from = Sample)
+View(metadata_wide)
+# 由于由于成熟乳有重复样本，表格的值变为list，先把重复样本计算平均值
+metadata1_rm_rep = metadata[!metadata$Person %in% c("FF4","FF6"),] 
+
+metadata_wide = data.frame(pivot_wider(metadata1_rm_rep[,c("Sample","group","pair")],
+													 names_from = group, values_from = Sample))
+#View(metadata_wide)
+metadata_wide_four = na.omit(metadata_wide)
+dim(metadata_wide_four)
+# 先筛选4个都有的人的名字，然后排序
+metadata4 = metadata1_rm_rep[metadata1_rm_rep$pair %in% metadata_wide_four$pair,]
+metadata4 = metadata4[order(metadata4$pair),]
+rownames(metadata4) = metadata4$Sample
+
+norm1 = norm1_rm[,metadata4$Sample]
+nrDAF = data.frame(list=rownames(norm1), row.names =rownames(norm1) )
+for(i in 1:nrow(nrDAF)){
+	#print(i)
+	nrDAF[i,2]=mad(norm1[i,])
+	nrDAF[i,3]=log2(max(c(norm1[i,]))*10000)
+	analydata = data.frame(Subject = metadata4$pair,
+												 Time = metadata4$Time,
+												 Value = norm1[i,metadata4$Sample])
+	colnames(analydata)[3]="Value"
+	# 执行配对样本方差分析
+	library(nlme) # 需要加载 nlme 包
+	repeated_anova <- aov(Value ~ Time + Error(Subject/Time), data = analydata)
+	#print(summary(repeated_anova))
+	nrDAF[i,4] = summary(repeated_anova)$`Error: Subject:Time`[[1]]$`Pr(>F)`[1]
+}
+nrDAF=nrDAF[,-1]
+colnames(nrDAF)=c("mad","logCPM", "PValue")
+nrDAF$FDR = p.adjust(nrDAF$PValue, method="fdr", dim(nrDAF)[1])
+nrDAF$logCPM=round(nrDAF$logCPM,3)
+pvalue = 0.05
+fdr = 1
+nrDAF$level = ifelse(nrDAF$PValue<pvalue & nrDAF$FDR<fdr, "Sig",
+                     "NotSig")
+# nrDAF$level=factor(nrDAF$level,levels = c("Enriched","Depleted","NotSig"))
+print(table(nrDAF$level))
+#----添加均值#----
+# Add MeanA and MeanB in percentage
+# calculate groupA mean
+group_list = c("0m","6m","12m")
+A_list = subset(metadata4, Time %in% group_list[1])
+A_norm = norm1[, rownames(A_list)]
+A_mean = as.data.frame(rowMeans(A_norm))
+colnames(A_mean)=group_list[1]
+# calculate groupB mean
+B_list = subset(metadata4, group %in% group_list[2])
+B_norm = norm1[, rownames(B_list)]
+B_mean = as.data.frame(rowMeans(B_norm))
+colnames(B_mean)=group_list[2]
+# calculate groupA mean
+C_list = subset(metadata4, Time %in% group_list[3])
+C_norm = norm1[, rownames(C_list)]
+C_mean = as.data.frame(rowMeans(C_norm))
+colnames(C_mean)=group_list[3]
+
+# merge and reorder
+Mean = round(cbind(A_mean, B_mean, C_mean,
+									 A_norm, B_norm,C_norm), 3) #
+Mean = Mean[rownames(nrDAF),]
+
+# 修正列名
+colnames(nrDAF)[2] = "log2CPM"
+output=cbind(nrDAF,Mean)
+write.table(output,"result/compare/three-stage-compare-pair.txt",
+						sep="\t",row.names = T,col.names = NA,quote=F)
+# 按照mad值排序
+output=output[order(output$mad,decreasing = T),]
+if(nrow(subset(output,level=="Sig"))<30){
+  n=nrow(subset(output,level=="Sig"))
+}else{n=30}
+plot_mad10 = subset(output,level=="Sig")[1:n,c(group_list)]
+plot_mad10$sample = rownames(plot_mad10)
+plot_mad10_1 = reshape2::melt(plot_mad10,id.vars="sample")
+
+# 绘制mad值前30的ASV的变化曲线
+p = ggplot(plot_mad10_1, aes(x = variable, y = value, group = sample, color = sample)) +
+  geom_line() +
+  theme_bw() +
+  labs(x = "Stage", y = "Normalized Abundance") +
+  guides(color = guide_legend(ncol = 1))
+p
+ggsave(paste0("result/compare/three-stage-compare-pair-line-plot-mad",n,".pdf"),p,width = 10)
+
+# 绘制mad值前30的ASV的丰度热图
+plot_mad10 = subset(output,level=="Sig")[1:n,c(group_list)]
+library(pheatmap)
+#View(output[rownames(plot_mad10),10:57])
+annotation_col_color = data.frame(group = metadata4[colnames(output)[9:ncol(output)],"Time"],
+																	row.names = colnames(output)[9:ncol(output)])
+pheatmap(output[rownames(plot_mad10),9:ncol(output)],
+				 scale = "row",annotation_col = annotation_col_color)
+pheatmap(output[rownames(plot_mad10),9:ncol(output)],
+				 scale = "row",annotation_col = annotation_col_color,
+				 filename = paste0("result/compare/three-stage-compare-pair-heatmap-mad",n,".pdf"),width = 12)
+pheatmap(output[rownames(plot_mad10),6:8],
+				 scale = "row",cluster_cols = F,)
+pheatmap(output[rownames(plot_mad10),6:8],
+				 scale = "row",cluster_cols = F,
+				 filename = paste0("result/compare/three-stage-compare-pair-heatmap-group-mad",n,".pdf"),width = 5)
+```
+
+```{r}
+# library(ez)
+# # wid参数表示人的标识，within参数表示配对的自变量
+# repeated_anova <- ezANOVA(data = analydata, dv = .(Value), wid = .(Subject), within = .(Time), detailed = TRUE)
+# repeated_anova$ANOVA
+# repeated_anova$ANOVA[2,"p"]
+
+library(rstatix)
+wilcox_test(Value ~ Time, ref.group = "meconium",paired = T,data=analydata)
+t_test(Value ~ Time, ref.group = "colostrum",paired = T,data=analydata)
+t_test(Value ~ Time, ref.group = "transition_milk",paired = T,data=analydata)
+t_test(Value ~ Time, ref.group = "mature_milk",paired = T,data=analydata)
+summary(repeated_anova)
+
+t.test(subset(analydata,Time=="mature_milk")$Value,subset(analydata, Time=="colostrum")$Value,paired = T)
+# 分组和数据排序，一一对应
+
+# 检验 Shapiro-Wilk正态性检验，p_value >0.05 正态分布
+shapiro.test(analydata$Value+1)
+library(car)
+# 检验 方差齐性 p_value >0.05 方差齐性
+leveneTest(Value ~ Time, data = analydata)
+```
+
+### 物种水平的多组分析
+
+```{r}
+metadata = read.table("result/metadata_AA.txt",header=T,sep='\t')
+rownames(metadata)=metadata$Sample
+metadata$pair = metadata$Person
+metadata$group = metadata$Time
+
+for(tax in c("p","c","o","f","g","s")){
+	print(tax)
+	pairdata = read.table(paste0("result/tax/sum_",tax,".txt"),header=T,sep='\t',row.names = 1,comment.char = "")
+	#----交叉筛选#----
+	idx = metadata$Sample %in% colnames(pairdata)
+	metadata = metadata[idx,,drop=F]
+	pairdata = pairdata[, metadata$Sample]
+	
+	# OTU表对于每个人每组重复的计算均值
+	pairdata1 = pairdata
+	dim(pairdata1)
+	#----丰度过滤#----
+	# 标准化为百分比
+	norm = as.matrix(pairdata)
+	norm1_rm = as.matrix(pairdata1)
+	
+	### 多组的所有样本的方差分析
+	nrDAF = data.frame(list=rownames(norm), row.names =rownames(norm) )
+	for(i in 1:nrow(nrDAF)){
+		#print(i)
+		nrDAF[i,2]=mad(norm[i,])
+		nrDAF[i,3]=log2(max(c(norm[i,]))*10000)
+		analydata = data.frame(Subject = metadata$pair,
+													 Time = metadata$Time,
+													 Value = norm[i,metadata$Sample])
+		colnames(analydata)[3]="Value"
+		# 执行配对样本方差分析
+		library(nlme) # 需要加载 nlme 包
+		repeated_anova <- aov(Value ~ Time, data = analydata)
+		#print(summary(repeated_anova))
+		nrDAF[i,4] = summary(repeated_anova)[[1]]$`Pr(>F)`[1]
+	}
+	nrDAF=nrDAF[,-1]
+	colnames(nrDAF)=c("mad","logCPM", "PValue")
+	nrDAF$FDR = p.adjust(nrDAF$PValue, method="fdr", dim(nrDAF)[1])
+	nrDAF$logCPM=round(nrDAF$logCPM,3)
+	pvalue = 0.05
+	fdr = 1
+	nrDAF$level = ifelse(nrDAF$PValue<pvalue & nrDAF$FDR<fdr, "Sig",
+	                     "NotSig")
+	# nrDAF$level=factor(nrDAF$level,levels = c("Enriched","Depleted","NotSig"))
+	print(table(nrDAF$level))
+	#----添加均值#----
+	# Add MeanA and MeanB in percentage
+	# calculate groupA mean
+	group_list = c("0m","6m","12m")
+	A_list = subset(metadata, Time %in% group_list[1])
+	A_norm = norm[, rownames(A_list)]
+	A_mean = as.data.frame(rowMeans(A_norm))
+	colnames(A_mean)=group_list[1]
+	# calculate groupB mean
+	B_list = subset(metadata, group %in% group_list[2])
+	B_norm = norm[, rownames(B_list)]
+	B_mean = as.data.frame(rowMeans(B_norm))
+	colnames(B_mean)=group_list[2]
+	# calculate groupA mean
+	C_list = subset(metadata, Time %in% group_list[3])
+	C_norm = norm[, rownames(C_list)]
+	C_mean = as.data.frame(rowMeans(C_norm))
+	colnames(C_mean)=group_list[3]
+	
+	# merge and reorder
+	Mean = round(cbind(A_mean, B_mean, C_mean,
+										 A_norm, B_norm,C_norm), 3) #
+	Mean = Mean[rownames(nrDAF),]
+	# 修正列名
+	colnames(nrDAF)[2] = "log2CPM"
+	output=cbind(nrDAF,Mean)
+	write.table(output,paste0("result/compare/",tax,"-three-stage-compare-unpair.txt"),
+							sep="\t",row.names = T,col.names = NA,quote=F)
+	# 按照mad值排序
+	output=output[order(output$mad,decreasing = T),]
+	n = ifelse(nrow(subset(output,level=="Sig"))>30,30,nrow(subset(output,level=="Sig")))
+	if(n>0){
+	plot_mad10 = subset(output,level=="Sig")[1:n,c(group_list)]
+	plot_mad10$sample = rownames(plot_mad10)
+	plot_mad10_1 = reshape2::melt(plot_mad10,id.vars="sample")
+	
+	# 绘制mad值前30的ASV的变化曲线
+	p = ggplot(plot_mad10_1, aes(x = variable, y = value, group = sample, color = sample)) +
+	  geom_line() +
+	  theme_bw() +
+	  labs(x = "Stage", y = "Normalized Abundance") +
+	  guides(color = guide_legend(ncol = 1))
+	p
+	ggsave(paste0("result/compare/",tax,"-three-stage-compare-unpair-line-plot-mad",n,".pdf"),p,width = 10)
+	
+	# 绘制mad值前30的ASV的丰度热图
+	if(n>1){
+	plot_mad10 = subset(output,level=="Sig")[1:n,c(group_list)]
+	library(pheatmap)
+	#View(output[rownames(plot_mad10),10:57])
+	annotation_col_color = data.frame(group = metadata[colnames(output)[9:ncol(output)],"Time"],
+																		row.names = colnames(output)[9:ncol(output)])
+	pheatmap(output[rownames(plot_mad10),9:ncol(output)],
+					 scale = "row",annotation_col = annotation_col_color)
+	pheatmap(output[rownames(plot_mad10),9:ncol(output)],
+					 scale = "row",annotation_col = annotation_col_color,
+					 filename =paste0("result/compare/",tax,"-three-stage-compare-unpair-heatmap-mad",n,".pdf"),width = 20)
+	pheatmap(output[rownames(plot_mad10),6:8],
+					 scale = "row",cluster_cols = F,)
+	pheatmap(output[rownames(plot_mad10),6:8],
+					 scale = "row",cluster_cols = F,
+					 filename =paste0("result/compare/",tax,"-three-stage-compare-unpair-heatmap-group-mad",n,".pdf"),width = 5)
+	}}
+	
+	### 多组的配对样本的方差分析
+	norm1 = norm1_rm[,metadata4$Sample]
+	nrDAF = data.frame(list=rownames(norm1), row.names =rownames(norm1) )
+	for(i in 1:nrow(nrDAF)){
+		#print(i)
+		nrDAF[i,2]=mad(norm1[i,])
+		nrDAF[i,3]=log2(max(c(norm1[i,]))*10000)
+		analydata = data.frame(Subject = metadata4$pair,
+													 Time = metadata4$Time,
+													 Value = norm1[i,metadata4$Sample])
+		colnames(analydata)[3]="Value"
+		# 执行配对样本方差分析
+		library(nlme) # 需要加载 nlme 包
+		repeated_anova <- aov(Value ~ Time + Error(Subject/Time), data = analydata)
+		#print(summary(repeated_anova))
+		nrDAF[i,4] = summary(repeated_anova)$`Error: Subject:Time`[[1]]$`Pr(>F)`[1]
+	}
+	nrDAF=nrDAF[,-1]
+	colnames(nrDAF)=c("mad","logCPM", "PValue")
+	nrDAF$FDR = p.adjust(nrDAF$PValue, method="fdr", dim(nrDAF)[1])
+	nrDAF$logCPM=round(nrDAF$logCPM,3)
+	pvalue = 0.05
+	fdr = 1
+	nrDAF$level = ifelse(nrDAF$PValue<pvalue & nrDAF$FDR<fdr, "Sig",
+	                     "NotSig")
+	# nrDAF$level=factor(nrDAF$level,levels = c("Enriched","Depleted","NotSig"))
+	print(table(nrDAF$level))
+	#----添加均值#----
+	# Add MeanA and MeanB in percentage
+	# calculate groupA mean
+	group_list = c("0m","6m","12m")
+	A_list = subset(metadata4, Time %in% group_list[1])
+	A_norm = norm1[, rownames(A_list)]
+	A_mean = as.data.frame(rowMeans(A_norm))
+	colnames(A_mean)=group_list[1]
+	# calculate groupB mean
+	B_list = subset(metadata4, group %in% group_list[2])
+	B_norm = norm1[, rownames(B_list)]
+	B_mean = as.data.frame(rowMeans(B_norm))
+	colnames(B_mean)=group_list[2]
+	# calculate groupA mean
+	C_list = subset(metadata4, Time %in% group_list[3])
+	C_norm = norm1[, rownames(C_list)]
+	C_mean = as.data.frame(rowMeans(C_norm))
+	colnames(C_mean)=group_list[3]
+	
+	# merge and reorder
+	Mean = round(cbind(A_mean, B_mean, C_mean,
+										 A_norm, B_norm,C_norm), 3) #
+	Mean = Mean[rownames(nrDAF),]
+	
+	# 修正列名
+	colnames(nrDAF)[2] = "log2CPM"
+	output=cbind(nrDAF,Mean)
+	write.table(output,paste0("result/compare/",tax,"-three-stage-compare-pair.txt"),
+							sep="\t",row.names = T,col.names = NA,quote=F)
+	# 按照mad值排序
+	output=output[order(output$mad,decreasing = T),]
+	n = ifelse(nrow(subset(output,level=="Sig"))>30,30,nrow(subset(output,level=="Sig")))
+	if(n>0){
+	plot_mad10 = subset(output,level=="Sig")[1:n,c(group_list)]
+	plot_mad10$sample = rownames(plot_mad10)
+	plot_mad10_1 = reshape2::melt(plot_mad10,id.vars="sample")
+	
+	# 绘制mad值前30的ASV的变化曲线
+	p = ggplot(plot_mad10_1, aes(x = variable, y = value, group = sample, color = sample)) +
+	  geom_line() +
+	  theme_bw() +
+	  labs(x = "Stage", y = "Normalized Abundance") +
+	  guides(color = guide_legend(ncol = 1))
+	p
+	ggsave(paste0("result/compare/",tax,"-three-stage-compare-pair-line-plot-mad",n,".pdf"),p,width = 10)
+	
+	# 绘制mad值前30的ASV的丰度热图
+	if(n>1){
+	plot_mad10 = subset(output,level=="Sig")[1:n,c(group_list)]
+	library(pheatmap)
+	#View(output[rownames(plot_mad10),10:57])
+	annotation_col_color = data.frame(group = metadata4[colnames(output)[9:ncol(output)],"Time"],
+																		row.names = colnames(output)[9:ncol(output)])
+	pheatmap(output[rownames(plot_mad10),9:ncol(output)],
+					 scale = "row",annotation_col = annotation_col_color)
+	pheatmap(output[rownames(plot_mad10),9:ncol(output)],
+					 scale = "row",annotation_col = annotation_col_color,
+					 filename = paste0("result/compare/",tax,"-three-stage-compare-pair-heatmap-mad",n,".pdf"),width = 12)
+	pheatmap(output[rownames(plot_mad10),6:9],
+					 scale = "row",cluster_cols = F,)
+	pheatmap(output[rownames(plot_mad10),6:9],
+					 scale = "row",cluster_cols = F,
+					 filename = paste0("result/compare/",tax,"-three-stage-compare-pair-heatmap-group-mad",n,".pdf"),width = 5)
+	}}
+}
+```
+
+
+
+### 两组的所有样本的wilcox test分析
+
+mkdir -p result/compare/two-group-compare/
+```{r}
+library(vegan)
+library(cowplot)
+library(ggplot2)
+library(tidyverse)
+library(ggpubr)
+library(stringr)
+library(ggrepel)
+
+metadata = read.table("result/metadata_AA.txt",header=T,sep='\t')
+rownames(metadata)=metadata$Sample
+metadata$pair = metadata$Person
+metadata$group = metadata$Time
+
+pairdata = read.table("result/feature-table.txt",header=T,sep='\t',row.names = 1,comment.char = "")
+#----交叉筛选#----
+idx = metadata$Sample %in% colnames(pairdata)
+metadata = metadata[idx,,drop=F]
+pairdata = pairdata[, metadata$Sample]
+
+# OTU表对于每个人每组重复的计算均值
+pairdata1 = pairdata
+dim(pairdata1)
+#----丰度过滤#----
+# 标准化为百分比
+if(T){
+	norm = t(t(pairdata)/colSums(pairdata,na=T)*100)
+	# 按丰度筛选标准化特征表和原始值
+	idx = rowMeans(norm) > 0
+	norm = norm[idx, ]
+	colSums(norm)
+	pairdata = pairdata[idx, ]
+	
+	norm1_rm = t(t(pairdata1)/colSums(pairdata1,na=T)*100)
+	# 按丰度筛选标准化特征表和原始值
+	idx = rowMeans(norm1_rm) > 0
+	norm1_rm = norm1_rm[idx, ]
+	colSums(norm1_rm)
+	pairdata1 = pairdata1[idx, ]
+}else{
+	norm = pairdata
+	norm1_rm = pairdata1
+}
+```
+
+```{r}
+dim(norm)
+print("Your are using unpair Wilcoxon test!")
+group_listL = c("0m","6m","12m")
+
+for(m in 1:2){
+	for(n in (m+1):3){
+		group_list_compare = paste0(group_listL[m],"-",group_listL[n])
+		print(group_list_compare)
+		group_list = c(group_listL[m],group_listL[n])
+
+		idx = metadata$group %in% group_list[1]
+		GroupA = norm[,rownames(metadata[idx,,drop=F])]
+		idx = metadata$group %in% group_list[2]
+		GroupB = norm[,rownames(metadata[idx,,drop=F])]
+		nrDAF = data.frame(list=rownames(norm), row.names =rownames(norm) )
+		for(i in 1:nrow(nrDAF)){
+		#print(i)
+		analydata = data.frame(Subject = metadata$pair,
+													 Time = metadata$Time,
+													 Value = norm[i,metadata$Sample])
+		colnames(analydata)[3]="Value"
+		# 对每行Feature进行秩合检验
+	  FC = (mean(GroupA[i,])+0.0000001)/(mean(GroupB[i,])+0.0000001)
+	  nrDAF[i,2]=log2(FC)
+	  nrDAF[i,3]=log2(max(c(GroupA[i,],GroupB[i,]))*10000)
+	  nrDAF[i,4]= suppressWarnings(wilcox.test(as.numeric(GroupA[i,]),as.numeric(GroupB[i,]))$p.value)
+	  }
+		nrDAF=nrDAF[,-1]
+		colnames(nrDAF)=c("logFC", "logCPM", "PValue")
+		nrDAF$FDR = p.adjust(nrDAF$PValue, method="fdr", dim(nrDAF)[1])
+		nrDAF$logCPM=round(nrDAF$logCPM,3)
+		pvalue = 0.05
+		fdr = 1
+		nrDAF$level = ifelse(nrDAF$logFC>0 & nrDAF$PValue<pvalue & nrDAF$FDR<fdr, "Enriched",
+		                     ifelse(nrDAF$logFC<0 & nrDAF$PValue<pvalue & nrDAF$FDR<fdr, "Depleted",
+		                            "NotSig"))
+		# nrDAF$level=factor(nrDAF$level,levels = c("Enriched","Depleted","NotSig"))
+		print(table(nrDAF$level))
+		#----添加均值#----
+		# Add MeanA and MeanB in percentage
+		# calculate groupA mean
+		A_list = subset(metadata, Time %in% group_list[1])
+		A_norm = norm[, rownames(A_list)]
+		A_mean = as.data.frame(rowMeans(A_norm))
+		colnames(A_mean)=group_list[1]
+		# calculate groupB mean
+		B_list = subset(metadata, group %in% group_list[2])
+		B_norm = norm[, rownames(B_list)]
+		B_mean = as.data.frame(rowMeans(B_norm))
+		colnames(B_mean)=group_list[2]
+		
+		# merge and reorder
+		Mean = round(cbind(A_mean, B_mean, 
+											 A_norm, B_norm), 3) #
+		Mean = Mean[rownames(nrDAF),]
+		# 修正列名
+		colnames(nrDAF)[1] = "log2FC"
+		colnames(nrDAF)[2] = "log2CPM"
+		output=cbind(nrDAF,Mean)
+		write.table(output,paste0("result/compare/two-group-compare/",
+															group_list_compare,"-compare-unpair.txt"),
+								sep="\t",row.names = T,col.names = NA,quote=F)
+	}
+}
+```
+
+```{bash}
+for compare in 6m-12m 0m-12m;do
+    echo $compare
+      
+    Rscript ${db}/script/compare_volcano1.R \
+      --input result/compare/two-group-compare/${compare}-compare-unpair.txt \
+      --compare ${compare} \
+      --output result/compare/two-group-compare/${compare}-compare-unpair.volcano.pdf \
+      --width 120 --height 90
+      
+    # 输入compare.R的结果，筛选列数，指定元数据和分组、物种注释，图大小英寸和字号
+    bash ${db}/script/compare_heatmap.sh \
+       -i result/compare/two-group-compare/${compare}-compare-unpair.txt -l 7 \
+       -d result/metadata${type}.txt -A Time \
+       -t result/taxonomy.txt \
+       -w 7 -h 10 -s 7 \
+       -o result/compare/two-group-compare/${compare}-compare-unpair
+       
+    declare -A taxon
+    taxon[p]=Phylum
+    taxon[c]=Class
+    taxon[o]=Order
+    taxon[f]=Family
+    taxon[g]=Genus
+    echo ${taxon[@]}
+    # for key in "${!my_array[@]}”# 能获取数组的全部下标
+    for tax in p c o f g;do
+    bash ${db}/script/compare_manhattan.sh -i result/compare/two-group-compare/${compare}-compare-unpair.txt \
+       -t result/taxonomy.txt \
+       -p result/tax/sum_${tax}.txt \
+       -w 183 -v 149 -s 7 -l 10 -L ${taxon[${tax}]} \
+       -o result/compare/two-group-compare/${compare}-compare-unpair.manhattan.${tax}.pdf
+    done
+done
+```
+### 两组的配对样本的wilcox.text 
+```{r}
+library(tidyr)
+metadata1_rm_rep = metadata
+
+metadata_wide = pivot_wider(metadata1_rm_rep[,c("Sample","group","pair")],
+													 names_from = group, values_from = Sample)
+metadata_wide = metadata_wide[,c("pair","0m","6m","12m")]
+
+# 筛选同一个人，两类数据的样本都有的数据
+metadata_wide_two = data.frame()
+for(j in 1:100){
+	for(i in 2:3){
+		for(s in (i+1):4){
+			group_list_compare = paste0(colnames(metadata_wide)[i],"-",colnames(metadata_wide)[s])
+			group_list = c(colnames(metadata_wide)[i],colnames(metadata_wide)[s])
+			if(is.na(metadata_wide[j,i]) || is.na(metadata_wide[j,s])){
+				n=0
+				break
+			}else{
+				n=1
+			}
+			if(n == 1){
+				metadata_wide_2_tmp = data.frame(pair=metadata_wide[j,1],
+																				compare=paste0(colnames(metadata_wide)[i],
+																				 							 "-",
+																											 colnames(metadata_wide)[s]))
+				metadata_wide_two = rbind(metadata_wide_two,metadata_wide_2_tmp)
+			}
+		}
+	}
+}
+
+group_listL = c("0m","6m","12m")
+for(m in 1:2){
+	for(n in (m+1):3){
+		group_list_compare = paste0(group_listL[m],"-",group_listL[n])
+		#print(group_list_compare)
+		group_list = c(group_listL[m],group_listL[n])
+		
+		metadata4 = subset(metadata_wide_two,compare==group_list_compare)
+
+		metadata2 = metadata1_rm_rep[metadata1_rm_rep$pair %in% metadata4$pair,]
+		metadata2 = subset(metadata2,metadata2$group %in% group_list)
+		metadata2 = metadata2[order(metadata2$pair),]
+		rownames(metadata2) = metadata2$Sample
+		print(paste(group_list_compare,"pair sample number:",nrow(metadata2)))
+		if(nrow(metadata2) > 0){
+		norm1 = norm1_rm[,metadata2$Sample]
+		idx = metadata2$group %in% group_list[1]
+		GroupA = norm1[,rownames(metadata2[idx,,drop=F])]
+		idx = metadata2$group %in% group_list[2]
+		GroupB = norm1[,rownames(metadata2[idx,,drop=F])]
+		
+		
+		nrDAF = data.frame(list=rownames(norm1), row.names =rownames(norm1) )
+		for(i in 1:nrow(nrDAF)){
+		#print(i)
+		analydata = data.frame(Subject = metadata2$pair,
+													 Time = metadata2$Time,
+													 Value = norm1[i,metadata2$Sample])
+		colnames(analydata)[3]="Value"
+		# 对每行Feature进行秩合检验
+	  FC = (mean(GroupA[i,])+0.0000001)/(mean(GroupB[i,])+0.0000001)
+	  nrDAF[i,2]=log2(FC)
+	  nrDAF[i,3]=log2(max(c(GroupA[i,],GroupB[i,]))*10000)
+	  nrDAF[i,4]= suppressWarnings(wilcox.test(as.numeric(GroupA[i,]),
+	  																				 as.numeric(GroupB[i,]),paired = T)$p.value)
+	  }
+		nrDAF=nrDAF[,-1]
+		colnames(nrDAF)=c("logFC", "logCPM", "PValue")
+		nrDAF$FDR = p.adjust(nrDAF$PValue, method="fdr", dim(nrDAF)[1])
+		nrDAF$logCPM=round(nrDAF$logCPM,3)
+		pvalue = 0.05
+		fdr = 1
+		nrDAF$level = ifelse(nrDAF$logFC>0 & nrDAF$PValue<pvalue & nrDAF$FDR<fdr, "Enriched",
+		                     ifelse(nrDAF$logFC<0 & nrDAF$PValue<pvalue & nrDAF$FDR<fdr, "Depleted",
+		                            "NotSig"))
+		# nrDAF$level=factor(nrDAF$level,levels = c("Enriched","Depleted","NotSig"))
+		print(table(nrDAF$level))
+		#----添加均值#----
+		# Add MeanA and MeanB in percentage
+		# calculate groupA mean
+		A_list = subset(metadata2, Time %in% group_list[1])
+		A_norm = norm1[, rownames(A_list)]
+		A_mean = as.data.frame(rowMeans(A_norm))
+		colnames(A_mean)=group_list[1]
+		# calculate groupB mean
+		B_list = subset(metadata2, group %in% group_list[2])
+		B_norm = norm1[, rownames(B_list)]
+		B_mean = as.data.frame(rowMeans(B_norm))
+		colnames(B_mean)=group_list[2]
+		
+		# merge and reorder
+		Mean = round(cbind(A_mean, B_mean, 
+											 A_norm, B_norm), 3) #
+		Mean = Mean[rownames(nrDAF),]
+		# 修正列名
+		colnames(nrDAF)[1] = "log2FC"
+		colnames(nrDAF)[2] = "log2CPM"
+		output=cbind(nrDAF,Mean)
+		write.table(output,paste0("result/compare/two-group-compare/",
+															group_list_compare,"-compare-pair.txt"),
+								sep="\t",row.names = T,col.names = NA,quote=F)
+	}}
+}
+```
+
+```{bash}
+for compare in colostrum-mature_milk ;do
+    echo $compare
+      
+    Rscript ${db}/script/compare_volcano1.R \
+      --input result/compare/two-group-compare/${compare}-compare-unpair.txt \
+      --compare ${compare} \
+      --output result/compare/two-group-compare/${compare}-compare-unpair.volcano.pdf \
+      --width 120 --height 90
+    
+    declare -A taxon
+    taxon[p]=Phylum
+    taxon[c]=Class
+    taxon[o]=Order
+    taxon[f]=Family
+    taxon[g]=Genus
+    echo ${taxon[@]}
+    # for key in "${!my_array[@]}”# 能获取数组的全部下标
+    for tax in p c o f g;do
+    bash ${db}/script/compare_manhattan.sh -i result/compare/two-group-compare/${compare}-compare-unpair.txt \
+       -t result/taxonomy.txt \
+       -p result/tax/sum_${tax}.txt \
+       -w 183 -v 149 -s 7 -l 10 -L ${taxon[${tax}]} \
+       -o result/compare/two-group-compare/${compare}-compare-unpair.manhattan.${tax}.pdf
+    done
+done
+
+
+for compare in transition_milk-mature_milk ;do
+    echo $compare
+      
+    Rscript ${db}/script/compare_volcano1.R \
+      --input result/compare/two-group-compare/${compare}-compare-pair.txt \
+      --compare ${compare} \
+      --output result/compare/two-group-compare/${compare}-compare-pair.volcano.pdf \
+      --width 120 --height 90
+    
+    declare -A taxon
+    taxon[p]=Phylum
+    taxon[c]=Class
+    taxon[o]=Order
+    taxon[f]=Family
+    taxon[g]=Genus
+    echo ${taxon[@]}
+    # for key in "${!my_array[@]}”# 能获取数组的全部下标
+    for tax in p c o f g;do
+    bash ${db}/script/compare_manhattan.sh -i result/compare/two-group-compare/${compare}-compare-pair.txt \
+       -t result/taxonomy.txt \
+       -p result/tax/sum_${tax}.txt \
+       -w 183 -v 149 -s 7 -l 10 -L ${taxon[${tax}]} \
+       -o result/compare/two-group-compare/${compare}-compare-pair.manhattan.${tax}.pdf
+    done
+done
+  
+```
+### 物种水平的两组分析
+
+```{r}
+metadata = read.table("result/metadata_AA.txt",header=T,sep='\t')
+rownames(metadata)=metadata$Sample
+metadata$pair = metadata$Person
+metadata$group = metadata$Time
+
+for(tax in c("p","c","o","f","g","s")){
+	print(tax)
+	pairdata = read.table(paste0("result/tax/sum_",tax,".txt"),header=T,sep='\t',row.names = 1,comment.char = "")
+	#----交叉筛选#----
+	idx = metadata$Sample %in% colnames(pairdata)
+	metadata = metadata[idx,,drop=F]
+	pairdata = pairdata[, metadata$Sample]
+	
+	# OTU表对于每个人每组重复的计算均值
+	#rep_sample = list(c("P2B3", "P2B4"),c("P3B3", "P3B4"),c("P15B3", "P15B4"))
+	pairdata1 = pairdata
+	dim(pairdata1)
+	
+	#----丰度过滤#----
+	# 标准化为百分比
+	norm = as.matrix(pairdata)
+	norm1_rm = as.matrix(pairdata1)
+	
+	### 多组的所有样本的wilcox分析
+	dim(norm)
+print("Your are using unpair Wilcoxon test!")
+group_listL = c("0m","6m","12m")
+
+for(m in 1:2){
+	for(n in (m+1):3){
+		group_list_compare = paste0(group_listL[m],"-",group_listL[n])
+		print(group_list_compare)
+		group_list = c(group_listL[m],group_listL[n])
+
+		idx = metadata$group %in% group_list[1]
+		GroupA = norm[,rownames(metadata[idx,,drop=F])]
+		idx = metadata$group %in% group_list[2]
+		GroupB = norm[,rownames(metadata[idx,,drop=F])]
+		nrDAF = data.frame(list=rownames(norm), row.names =rownames(norm) )
+		for(i in 1:nrow(nrDAF)){
+		#print(i)
+		analydata = data.frame(Subject = metadata$pair,
+													 Time = metadata$Time,
+													 Value = norm[i,metadata$Sample])
+		colnames(analydata)[3]="Value"
+		# 对每行Feature进行秩合检验
+	  FC = (mean(GroupA[i,])+0.0000001)/(mean(GroupB[i,])+0.0000001)
+	  nrDAF[i,2]=log2(FC)
+	  nrDAF[i,3]=log2(max(c(GroupA[i,],GroupB[i,]))*10000)
+	  nrDAF[i,4]= suppressWarnings(wilcox.test(as.numeric(GroupA[i,]),as.numeric(GroupB[i,]))$p.value)
+	  }
+		nrDAF=nrDAF[,-1]
+		colnames(nrDAF)=c("logFC", "logCPM", "PValue")
+		nrDAF$FDR = p.adjust(nrDAF$PValue, method="fdr", dim(nrDAF)[1])
+		nrDAF$logCPM=round(nrDAF$logCPM,3)
+		pvalue = 0.05
+		fdr = 1
+		nrDAF$level = ifelse(nrDAF$logFC>0 & nrDAF$PValue<pvalue & nrDAF$FDR<fdr, "Enriched",
+		                     ifelse(nrDAF$logFC<0 & nrDAF$PValue<pvalue & nrDAF$FDR<fdr, "Depleted",
+		                            "NotSig"))
+		# nrDAF$level=factor(nrDAF$level,levels = c("Enriched","Depleted","NotSig"))
+		print(table(nrDAF$level))
+		#----添加均值#----
+		# Add MeanA and MeanB in percentage
+		# calculate groupA mean
+		A_list = subset(metadata, Time %in% group_list[1])
+		A_norm = norm[, rownames(A_list)]
+		A_mean = as.data.frame(rowMeans(A_norm))
+		colnames(A_mean)=group_list[1]
+		# calculate groupB mean
+		B_list = subset(metadata, group %in% group_list[2])
+		B_norm = norm[, rownames(B_list)]
+		B_mean = as.data.frame(rowMeans(B_norm))
+		colnames(B_mean)=group_list[2]
+		
+		# merge and reorder
+		Mean = round(cbind(A_mean, B_mean, 
+											 A_norm, B_norm), 3) #
+		Mean = Mean[rownames(nrDAF),]
+		# 修正列名
+		colnames(nrDAF)[1] = "log2FC"
+		colnames(nrDAF)[2] = "log2CPM"
+		output=cbind(nrDAF,Mean)
+		write.table(output,paste0("result/compare/two-group-compare/",
+															group_list_compare,"-",tax,"-compare-unpair.txt"),
+								sep="\t",row.names = T,col.names = NA,quote=F)
+	}
+}
+
+print("Your are using pair Wilcoxon test!")	
+	### 多组的配对样本的方差分析
+for(m in 1:2){
+	for(n in (m+1):3){
+		group_list_compare = paste0(group_listL[m],"-",group_listL[n])
+		#print(group_list_compare)
+		group_list = c(group_listL[m],group_listL[n])
+		
+		metadata4 = subset(metadata_wide_two,compare==group_list_compare)
+
+		metadata2 = metadata1_rm_rep[metadata1_rm_rep$pair %in% metadata4$pair,]
+		metadata2 = subset(metadata2,metadata2$group %in% group_list)
+		metadata2 = metadata2[order(metadata2$pair),]
+		rownames(metadata2) = metadata2$Sample
+		print(paste(group_list_compare,"pair sample number:",nrow(metadata2)))
+		if(nrow(metadata2) > 0){
+		norm1 = norm1_rm[,metadata2$Sample]
+		idx = metadata2$group %in% group_list[1]
+		GroupA = norm1[,rownames(metadata2[idx,,drop=F])]
+		idx = metadata2$group %in% group_list[2]
+		GroupB = norm1[,rownames(metadata2[idx,,drop=F])]
+		
+		nrDAF = data.frame(list=rownames(norm1), row.names =rownames(norm1) )
+		for(i in 1:nrow(nrDAF)){
+		#print(i)
+		analydata = data.frame(Subject = metadata2$pair,
+													 Time = metadata2$Time,
+													 Value = norm1[i,metadata2$Sample])
+		colnames(analydata)[3]="Value"
+		# 对每行Feature进行秩合检验
+	  FC = (mean(GroupA[i,])+0.0000001)/(mean(GroupB[i,])+0.0000001)
+	  nrDAF[i,2]=log2(FC)
+	  nrDAF[i,3]=log2(max(c(GroupA[i,],GroupB[i,]))*10000)
+	  nrDAF[i,4]= suppressWarnings(wilcox.test(as.numeric(GroupA[i,]),
+	  																				 as.numeric(GroupB[i,]),paired = T)$p.value)
+	  }
+		nrDAF=nrDAF[,-1]
+		colnames(nrDAF)=c("logFC", "logCPM", "PValue")
+		nrDAF$FDR = p.adjust(nrDAF$PValue, method="fdr", dim(nrDAF)[1])
+		nrDAF$logCPM=round(nrDAF$logCPM,3)
+		pvalue = 0.05
+		fdr = 1
+		nrDAF$level = ifelse(nrDAF$logFC>0 & nrDAF$PValue<pvalue & nrDAF$FDR<fdr, "Enriched",
+		                     ifelse(nrDAF$logFC<0 & nrDAF$PValue<pvalue & nrDAF$FDR<fdr, "Depleted",
+		                            "NotSig"))
+		# nrDAF$level=factor(nrDAF$level,levels = c("Enriched","Depleted","NotSig"))
+		print(table(nrDAF$level))
+		#----添加均值#----
+		# Add MeanA and MeanB in percentage
+		# calculate groupA mean
+		A_list = subset(metadata2, Time %in% group_list[1])
+		A_norm = norm1[, rownames(A_list)]
+		A_mean = as.data.frame(rowMeans(A_norm))
+		colnames(A_mean)=group_list[1]
+		# calculate groupB mean
+		B_list = subset(metadata2, group %in% group_list[2])
+		B_norm = norm1[, rownames(B_list)]
+		B_mean = as.data.frame(rowMeans(B_norm))
+		colnames(B_mean)=group_list[2]
+		
+		# merge and reorder
+		Mean = round(cbind(A_mean, B_mean, 
+											 A_norm, B_norm), 3) #
+		Mean = Mean[rownames(nrDAF),]
+		# 修正列名
+		colnames(nrDAF)[1] = "log2FC"
+		colnames(nrDAF)[2] = "log2CPM"
+		output=cbind(nrDAF,Mean)
+		write.table(output,paste0("result/compare/two-group-compare/",
+															group_list_compare,"-",tax,"-compare-pair.txt"),
+								sep="\t",row.names = T,col.names = NA,quote=F)
+	}}
+}
+}
+```
+
+```{bash}
+for compare in 0m-12m;do
+for tax in s;do
+echo $compare
+echo $tax
+Rscript ${db}/script/compare_volcano1.R \
+  --input result/compare/two-group-compare/${compare}-${tax}-compare-pair.txt \
+  --compare ${compare} \
+  --output result/compare/two-group-compare/${compare}-${tax}-compare-pair.volcano.pdf \
+  --width 120 --height 90
+bash ${db}/script/compare_heatmap1.sh \
+    -i result/compare/two-group-compare/${compare}-${tax}-compare-pair.txt -l 7 \
+    -d result/metadata${type}.txt -A Time \
+    -w 15 -h 6 -s 7 \
+    -o result/compare/two-group-compare/${compare}-${tax}-compare-pair
+  done
+done
+
+for compare in 6m-12m 0m-12m;do
+for tax in p c o f g s;do
+echo $compare
+echo $tax
+Rscript ${db}/script/compare_volcano1.R \
+  --input result/compare/two-group-compare/${compare}-${tax}-compare-unpair.txt \
+  --compare ${compare} \
+  --output result/compare/two-group-compare/${compare}-${tax}-compare-unpair.volcano.pdf \
+  --width 120 --height 90
+bash ${db}/script/compare_heatmap1.sh \
+    -i result/compare/two-group-compare/${compare}-${tax}-compare-unpair.txt -l 7 \
+    -d result/metadata${type}.txt -A Time \
+    -w 15 -h 6 -s 7 \
+    -o result/compare/two-group-compare/${compare}-${tax}-compare-unpair
+  done
+done
+```

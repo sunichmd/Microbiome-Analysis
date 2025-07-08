@@ -1,0 +1,10 @@
+ASV_1464			
+ASV_957	d:Eukaryota(0.61),p:Plantae(0.61),c:Liliopsida(0.61),o:Poales(0.61),f:Poaceae(0.61),g:Zea(0.61)	+	
+ASV_1162	d:Bacteria(1.00),p:Cyanobacteria/Chloroplast(0.99),c:Cyanobacteria(0.92),f:Family_XII(0.03),g:GpXII(0.03)	+	d:Bacteria,p:Cyanobacteria/Chloroplast
+ASV_131	d:Bacteria(1.00),p:Cyanobacteria/Chloroplast(1.00),c:Cyanobacteria(1.00),f:Family_I(0.82),g:Potamolinea(0.16)	+	d:Bacteria,p:Cyanobacteria/Chloroplast,c:Cyanobacteria
+ASV_137	d:Bacteria(1.00),p:Cyanobacteria/Chloroplast(1.00),c:Cyanobacteria(1.00),f:Family_I(0.55),g:GpI(0.06)	+	d:Bacteria,p:Cyanobacteria/Chloroplast,c:Cyanobacteria
+ASV_1561	d:Bacteria(1.00),p:Cyanobacteria/Chloroplast(1.00),c:Chloroplast(0.99),f:Chloroplast(0.99),g:Streptophyta(0.99)	+	d:Bacteria,p:Cyanobacteria/Chloroplast,c:Chloroplast,f:Chloroplast,g:Streptophyta
+ASV_5	d:Bacteria(1.00),p:Cyanobacteria/Chloroplast(1.00),c:Chloroplast(1.00),f:Chloroplast(1.00),g:Streptophyta(1.00)	+	d:Bacteria,p:Cyanobacteria/Chloroplast,c:Chloroplast,f:Chloroplast,g:Streptophyta
+ASV_601	d:Bacteria(1.00),p:Cyanobacteria/Chloroplast(1.00),c:Cyanobacteria(1.00),f:Family_I(1.00),g:Aliinostoc(0.28)	+	d:Bacteria,p:Cyanobacteria/Chloroplast,c:Cyanobacteria,f:Family_I
+ASV_992	d:Bacteria(1.00),p:Cyanobacteria/Chloroplast(0.97),c:Cyanobacteria(0.86),f:Family_I(0.56),g:Potamolinea(0.08)	+	d:Bacteria
+ASV_991	d:Bacteria(1.00),p:Cyanobacteria/Chloroplast(1.00),c:Chloroplast(1.00),f:Chloroplast(1.00),g:Streptophyta(1.00)	+	d:Bacteria,p:Cyanobacteria/Chloroplast,c:Chloroplast,f:Chloroplast,g:Streptophyta

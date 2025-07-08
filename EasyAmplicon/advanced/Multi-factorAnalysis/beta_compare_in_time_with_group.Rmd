@@ -1,0 +1,256 @@
+# 多分组对beta多样性丰度影响
+
+## 箱线图比较alpha/单物种 在不同分组下；不同时间点两两差异
+```{r}
+# beta
+#weighted_unifrac unweighted_unifrac bray_curtis jaccard
+library(amplicon)
+p_time = list()
+pc_time = list()
+groupN = c("FF","FA","AA")
+
+
+for(name in c("bray_curtis","weighted_unifrac","unweighted_unifrac","jaccard")){
+    beta <- read.table(paste0("result/beta/",name,".txt"),sep="\t",header = T,row.names = 1)
+    metadata = read.table(paste0("result/metadata.txt"),header=T,sep='\t',row.names = 1)
+    
+    for(j in c("FA","AA","FF")){
+      metadata_temp = subset(metadata,Group1==j)
+      metadata_temp$Treat = factor(metadata_temp$Time,level = c("0m","6m","12m"))
+      beta_temp = beta[rownames(metadata_temp),rownames(metadata_temp)]
+      
+      if(j == "FF"){col = c1}
+      if(j == "FA"){col = c2}
+      if(j == "AA"){col = c3}
+      
+      p_time[[paste0(i,j)]] = beta_pcoa(beta_temp, metadata_temp, groupID = "Treat") +
+        scale_color_manual(values = col) 
+      p_time[[paste0(i,j)]]
+      pc_time[[paste0(i,j)]] = beta_cpcoa_dis(beta_temp, metadata_temp, groupID = "Treat") +
+        scale_color_manual(values = col) 
+      pc_time[[paste0(i,j)]]
+      
+      ggsave(paste0("result/beta/",j,"_",name,"_pcoa.pdf"),p_time[[paste0(i,j)]],height = 6,width=7)
+      ggsave(paste0("result/beta/",j,"_",name,"_cpcoa.pdf"),pc_time[[paste0(i,j)]],height = 6,width=7)
+    }
+}
+
+compareL = list(c("0m","6m"),c("6m","12m"))
+pg = list()
+name = "jaccard"
+for(name in c("bray_curtis","weighted_unifrac","unweighted_unifrac","jaccard")){
+  beta <- read.table(paste0("result/beta/",name,".txt"),sep="\t",header = T,row.names = 1)
+  metadata = read.table(paste0("result/metadata.txt"),header=T,sep='\t',row.names = 1)
+  
+  metadata = metadata[!(metadata$Person %in% c("FF4","FF6")),]
+  
+  for(j in c("FA","AA","FF")){
+    
+    if(j == "FF"){col = c1}
+    if(j == "FA"){col = c2}
+    if(j == "AA"){col = c3}
+    
+    metadata_temp = subset(metadata,Group1==j)
+    metadata_temp$Treat = factor(metadata_temp$Time,level = c("0m","6m","12m"))
+    
+    metadata_temp = metadata_temp[order(metadata_temp$Person),]
+    beta_temp = beta[rownames(metadata_temp),rownames(metadata_temp)]
+    
+    env1 <- rownames(subset(metadata_temp, Time == '0m'))
+    print(env1)
+    dis_env1 <- beta[env1,env1]
+    
+    env2 <- rownames(subset(metadata_temp, Time == '6m'))
+    dis_env2 <- beta[env2,env2]
+    print(env2)
+    
+    env3 <- rownames(subset(metadata_temp, Time == '12m'))
+    dis_env3 <- beta[env3,env3]
+    print(env3)
+
+#将矩阵转化为向量，以便用于作图和统计
+dis_env1 <- as.vector(as.dist(dis_env1))
+dis_env2 <- as.vector(as.dist(dis_env2))
+dis_env3 <- as.vector(as.dist(dis_env3))
+
+dat <- data.frame(
+  dis = c(dis_env1, dis_env2, dis_env3),
+  group = factor(c(
+    rep('0m', length(dis_env1)), 
+    rep('6m', length(dis_env2)),
+    rep('12m', length(dis_env3))
+  ),levels = c("0m","6m","12m")))
+
+pf = ggboxplot(dat, x="group", y="dis", fill = "group",
+          palette = col,add="jitter") + 
+  stat_compare_means(comparisons=compareL,paired = T,method ="t.test") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = j,x=NULL,y=paste(name)) + 
+  stat_compare_means(method ="anova",label.y = max(dat$dis)+(max(dat$dis)-min(dat$dis))*0.3,label.x = 2)
+
+pf
+ggsave(paste0("result/beta/pair_boxplot_",j,"_bray_curtis_wilcox.pdf"),pf,width = 7,height = 7)
+
+# pcoA连线图
+pcoa <- cmdscale(beta, k = 65, eig = TRUE)
+pcoa_exp <- pcoa$eig/sum(pcoa$eig)
+pcoa1 <- paste('PCoA axis1 :', round(100*pcoa_exp[1], 2), '%')
+pcoa2 <- paste('PCoA axis2 :', round(100*pcoa_exp[2], 2), '%')
+
+#提取前两轴的的坐标，并添加样本的分组信息
+site <- data.frame(pcoa$point)[1:2]
+site$sample <- rownames(site)
+site <- merge(site, metadata_temp, by = 0)
+names(site)[2:3] <- c('pcoa1', 'pcoa2')
+
+site$Group = factor(site$Group,level = c("FF.0m", "FF.6m", "FF.12m",
+                                         "FA.0m", "FA.6m", "FA.12m",
+                                         "AA.0m", "AA.6m", "AA.12m"))
+#ggplot2 绘制二维平面图展示 PCoA 结果
+p <- ggplot(data = site) +
+  geom_point(aes(x = pcoa1, y = pcoa2, color = Group), size = 2) +  #绘制两轴的样本点
+  geom_text_repel(aes(x = pcoa1, y = pcoa2, label = sample, color = Group), size = 2.5,
+                  max.overlaps = 20,
+                  box.padding = unit(0.3, 'lines'), show.legend = FALSE) +  #添加样本标签
+  scale_color_manual(values = col) +  #两组的颜色
+  theme(panel.grid = element_blank(), panel.background = element_blank(), 
+        axis.line = element_line(color = 'black'), legend.key = element_blank()) +
+  labs(x = pcoa1, y = pcoa2, color = '')
+
+p
+
+#在图中添加两组的质心（分别计算两组样本在 PCoA 两轴坐标的均值），并以中心大点显示在图中
+#group_average <- aggregate(cbind(pcoa1, pcoa2)~Group1, data = site, FUN = mean)
+
+p1 <- p #+
+#stat_ellipse(aes(x = pcoa1, y = pcoa2, color = Group1), level = 0.95, linetype = 2, show.legend = FALSE) #+  #绘制两组的 95% 置信椭圆
+#geom_point(data = group_average, aes(x = pcoa1, y = pcoa2, color = Group1), size = 5, show.legend = FALSE)  #绘制中央质心大点
+
+#在图中添加上文的 PERMANOVA 的结果（P 值）
+# p1 <- p1 +
+# annotate('text', label = 'PERMANOVA', x = 0.18, y = 0.15, size = 3) +
+# annotate('text', label = sprintf('italic(P) == %.3f', adonis_drug$aov.tab[1,6]), x = 0.18, y = 0.13, size = 3, parse = TRUE)
+
+beta_o = as.matrix(beta[rownames(metadata_temp),rownames(metadata_temp)])
+beta_o = as.dist(beta_o, diag = FALSE, upper = FALSE)
+set.seed(1);adonis_individual = vegan::adonis2(beta_o~Person+Group,metadata_temp,by="margin")
+adonis_individual
+
+#继续在上述 PCoA 结果图中以虚线连接来自相同个体的配对样本
+site_before <- subset(site, Time == '0m')[c('Person', 'pcoa1', 'pcoa2')]
+site_after <- subset(site, Time == '6m')[c('Person', 'pcoa1', 'pcoa2')]
+site_last <- subset(site, Time == '12m')[c('Person', 'pcoa1', 'pcoa2')]
+site_ab <- merge(site_before, site_after, by = 'Person')
+site_bc <- merge(site_after, site_last, by = 'Person')
+
+p2 <- p1 +
+  geom_segment(data = site_ab, aes(x = pcoa1.x, y = pcoa2.x, xend = pcoa1.y, yend = pcoa2.y), 
+               color = 'gray', size = 0.3, linetype = 2)
+p3 <- p2 +  geom_segment(data = site_bc, aes(x = pcoa1.x, y = pcoa2.x, xend = pcoa1.y, yend = pcoa2.y), 
+                   color = 'gray', size = 0.3, linetype = 2)
+#在图中添加上文的 PERMANOVA 结果（P 值）
+
+p3 <- p3 + ggtitle(paste("PERMANOVA: ","Pair: ",adonis_individual$`Pr(>F)`[1],"Time:",adonis_individual$`Pr(>F)`[2]))
+# annotate('text', label = 'PERMANOVA', x = 0.13, y = 0.15, size = 3) +
+# annotate('text', label = sprintf('italic(P) == %.3f', adonis_individual$`Pr(>F)`[1]), size = 3, parse = TRUE)
+library(cowplot)
+pg[[j]] = ggarrange(pf)
+
+ggsave(paste0("result/beta/pair_pcoa_",j,"_bray_curtis_wilcox.pdf"),p3,width = 7,height = 7)
+  }
+}
+
+plot_grid(pg[["FF"]],pg[["FA"]],pg[["AA"]],nrow=1)
+```
+
+### Beta多样性指标 – bray_curtis距离
+
+```{r}
+beta <- read.table("../beta/unifrac.txt",sep="\t",header = T,row.names = 1)
+env1 <- rownames(subset(metadata, Group1 == 'X0m'))
+dis_env1 <- beta[env1,env1]
+
+env2 <- rownames(subset(metadata, Group1 == 'X1m'))
+dis_env2 <- beta[env2,env2]
+
+#将矩阵转化为向量，以便用于作图和统计
+dis_env1 <- as.vector(as.dist(dis_env1))
+dis_env2 <- as.vector(as.dist(dis_env2))
+
+dat <- data.frame(
+    dis = c(dis_env1, dis_env2),
+    group = factor(c(
+        rep('X0m', length(dis_env1)), 
+        rep('X1m', length(dis_env2))
+    )))
+
+pf <- ggplot(dat, aes(group, dis)) +
+geom_boxplot(aes(fill = group), width = 0.6) +
+scale_fill_manual(values = c('#CD5B45', '#228B22', '#00688B')) +
+theme(panel.grid = element_blank(), panel.background = element_blank(), 
+    axis.line = element_line(colour = 'black'), legend.position = 'none') +
+labs(x = NULL, y = 'Distance') +
+  stat_compare_means(method = "t.test",paired = T)
+
+ggsave(paste0("otu_bray_curtis_pair_t.pdf"),pf)
+
+# pcaoA连线图
+pcoa <- cmdscale(beta, k = 65, eig = TRUE)
+pcoa_exp <- pcoa$eig/sum(pcoa$eig)
+pcoa1 <- paste('PCoA axis1 :', round(100*pcoa_exp[1], 2), '%')
+pcoa2 <- paste('PCoA axis2 :', round(100*pcoa_exp[2], 2), '%')
+
+#提取前两轴的的坐标，并添加样本的分组信息
+site <- data.frame(pcoa$point)[1:2]
+site$sample <- rownames(site)
+site <- merge(site, metadata, by = 0)
+names(site)[2:3] <- c('pcoa1', 'pcoa2')
+ 
+#ggplot2 绘制二维平面图展示 PCoA 结果
+p <- ggplot(data = site) +
+geom_point(aes(x = pcoa1, y = pcoa2, color = Group1), size = 2) +  #绘制两轴的样本点
+geom_text_repel(aes(x = pcoa1, y = pcoa2, label = sample, color = Group1), size = 2.5, 
+    box.padding = unit(0.3, 'lines'), show.legend = FALSE) +  #添加样本标签
+scale_color_manual(limits = c('X0m', 'X1m'), values = c('#D27FB2', 'lightgreen')) +  #两组的颜色
+theme(panel.grid = element_blank(), panel.background = element_blank(), 
+    axis.line = element_line(color = 'black'), legend.key = element_blank()) +
+labs(x = pcoa1, y = pcoa2, color = '')
+ 
+#p
+ 
+#在图中添加两组的质心（分别计算两组样本在 PCoA 两轴坐标的均值），并以中心大点显示在图中
+#group_average <- aggregate(cbind(pcoa1, pcoa2)~Group1, data = site, FUN = mean)
+ 
+p1 <- p #+
+#stat_ellipse(aes(x = pcoa1, y = pcoa2, color = Group1), level = 0.95, linetype = 2, show.legend = FALSE) #+  #绘制两组的 95% 置信椭圆
+#geom_point(data = group_average, aes(x = pcoa1, y = pcoa2, color = Group1), size = 5, show.legend = FALSE)  #绘制中央质心大点
+ 
+#在图中添加上文的 PERMANOVA 的结果（P 值）
+# p1 <- p1 +
+# annotate('text', label = 'PERMANOVA', x = 0.18, y = 0.15, size = 3) +
+# annotate('text', label = sprintf('italic(P) == %.3f', adonis_drug$aov.tab[1,6]), x = 0.18, y = 0.13, size = 3, parse = TRUE)
+
+beta_o = beta[rownames(metadata),rownames(metadata)]
+beta_o = as.dist(beta_o, diag = FALSE, upper = FALSE)
+adonis_individual = vegan::adonis2(beta_o~pair+Group1,metadata)
+adonis_individual
+ 
+#继续在上述 PCoA 结果图中以虚线连接来自相同个体的配对样本
+site_before <- subset(site, Group1 == 'X0m')[c('pair', 'pcoa1', 'pcoa2')]
+site_after <- subset(site, Group1 == 'X1m')[c('pair', 'pcoa1', 'pcoa2')]
+site_ab <- merge(site_before, site_after, by = 'pair')
+ 
+p2 <- p1 +
+geom_segment(data = site_ab, aes(x = pcoa1.x, y = pcoa2.x, xend = pcoa1.y, yend = pcoa2.y), 
+    color = 'gray', size = 0.3, linetype = 2)
+ 
+#在图中添加上文的 PERMANOVA 结果（P 值）
+p2 <- p2 + ggtitle(paste("PERMANOVA: ","Pair: ",adonis_individual$`Pr(>F)`[1],"Time:",adonis_individual$`Pr(>F)`[2]))
+# annotate('text', label = 'PERMANOVA', x = 0.13, y = 0.15, size = 3) +
+# annotate('text', label = sprintf('italic(P) == %.3f', adonis_individual$`Pr(>F)`[1]), size = 3, parse = TRUE)
+ 
+plot_grid(pf,p2)
+
+ggsave(paste0("otu_bray_curtis_pcoa.pdf"),p)
+```
+左图的箱线图展示每组的组内的bray_curtis距离。箱体内水平线表示中位数，箱体上边缘线和下边缘线分别代表第三四分位数和第一四分位数，箱体上下各画一条线段延伸至非异常值的最远点，其表示该组数据bray_curtis距离正常值的分布区间。并且通过配对t-test比较组间的bray_curtis距离是否差异显著。右图基于bray_curtis距离进行主坐标轴分析(PCoA)来展示样品间差异(Beta diversity)。每个点代表一个样品，点与点之间的距离表示样本间的差异，距离越远表示差异越大。横轴是降维得到的第一主坐标轴（PCo1），解释样品间差异的比例最大，括号里面的数字是第一主坐标轴解释的样品间差异的百分比，纵轴是第二主坐标轴（PCo2），解释样品间差异的贡献仅次于第一主坐标轴，括号中的数字是第二主坐标轴解释的样品间差异的百分比。因为在PCo1和PCo2构成的空间对样品原始差异信息解释最多，所以一般展示样品在由PCo1和PCo2构成的空间的分布。点的颜色代表着样本的分组信息，可以通过相同颜色的点的距离来估计组内的差异，图中对配对的样本通过灰色的线相连，标题的Pair和Time之后的数据分别为考虑配对信息或时间信息计算PERMANOVA的P值。 [[左图PDF]](3_amplicon_diversity/beta/otu_bray_curtis_pair_t.pdf) [[右图PDF]](3_amplicon_diversity/beta/otu_bray_curtis_pcoa.pdf)

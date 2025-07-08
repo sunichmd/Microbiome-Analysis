@@ -1,0 +1,149 @@
+# 计算Bray-Curtis dissimilarities
+
+```{r}
+br = read.table("../Fungi/result/beta/bray_curtis.txt",sep = "\t",
+								header = T,check.names = F,row.names = 1)
+br = 1-br
+for(i in c("b1","b2","b3","b4")){
+	metadata = read.table(paste0("../metadata_fungi_",i,".txt"),sep="\t",
+												header = T,row.names = 1)
+	metadata$group = metadata$oldGroup
+	br1 = br[rownames(metadata),rownames(metadata)]
+	control = "S4"
+	treat = unique(metadata$oldGroup)[!unique(metadata$oldGroup) %in% control]
+	for(j in treat){
+		br_in = br1[rownames(subset(metadata,metadata$group == j)),
+								rownames(subset(metadata,metadata$group == j))]
+		br_in_m = melt(as.matrix(br_in))
+		# 删除对角线信息（样本与自身的比较）
+		br_in_m <- br_in_m[br_in_m$Var1 != br_in_m$Var2, ]
+		# 确保每个样本对只出现一次，去除上/下三角重复项
+		br_in_m <- br_in_m[!duplicated(t(apply(br_in_m[, 1:2], 1, sort))), ]
+		br_in_m$type = "within"
+		
+		br_be = br1[rownames(subset(metadata,metadata$group == control)),
+								rownames(subset(metadata,metadata$group == j))]
+		br_be_m = melt(as.matrix(br_be))
+		# 确保每个样本对只出现一次，去除上/下三角重复项
+		br_be_m <- br_be_m[!duplicated(t(apply(br_be_m[, 1:2], 1, sort))), ]
+		br_be_m$type = "compare"
+		res_b = rbind(br_be_m,br_in_m)
+		res_b$group = j
+		res_b$source="fungi"
+		
+		res_al = rbind(res_al,res_b)
+	}
+	j=control
+	br_in = br1[rownames(subset(metadata,metadata$group == j)),
+							rownames(subset(metadata,metadata$group == j))]
+	br_in_m = melt(as.matrix(br_in))
+	# 删除对角线信息（样本与自身的比较）
+	br_in_m <- br_in_m[br_in_m$Var1 != br_in_m$Var2, ]
+	# 确保每个样本对只出现一次，去除上/下三角重复项
+	br_in_m <- br_in_m[!duplicated(t(apply(br_in_m[, 1:2], 1, sort))), ]
+	br_in_m$type = "within"
+	br_in_m$group = j
+	br_in_m$source = "fungi"
+	res_al = rbind(res_al,br_in_m)
+	
+}
+
+p = ggplot(res_al,aes(x=group,y=value,fill=type))+
+	geom_boxplot() +
+	theme_bw() + facet_wrap(~source) +
+	scale_fill_manual(values=c(within = "lightblue",compare = "salmon"))
+p
+
+write.csv(res_al,"../result/b1-Bray-Curtis-1.txt")
+ggsave("../result/b1-Bray-Curtis-1-boxplot.pdf",p,width = 6)
+```
+
+## 细菌+真菌
+```{r}
+mine = T
+for(i in c("b2")){
+	# NG FL30Y FL20Y
+	control = "FL20Y"
+	br = read.table("result/beta/bray_curtis.txt",sep = "\t",
+									header = T,check.names = F,row.names = 1)
+	if(mine) {br = 1-br}
+
+	metadata = read.table(paste0("../metadata_bac_",i,".txt"),sep="\t",
+												header = T,row.names = 1)
+	metadata$group = metadata$oldGroup
+	br1 = br[rownames(metadata),rownames(metadata)]
+	
+	res_al = c()
+	treat = unique(metadata$oldGroup)[!unique(metadata$oldGroup) %in% control]
+	for(j in treat){
+		br_be = br1[rownames(subset(metadata,metadata$group == control)),
+								rownames(subset(metadata,metadata$group == j))]
+		br_be_m = melt(as.matrix(br_be))
+		# 确保每个样本对只出现一次，去除上/下三角重复项
+		br_be_m <- br_be_m[!duplicated(t(apply(br_be_m[, 1:2], 1, sort))), ]
+		br_be_m$type = "compare"
+		res_b = rbind(br_be_m)
+		res_b$group = j
+		
+		res_al = rbind(res_al,res_b)
+	}
+	res_al$source = "Bac"
+	
+	# Fungi
+	br = read.table("../Fungi/result/beta/bray_curtis.txt",sep = "\t",
+									header = T,check.names = F,row.names = 1)
+	if(mine) {br = 1-br}
+
+	metadata = read.table(paste0("../metadata_fungi_",i,".txt"),sep="\t",
+												header = T,row.names = 1)
+	metadata$group = metadata$oldGroup
+	br1 = br[rownames(metadata),rownames(metadata)]
+	
+	treat = unique(metadata$oldGroup)[!unique(metadata$oldGroup) %in% control]
+	
+	for(j in treat){
+		br_be = br1[rownames(subset(metadata,metadata$group == control)),
+								rownames(subset(metadata,metadata$group == j))]
+		br_be_m = melt(as.matrix(br_be))
+		# 确保每个样本对只出现一次，去除上/下三角重复项
+		br_be_m <- br_be_m[!duplicated(t(apply(br_be_m[, 1:2], 1, sort))), ]
+		br_be_m$type = "compare"
+		res_b = rbind(br_be_m)
+		res_b$group = j
+		res_b$source="Fungi"
+		res_al = rbind(res_al,res_b)
+	}
+	
+	if(mine){yl = "1 - Bray-Curtis dissimilarity"}else{yl = "Bray-Curtis dissimilarity"}
+	p = ggplot(res_al,aes(x=group,y=value,fill=source))+
+		geom_boxplot() +
+		theme_bw() + 
+		ylab(yl) + xlab("Group")+
+		theme(axis.text.x = element_text(angle = 45,hjust = 1,vjust = 1)) +
+		scale_fill_manual(values=c(Bac = "lightblue",Fungi = "salmon"))
+	p
+	
+	stat_res = res_al %>% group_by(group,source) %>% 
+						 	summarize(mean = mean(value),
+						 						median = median(value),
+						 						max = max(value),
+						 						min = max(value))
+
+	if(mine){
+		write.csv(res_al,paste0("../result/",i,"_",control,"_1-Bray-Curtis.csv"),
+							quote = F,row.names = F)
+		write.csv(stat_res,paste0("../result/",i,"_",control,"_1-Bray-Curtis-stat.csv"),
+							quote = F,row.names = F)
+		ggsave(paste0("../result/",i,"_",control,"_1-Bray-Curtis-boxplot.pdf"),p,
+					 width = 9,height = 6)
+	}else{
+		write.csv(res_al,paste0("../result/",i,"_",control,"_Bray-Curtis.csv"))
+		write.csv(stat_res,paste0("../result/",i,"_",control,"_Bray-Curtis-stat.csv"),
+							quote = F,row.names = F)
+		ggsave(paste0("../result/",i,"_",control,"_Bray-Curtis-boxplot.pdf"),p,
+					 width = 9,height = 6)
+	}
+	
+}
+```
+

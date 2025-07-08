@@ -1,0 +1,364 @@
+[TOC]
+
+# ggpicrust2：PICRUSt2结果分析和可视化
+
+https://github.com/cafferychen777/ggpicrust2
+
+ggpicrust2是一个综合软件包，旨在为分析和解释 PICRUSt2 功能预测结果提供无缝且直观的解决方案。它提供了广泛的功能，包括通路名称/描述注释、高级差异丰度 (differential abundance, DA) 方法以及 DA 结果的可视化。
+
+```{r}
+pathway_annotation = function (file = NULL, pathway = NULL, daa_results_df = NULL, 
+	ko_to_kegg = T) 
+{
+	message("Starting pathway annotation...")
+	if (is.null(file) && is.null(daa_results_df)) {
+		stop("Please input the picrust2 output or results of pathway_daa daa_results_df")
+	}
+	if (!is.null(file)) {
+		message("Reading the input file...")
+		file_format <- substr(file, nchar(file) - 3, nchar(file))
+		switch(file_format, .txt = {
+			message("Loading .txt file...")
+			abundance <- readr::read_delim(file, delim = "\t", 
+				escape_double = FALSE, trim_ws = TRUE)
+			message(".txt file successfully loaded.")
+		}, .tsv = {
+			message("Loading .tsv file...")
+			abundance <- readr::read_delim(file, delim = "\t", 
+				escape_double = FALSE, trim_ws = TRUE)
+			message(".tsv file successfully loaded.")
+		}, .csv = {
+			message("Loading .csv file...")
+			abundance <- readr::read_delim(file, delim = "\t", 
+				escape_double = FALSE, trim_ws = TRUE)
+			message(".csv file successfully loaded.")
+		}, stop("Invalid file format. Please input file in .tsv, .txt or .csv format. The best input file format is the output file from PICRUSt2, specifically 'pred_metagenome_unstrat.tsv'."))
+		abundance <- abundance %>% tibble::add_column(description = rep(NA, 
+			length = nrow(abundance)), .after = 1)
+		switch(pathway, KO = {
+			message("Loading KO reference data...")
+			load(system.file("extdata", "KO_reference.RData", 
+				package = "ggpicrust2"))
+			message("Annotating abundance data with KO reference...")
+			for (i in seq_len(nrow(abundance))) {
+				abundance[i, 2] <- KO_reference[KO_reference[, 
+					1] %in% abundance[i, 1], 5][1]
+			}
+			message("Abundance data annotation with KO reference completed.")
+		}, EC = {
+			message("Loading EC reference data...")
+			load(system.file("extdata", "EC_reference.RData", 
+				package = "ggpicrust2"))
+			message("Annotating abundance data with EC reference...")
+			for (i in seq_len(nrow(abundance))) {
+				abundance[i, 2] <- EC_reference[EC_reference[, 
+					1] %in% abundance[i, 1], 2]
+			}
+			message("Abundance data annotation with EC reference completed.")
+			message("Note: EC description may appear to be duplicated due to shared EC numbers across different reactions.")
+		}, MetaCyc = {
+			message("Loading MetaCyc reference data...")
+			load(system.file("extdata", "MetaCyc_reference.RData", 
+				package = "ggpicrust2"))
+			message("Annotating abundance data with MetaCyc reference...")
+			for (i in seq_len(nrow(abundance))) {
+				abundance[i, 2] <- MetaCyc_reference[MetaCyc_reference[, 
+					1] %in% abundance[i, 1], 2]
+			}
+			message("Abundance data annotation with MetaCyc reference completed.")
+		}, stop("Invalid pathway option. Please provide one of the following options: 'KO', 'EC', 'MetaCyc'."))
+		return(abundance)
+	}
+	if (!is.null(daa_results_df)) {
+		message("DAA results data frame is not null. Proceeding...")
+		if (ko_to_kegg == FALSE) {
+			message("KO to KEGG is set to FALSE. Proceeding with standard workflow...")
+			daa_results_df$description <- NA
+			switch(pathway, KO = {
+				message("Loading KO reference data...")
+				load(system.file("extdata", "KO_reference.RData", 
+					package = "ggpicrust2"))
+				for (i in seq_len(nrow(daa_results_df))) {
+					daa_results_df[i, ]$description <- KO_reference[KO_reference[, 
+						1] %in% daa_results_df[i, ]$feature, 5][1]
+				}
+			}, EC = {
+				message("Loading EC reference data...")
+				load(system.file("extdata", "EC_reference.RData", 
+					package = "ggpicrust2"))
+				for (i in seq_len(nrow(daa_results_df))) {
+					daa_results_df[i, ]$description <- EC_reference[EC_reference[, 
+						1] %in% daa_results_df[i, ]$feature, 2]
+				}
+				message("EC description may appear to be duplicated")
+			}, MetaCyc = {
+				message("Loading MetaCyc reference data...")
+				load(system.file("extdata", "MetaCyc_reference.RData", 
+					package = "ggpicrust2"))
+				for (i in seq_len(nrow(daa_results_df))) {
+					daa_results_df[i, ]$description <- MetaCyc_reference[MetaCyc_reference[, 
+						1] %in% daa_results_df[i, ]$feature, 2]
+				}
+			}, stop("Only provide 'KO', 'EC' and 'MetaCyc' pathway"))
+			message("Returning DAA results data frame...")
+			return(daa_results_df)
+		}
+		else {
+			message("KO to KEGG is set to TRUE. Proceeding with KEGG pathway annotations...")
+			daa_results_filtered_df <- daa_results_df[daa_results_df$p_adjust < 
+				0.05, ]
+			if (nrow(daa_results_filtered_df) == 0) {
+				stop("No statistically significant biomarkers found. 'Statistically significant biomarkers' refer to those biomarkers that demonstrate a significant difference in expression between different groups, as determined by a statistical test (p_adjust < 0.05 in this case).\n", 
+					"You might consider re-evaluating your experiment design or trying alternative statistical analysis methods. Consult with a biostatistician or a data scientist if you are unsure about the next steps.")
+			}
+			daa_results_filtered_df$pathway_name <- NA
+			daa_results_filtered_df$pathway_description <- NA
+			daa_results_filtered_df$pathway_class <- NA
+			daa_results_filtered_df$pathway_map <- NA
+			keggGet_results <- list()
+			message("We are connecting to the KEGG database to get the latest results, please wait patiently.")
+			if (nrow(daa_results_filtered_df) > 0) {
+				cat("\n")
+				message("Processing pathways in chunks...")
+				cat("\n")
+				# 进度条
+				# pb <- txtProgressBar(min = 0, max = nrow(daa_results_filtered_df), 
+				# 	style = 3)
+				start_time <- Sys.time()
+				n <- nrow(daa_results_filtered_df)
+				
+				ids <- daa_results_filtered_df$feature
+				keggGet_results = lapply(ids, function(id) KEGGREST::keggGet(id))
+				
+				#setTxtProgressBar(pb, i)
+				end_time <- Sys.time()
+				time_taken <- end_time - start_time
+				cat("\n")
+				message("Finished processing chunks. Time taken: ", 
+					round(time_taken, 2), " seconds.")
+				cat("\n")
+				message("Finalizing pathway annotations...")
+				cat("\n")
+				start_time <- Sys.time()
+				for (k in 1:n) {
+					w <- length(keggGet_results[[k]])
+					for (j in 1:w) {
+						daa_results_filtered_df[daa_results_filtered_df$feature == 
+							keggGet_results[[k]][[j]]$ENTRY, ]$pathway_name <- keggGet_results[[k]][[j]]$NAME[1]
+						daa_results_filtered_df[daa_results_filtered_df$feature == 
+							keggGet_results[[k]][[j]]$ENTRY, ]$pathway_description <- keggGet_results[[k]][[j]]$DESCRIPTION[1]
+						daa_results_filtered_df[daa_results_filtered_df$feature == 
+							keggGet_results[[k]][[j]]$ENTRY, ]$pathway_class <- keggGet_results[[k]][[j]]$CLASS[1]
+						daa_results_filtered_df[daa_results_filtered_df$feature == 
+							keggGet_results[[k]][[j]]$ENTRY, ]$pathway_map <- keggGet_results[[k]][[j]]$PATHWAY_MAP[1]
+					}
+					#setTxtProgressBar(pb, k)
+				}
+				end_time <- Sys.time()
+				time_taken <- end_time - start_time
+				cat("\n")
+				message("Finished finalizing pathway annotations. Time taken: ", 
+					round(time_taken, 2), " seconds.")
+				cat("\n")
+				close(pb)
+			}
+			daa_results_filtered_annotation_df <- daa_results_filtered_df
+			message("Returning DAA results filtered annotation data frame...")
+			return(daa_results_filtered_annotation_df)
+		}
+	}
+}
+
+```
+
+```{r}
+ggpicrust2 = function (file = NULL, data = NULL, metadata, group, pathway, 
+	daa_method = "ALDEx2", ko_to_kegg = FALSE, p.adjust = "BH", 
+	order = "group", p_values_bar = TRUE, x_lab = NULL, select = NULL, 
+	reference = NULL, colors = NULL) 
+{
+	plot_result_list <- list()
+	cat("Starting the ggpicrust2 analysis...\n")
+	if (ko_to_kegg == TRUE) {
+		cat("Converting KO to KEGG...\n")
+		plot_result_list <- list()
+		abundance <- if (!is.null(file)) {
+			ko2kegg_abundance(file)
+		}
+		else {
+			ko2kegg_abundance(data = data)
+		}
+		cat("Performing pathway differential abundance analysis...\n")
+		daa_results_df <- pathway_daa(abundance = abundance, 
+			metadata = metadata, group = group, daa_method = daa_method, 
+			select = select, p.adjust = p.adjust, reference = reference)
+		if (daa_method == "Lefse") {
+			stop("The 'Lefse' method is not suitable for the ggpicrust2() function as Lefse in R does not output p-values, only effect sizes.")
+		}
+		num_significant_biomarkers <- sum(as.numeric(daa_results_df$p_adjust <= 
+			0.05))
+		if (num_significant_biomarkers == 0) {
+			stop("Notice: There are no statistically significant biomarkers in the dataset. This is not an error, but it might indicate that the data do not contain any biomarkers passing the set significance threshold (p<=0.05). You may refer to the tutorial's FAQ for further help and suggestions.")
+		}
+		else {
+			message(paste("Success: Found", num_significant_biomarkers, 
+				"statistically significant biomarker(s) in the dataset."))
+		}
+		cat("Annotating pathways...\n")
+		daa_results_df <- pathway_annotation(daa_results_df = daa_results_df, 
+			ko_to_kegg = TRUE)
+		j <- 1
+		cat("Creating pathway error bar plots...\n")
+		for (i in unique(daa_results_df$method)) {
+			daa_sub_method_results_df <- daa_results_df[daa_results_df[, 
+				"method"] == i, ]
+			combination_bar_plot <- pathway_errorbar(abundance = abundance, 
+				daa_results_df = daa_sub_method_results_df, 
+				Group = metadata %>% select(all_of(c(group))) %>% 
+					as.data.frame() %>% pull(), ko_to_kegg = ko_to_kegg, 
+				p_value_bar = p_values_bar, order = order, colors = colors, 
+				select = select, x_lab = x_lab)
+			sub_list <- list(plot = combination_bar_plot, results = daa_sub_method_results_df)
+			plot_result_list[[j]] <- sub_list
+			cat(sprintf("Plot %d created.\n", j))
+			j <- j + 1
+		}
+		cat("ggpicrust2 analysis completed.\n")
+		return(plot_result_list)
+	}
+	else {
+		cat("Reading input file or using provided data...\n")
+		plot_result_list <- list()
+		abundance <- if (!is.null(file)) {
+			readr::read_delim(file, delim = "\t", escape_double = FALSE, 
+				trim_ws = TRUE)
+		}
+		else {
+			data
+		}
+		abundance <- as.data.frame(abundance)
+		rownames(abundance) <- abundance[, 1]
+		abundance <- abundance[, -1]
+		cat("Performing pathway differential abundance analysis...\n")
+		daa_results_df <- pathway_daa(abundance = abundance, 
+			metadata = metadata, group = group, daa_method = daa_method, 
+			select = select, p.adjust = p.adjust, reference = reference)
+		if (daa_method == "Lefse") {
+			stop("The 'Lefse' method is not suitable for the ggpicrust2() function as Lefse in R does not output p-values, only effect sizes.")
+		}
+		cat("Annotating pathways...\n")
+		daa_results_df <- pathway_annotation(pathway = pathway, 
+			ko_to_kegg = ko_to_kegg, daa_results_df = daa_results_df)
+		j <- 1
+		cat("Creating pathway error bar plots...\n")
+		for (i in unique(daa_results_df$method)) {
+			daa_sub_method_results_df <- daa_results_df[daa_results_df[, 
+				"method"] == i, ]
+			combination_bar_plot <- pathway_errorbar(abundance = abundance, 
+				daa_results_df = daa_sub_method_results_df, 
+				Group = metadata %>% select(all_of(c(group))) %>% 
+					as.data.frame() %>% pull(), ko_to_kegg = ko_to_kegg, 
+				p_value_bar = p_values_bar, order = order, colors = colors, 
+				select = select, x_lab = x_lab)
+			sub_list <- list(plot = combination_bar_plot, results = daa_sub_method_results_df)
+			plot_result_list[[j]] <- sub_list
+			cat(sprintf("Plot %d created.\n", j))
+			j <- j + 1
+		}
+		cat("ggpicrust2 analysis completed.\n")
+		return(plot_result_list)
+	}
+}
+
+```
+
+```{r}
+# 软件检测和安装
+if(!requireNamespace("ggpicrust2", quietly = TRUE))
+  devtools::install_github('cafferychen777/ggpicrust2')
+library(readr)
+library(ggh4x)
+library(ggpicrust2)
+library(tibble)
+library(tidyverse)
+library(ggprism)
+library(patchwork)
+
+```
+
+## 工作流程ggpicrust2
+
+```{r}
+# 加载必要的数据: abundance data（丰度数据） and metadata（元数据）
+df <- read_delim("KO_metagenome_out/pred_metagenome_unstrat.tsv.gz", delim = "\t", col_names = TRUE, trim_ws = TRUE)
+# 样本列表：有些分析只能有2个分组
+md <- read_delim("../metadata.txt", delim = "\t", escape_double = FALSE, trim_ws = TRUE)
+#md1 = t(md)
+```
+
+
+```{r}
+# 转换KO为通路
+kegg_abundance <- ko2kegg_abundance(data = df)
+```
+
+
+```{r}
+# PCA
+p = pathway_pca(abundance = kegg_abundance, metadata = md, group = "Group")
+ggsave("pathway_pca.pdf", p, width = 160, height = 100, units = "mm")
+
+
+# 只能有2个分组
+# 筛选样本
+idx = md$Group %in% c("KO", "WT")
+md = md[idx,]
+idx = colnames(kegg_abundance) %in% md$SampleID # c(md$SampleID, "function", "#NAME")
+kegg_abundance = kegg_abundance[,idx]
+
+# 组间差异比较
+daa <- pathway_daa(abundance = kegg_abundance, metadata = md, group = "Group", daa_method = "LinDA", select = NULL, p.adjust = "none", reference = "WT")
+write.table(daa, file="daa_LinDA_WT.txt", append = F, sep="\t", quote=F, row.names=F, col.names=T)
+
+
+#注释结果，仅筛选p<0.05的结果
+annotated_daa <- pathway_annotation(pathway = "KO",
+  daa_results_df = daa, ko_to_kegg = T)
+
+# 进一步过滤 p < 0.05/0.01/0.001的特征    
+feature_filter <- annotated_daa %>% 
+  filter(p_adjust < 0.05)
+
+# 创建热图
+kegg_abundance$pathway = rownames(kegg_abundance)
+p = pathway_heatmap(
+  abundance = kegg_abundance %>% 
+    right_join(
+      feature_filter %>% select(all_of(c("feature","pathway_name"))),
+      by = c("pathway" = "feature")
+    ) %>% select(-"pathway") %>% 
+    column_to_rownames("pathway_name"),
+  metadata = md, 
+  group = "Group"
+)
+ggsave("pathway_heatmap.pdf", p, width = 160*1.5, height = 100*1.5, units = "mm")
+
+
+# 分析流程, method: ALDEx2(无结果)、DESeq2、edgeR(结果>30)、limma voom、metagenomeSeq、LinDA(无结果)、Maaslin2
+result <- ggpicrust2(data = df[,c("function", md$SampleID)],
+                     metadata = md, group = "Group", reference = "WT",
+                     pathway = "KO", daa_method = "Maaslin2", p.adjust = "none",
+                     ko_to_kegg = TRUE, order = "pathway_class",
+                     p_values_bar = TRUE, x_lab = "pathway_name")
+
+# 访问第一个DA方法的绘图、预览和保存
+pathway_errorbar <- result[[1]]$plot
+pathway_errorbar
+ggsave("pathway_errorbar.pdf", pathway_errorbar, width = 360, height = 180, units = "mm")
+# 访问第一个DA方法的绘图和结果数据
+pathway_errorbar <- result[[1]]$results
+head(pathway_errorbar)
+write.table(pathway_errorbar, file="pathway_errorbar.txt", append = F, sep="\t", quote=F, row.names=F, col.names=T)
+```
+
+ 

@@ -1,0 +1,229 @@
+# PCoA 密度曲线
+
+## 加载必要的包
+```{r}
+library(ggplot2)
+library(ggforce)
+library(ggrepel)
+library(vegan)
+library(stringr)
+library(dplyr)
+library(ggpubr)
+library(patchwork)
+library(ggExtra)
+```
+
+## 读取数据
+```{r}
+metadata = read.table("result/metadata.txt",sep = "\t",header = T,row.names = 1)
+
+i="result/beta/bray_curtis.txt"
+
+dis_mat = read.table(i,sep = "\t",header = T,row.names = 1)
+
+sub_dis_table = dis_mat[rownames(metadata),rownames(metadata)]
+
+sub_dis_table = as.dist(sub_dis_table, diag = FALSE, upper = FALSE)
+
+# 对距离矩阵进行adnois分析
+# !!需要调整自己的分组列名
+adonis_table = adonis2(dis_mat~Group, data=metadata,permutations = 10000)
+adonis_table
+```
+## PCOA分析
+```{r}
+# 提取样品组信息,!!需要调整自己的分组
+groupID="Group"
+timeID="Time"
+
+sampFile=as.data.frame(metadata[, c(groupID,timeID)],row.names=row.names(metadata))
+
+# PCoA
+pcoa=cmdscale(dis_mat, k=3, eig=T) # k is dimension, 3 is recommended; eig is eigenvalues
+points=as.data.frame(pcoa$points) # get coordinate string, format to dataframme
+eig=pcoa$eig
+points=cbind(points, sampFile[rownames(points),])
+
+# x pc1 y pc2 z pc3
+colnames(points)=c("x", "y", "z","group","time")
+points$time = as.factor(points$time)
+points
+```
+
+## 图1：PCoa密度曲线图
+
+密度曲线和PCOA图拼到一起；另外计算了分组在PC1是否有差异；分组在PC2是否有差异
+
+```{r}
+# 设置颜色；需要按照自己的分组调整
+group_colors <- c(
+  "KO" = "#FED439FF",       # 为不同分组
+  "WT" = "#709AE1FF",
+  "OE" = "#FD7446FF"   
+)
+
+time_colors <- c(
+  "1" = "#16A085FF",
+  "2" = "#FD8CC1FF")
+
+p1 = ggplot(points, aes(x=x, y=y))  +
+  labs(x=paste("PCo 1 (", format(100 * eig[1] / sum(eig), digits=4), "%)", sep=""),
+       y=paste("PCo 2 (", format(100 * eig[2] / sum(eig), digits=4), "%)", sep="")) +
+  geom_point(aes(color=group),alpha=.7) + 
+  stat_ellipse(aes(group = group,fill=group,color=group), type = "norm", level = 0.66) + # 添加置信椭圆
+  theme_classic() + 
+  scale_color_manual(values = group_colors) +
+  guides(color = guide_legend(order = 2),
+         shape = guide_legend(order = 3),
+         size = guide_legend(order = 1)
+         )+
+  theme(axis.text = element_text(angle = 0,size = 15,color = "black"),
+        axis.line = element_line(size = 1),
+        axis.title = element_text(angle = 0,size = 18,color = "black"),
+        plot.title = element_text(hjust = 0.5,size=15,colour = "black"))
+
+
+p2 = ggMarginal(p1, type = "density", groupColour = TRUE, groupFill = TRUE)
+p2
+ggsave(paste0(i,".pcoa_density_group.pdf"), p2, width = 14,height = 8)
+
+# 查看分组对PC1和PC2是否有差异
+compare_means(x ~ group, data = points,
+              method = "wilcox", p.adjust.method = "none")
+compare_means(y ~ group, data = points,
+              method = "wilcox", p.adjust.method = "none")
+```
+
+## 图2： PCoa按照分组2来绘制密度曲线
+
+计算
+```{r}
+# 2. 提取p1绘图范围
+p1_build <- ggplot_build(p1)
+xrange <- p1_build$layout$panel_params[[1]]$x$limits
+xbreaks <- p1_build$layout$panel_params[[1]]$x$breaks
+
+ybreaks <- p1_build$layout$panel_params[[1]]$y$breaks
+yrange <-  p1_build$layout$panel_params[[1]]$y$limits
+
+# Pc1 按 Time/Group 分组
+top_density <- ggplot(points, aes(x = x, fill = time)) +
+  geom_density(alpha = 0.6) +
+  theme_classic() + # 换成theme_void() 就不会有轴线了
+  scale_color_manual(values = group_colors) +
+  theme(strip.background = element_blank(),
+        axis.text = element_text(angle = 0,size = 15,color = "black"),
+        axis.line = element_line(size = 1),
+        axis.title = element_text(angle = 0,size = 18,color = "black"),
+        plot.title = element_text(hjust = 0.5,size=15,colour = "black")) +
+  facet_wrap(~group, ncol = 1, scales = "fixed") +
+  scale_x_continuous(limits = xrange, breaks = xbreaks)
+
+# 拼接图像
+top_density
+p3 = top_density/p1
+p3
+
+ggsave(paste0(i,".pcoa_density_pc1_group_time.pdf"), p3, width = 8,height = 6)
+
+# Pc2 按 Time/Group 分组
+right_density <- ggplot(points, aes(x = y, fill = time)) +
+  geom_density(alpha = 0.6) +
+  coord_flip() +
+  theme_classic() +
+  facet_wrap(~group,scales = "fixed",nrow=1)+
+  theme(strip.background = element_blank(),
+        strip.placement = "inside",
+        axis.text = element_text(angle = 0,size = 15,color = "black"),
+        axis.line = element_line(size = 1),
+        axis.title = element_text(angle = 0,size = 18,color = "black"),
+        plot.title = element_text(hjust = 0.5,size=15,colour = "black")) +
+  scale_x_continuous(limits = yrange, breaks = ybreaks)
+
+# 拼接图像
+right_density
+p4 = p1 | right_density
+p4
+ggsave(paste0(i,".pcoa_density_pc2_group_time.pdf"), p4, width = 8,height = 4)
+```
+
+
+```{r}
+# 以上图形全部拼接
+library(cowplot)
+blank_plot <- ggplot() + theme_void()
+combined_plot <- plot_grid(
+  top_density, blank_plot,
+  p1, right_density,
+  ncol = 2, nrow = 2,
+  rel_widths = c(3, 1), # 主图和 PCo1 密度图的相对宽度
+  rel_heights = c(1, 3), # 主图和 PCo2 密度图的相对高度
+  align = "hv", axis = "tblr"
+)
+ggsave(paste0(i,".pcoa_density_pc1_2_group_time.pdf"), combined_plot, width = 10,height = 10)
+
+# p值查看以下结果，后续手动加到图里；或用后面boxplot结果
+compare_means(x ~ time, data = points, 
+              group.by = "group", 
+              method = "wilcox", 
+              p.adjust.method = "none")
+
+compare_means(y ~ time, data = points, 
+              group.by = "group", 
+              method = "wilcox", 
+              p.adjust.method = "none")
+```
+
+## 图3：绘制boxplot比较不同分组内 时间是否对PC1有显著影响
+```{r}
+pco1_boxplot_compare = ggboxplot(points,
+                    x = "time", y = "x", fill = "time",
+                 color = "black", size = 1, width = 0.5,alpha=.7,
+                 facet.by = "group") +
+  stat_compare_means(paired = F,method ="wilcox.test") + # 也可用t.test
+  labs(x=NULL,y=NULL) +
+  theme_classic() +
+  scale_fill_manual(values = time_colors) +
+  theme(legend.position = "none") +
+  theme(strip.background = element_rect(fill = "white",
+                                        colour = "white",
+                                        size = 0.1),
+        strip.text =  element_text(size = 15,color = "black",angle = 0),
+        axis.text = element_text(angle = 0,size = 15,color = "black"),
+        axis.line = element_line(size = 1),
+        axis.title = element_text(angle = 0,size = 18,color = "black"),
+        plot.title = element_text(hjust = 0.5,size=15,colour = "black"))
+pco1_boxplot_compare
+```
+
+绘制boxplot比较不同分组内 时间是否对PC2有显著影响
+```{r}
+group_colors <- c(
+  "KO" = "#FED439FF",       # 为不同分组
+  "WT" = "#709AE1FF",
+  "OE" = "#FD7446FF"   
+)
+
+time_colors <- c(
+  "1" = "#16A085FF",
+  "2" = "#FD8CC1FF")
+
+pco2_boxplot_compare = ggboxplot(points,
+                    x = "time", y = "y", fill = "time",
+                 color = "black", size = 1, width = 0.5,alpha=.7,
+                 facet.by = "group") +
+  stat_compare_means(paired = F,method ="wilcox.test") + # 也可用t.test
+  labs(x=NULL,y=NULL) +
+  theme_classic() +
+  scale_fill_manual(values = time_colors) +
+  theme(legend.position = "none") +
+  theme(strip.background = element_rect(fill = "white",
+                                        colour = "white",
+                                        size = 0.1),
+        strip.text =  element_text(size = 15,color = "black",angle = 0),
+        axis.text = element_text(angle = 0,size = 15,color = "black"),
+        axis.line = element_line(size = 1),
+        axis.title = element_text(angle = 0,size = 18,color = "black"),
+        plot.title = element_text(hjust = 0.5,size=15,colour = "black"))
+pco2_boxplot_compare
+```

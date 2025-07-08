@@ -1,0 +1,97 @@
+# FEAST
+
+## 配对一一对应样本分析
+```{r}
+#devtools::install_github("cozygene/FEAST")
+library("FEAST")
+##  读入样本信息表
+metadata = Load_metadata(metadata_path = "result/sourcetracker_metadata_MB.txt")
+metadata$Env = metadata$Source
+metadata$id = paste0(metadata$Person_name,"_",metadata$Stage)
+metadata$SourceSink = ifelse(metadata$Source=="Stool","source","sink")
+metadata = subset(metadata,Person=="Mother")
+
+id_comm = intersect(subset(metadata,Source=="Stool")[,"id"],
+										subset(metadata,Source=="Breast_Milk")[,"id"])
+metadata = metadata[metadata$id %in% id_comm,]
+##  读入OTU丰度表
+otus = Load_CountMatrix(CountMatrix_path = "result/otutab.txt")
+##  设置结果输出路径
+dir.create("result/feast")
+dir_path = paste0(getwd(),"/result/feast")
+##  使用FEAST进行溯源
+## different_sources_flag = 1时，就是一一对应分析
+set.seed(18);FEAST_output1 = suppressWarnings(suppressMessages(FEAST(C = otus, metadata = metadata, different_sources_flag = 1, 
+                                                                     dir_path = dir_path,outfile="Feast-pair")))
+
+FEAST_output2 = read.table("result/feast/Feast-pair_source_contributions_matrix.txt",sep="\t")
+
+##输出pdf格式的图片
+pdf(paste0(dir_path,"/Feast-pair_FEAST_singe.pdf"),width = 10,height = 10)   
+PlotSourceContribution(
+  SinkNames = rownames(FEAST_output2),
+  SourceNames = colnames(FEAST_output2),
+  dir_path = dir_path,
+  mixing_proportions = FEAST_output2,
+  Plot_title = "Feast-pair_single",
+  Same_sources_flag = 0,
+  N = 11)
+dev.off()
+
+# 合并一起的柱状图
+PlotSourceContribution(
+  SinkNames = rownames(FEAST_output2),
+  SourceNames = colnames(FEAST_output2),
+  dir_path = dir_path,
+  mixing_proportions = FEAST_output2,
+  Plot_title = "Feast-pair",
+  Same_sources_flag = 1,
+  N = 8)
+
+```
+## 所有样本均考虑
+```{r}
+#devtools::install_github("cozygene/FEAST")
+library("FEAST")
+##  读入样本信息表
+metadata = Load_metadata(metadata_path = "result/sourcetracker_metadata_EB.txt")
+metadata$Env = metadata$Source
+metadata$id = paste0(metadata$Person_name,"_",metadata$Stage)
+metadata$SourceSink = ifelse(metadata$Source=="Stool","source","sink")
+metadata = subset(metadata,Person=="Mother")
+
+##  读入OTU丰度表
+otus = Load_CountMatrix(CountMatrix_path = "result/otutab.txt")
+##  设置结果输出路径
+dir.create("result/feast")
+dir_path = paste0(getwd(),"/result/feast")
+##  使用FEAST进行溯源
+## different_sources_flag = 1时，就是一一对应分析
+set.seed(18);FEAST_output1 = suppressWarnings(suppressMessages(FEAST(C = otus, metadata = metadata, different_sources_flag = 0, 
+                                                                     dir_path = dir_path,outfile="Feast")))
+
+FEAST_output2 = read.table("result/feast/Feast_source_contributions_matrix.txt",sep="\t")
+
+##输出pdf格式的图片
+pdf(paste0(dir_path,"/Feast_FEAST_singe.pdf"),width = 10,height = 10)   
+PlotSourceContribution(
+  SinkNames = rownames(FEAST_output2),
+  SourceNames = colnames(FEAST_output2),
+  dir_path = dir_path,
+  mixing_proportions = FEAST_output2,
+  Plot_title = "Feast_single",
+  Same_sources_flag = 0,
+  N = 4)
+dev.off()
+
+# 合并一起的柱状图
+PlotSourceContribution(
+  SinkNames = rownames(FEAST_output2),
+  SourceNames = colnames(FEAST_output2),
+  dir_path = dir_path,
+  mixing_proportions = FEAST_output2,
+  Plot_title = "Feast",
+  Same_sources_flag = 1,
+  N = 8)
+
+```

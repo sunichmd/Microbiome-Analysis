@@ -1,0 +1,131 @@
+---
+title: 物种组成和相关性结果
+output:
+  html_document: 
+    fig_caption: true
+    number_section: yes
+    theme: paper
+    toc: yes
+---
+
+# 相关性结果
+
+```{r,echo=F}
+## 读入原始OTU表
+metadata_file="metadata_final.txt"
+file2="KEGG.Pathway.raw.txt"
+cor_method = "spearman"
+
+otu_all = read.table("tax_6Genus.txt", header=T, sep="\t", quote = "", row.names=1, comment.char="")
+
+# 是否要进行标准化！！！注意读入数据是otutab表则需要标准化，读入物种表则不需要
+if(F){
+  otu = otu_all/colSums(otu_all,na=T) * 100
+}else{
+  otu = otu_all
+}
+
+otu = as.data.frame(t(otu))
+
+metadata<- read.table(metadata_file,header = T,sep="\t", quote = "", row.names=1, comment.char="")
+metric = read.table(file2, header=T, sep="\t", quote = "", row.names=1, comment.char="")
+
+# 需要保证该数据也为样本在行，变量在列
+metric = as.data.frame(t(metric))
+
+common_sample =  Reduce(intersect,list(rownames(metadata),
+                                       rownames(otu),
+                                       rownames(metric)))
+
+metadata = metadata[common_sample,]
+
+otu = otu[common_sample,]
+otu = otu[,!(colSums(otu)==0)]
+
+metric = metric[common_sample,]
+metric = metric[,!(colSums(metric)==0)]
+
+
+library(Hmisc) 
+library(igraph)
+library(tidygraph)
+library(ggraph)
+library(reshape2)
+
+# 计算相关性
+cor_r <- cor(as.matrix(otu), as.matrix(metric), method = cor_method)
+cor_result <- rcorr(as.matrix(otu), as.matrix(metric), type = cor_method)
+cor_p <- cor_result$P  
+
+# 将两个矩阵转为长数据框
+cor_r_long <- melt(cor_r, varnames = c("OTU", "Metric"), value.name = "cor")
+cor_p_long <- melt(cor_p, varnames = c("OTU", "Metric"), value.name = "pvalue")
+
+# 合并两个长表
+cor_df <- merge(cor_r_long, cor_p_long, by = c("OTU", "Metric"))
+write.table(cor_df, "All_Correlation_pvalue_otu_metric.txt",sep="\t",quote=F, row.names = T, col.names = T)
+# 筛选满足条件的显著相关性
+
+# 先设定阈值 可依据自己数据修改
+r_cutoff <- 0.8
+p_cutoff <- 0.05
+
+cor_df_sig <- subset(cor_df, abs(cor) > r_cutoff & pvalue < p_cutoff)
+write.table(cor_df_sig, "Sig_Correlation_pvalue_otu_metric.txt",sep="\t",quote=F, row.names = T, col.names = T)
+
+# igrah网络文件
+cor_df_sig$weight = abs(cor_df_sig$cor)
+net <- graph_from_data_frame(cor_df_sig, directed = FALSE)
+# 创建节点属性表
+node_attr <- rbind(data.frame(name = unique(cor_df_sig$OTU),type = "Taxonomy"),
+                   data.frame(name = unique(cor_df_sig$Metric),type ="KEGG"))
+
+# 转换画图对象
+net_tbl <- as_tbl_graph(net) %>%
+  left_join(node_attr, by = c("name" = "name"))
+
+# layout可选 kk,circle,"auto", "fr", "kk", "drl", "lgl", "mds", "graphopt", "linear", "star"
+p = ggraph(net_tbl, layout = "fr") +  
+  geom_edge_link(aes(edge_width = abs(cor), color = cor > 0), alpha = 0.8) +
+  geom_node_point(aes(color = type),size = 5) +
+  theme_void() +
+  scale_edge_width(range = c(0.5, 2)) +
+  scale_edge_color_manual(values = c("blue", "red"))
+p
+ggsave("cor_network_plot.pdf",p)
+
+# 加上节点标签；不建议
+p + geom_node_text(aes(label = name), repel = TRUE, size = 3)
+```
+
+其他 交互式网络图，更方便查看点的信息
+
+```{r}
+library(visNetwork)
+library(igraph)
+library(dplyr)
+library(htmlwidgets)
+
+# 假设已有 igraph 对象 net 和节点分组信息 node_attr
+# 边数据框，添加边权重和颜色示例
+edges <- igraph::as_data_frame(net, what = "edges") %>%
+  mutate(width = abs(weight) * 2,
+         color = ifelse(weight > 0, "red", "blue"))
+
+# nodes数据框
+nodes <- data.frame(id = V(net)$name,
+                    label = V(net)$name,
+                    group = ifelse(V(net)$name %in% colnames(otu),"Taxonomy","KEGG"))
+# 绘图
+vis_net <- visNetwork(nodes, edges) %>%
+  visOptions(highlightNearest = list(enabled = TRUE, degree = 1, hover = TRUE),
+             nodesIdSelection = TRUE) %>%
+  visGroups(groupname = "Taxonomy", color = "lightblue") %>%
+  visGroups(groupname = "KEGG", color = "orange") %>%
+  visEdges(smooth = FALSE) %>%
+  visPhysics(stabilization = TRUE)
+
+vis_net
+# 注意这种交互式文件不太好保存为pdf，但可以保存为html；用浏览器打开进行查看
+saveWidget(vis_net, file = "network_plot.html", selfcontained = TRUE)
+```

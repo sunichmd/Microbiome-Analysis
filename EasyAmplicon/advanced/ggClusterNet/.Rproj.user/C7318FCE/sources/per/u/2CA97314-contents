@@ -1,0 +1,10 @@
+
+install.packages('remotes')
+
+remotes::install_github("https://github.com/xielab2017/EasyMicroPlot",subdir='Version_0.5')
+
+library(EasyMicroPlot)
+
+# 文档位置
+# https://mp.weixin.qq.com/s/-L5uLhkxnwU5MjB5HVTetg
+

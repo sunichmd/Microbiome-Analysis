@@ -1,0 +1,314 @@
+# 批次校正
+
+### adnois检查beta多样性结果批次
+```{r}
+library(vegan)
+type="_EBvsMB"
+# 读取微生物组学数据矩阵（假设名为"otu_table"）
+otu_table <- read.table("result/otutab1.txt",sep="\t", row.names = 1, header = TRUE,comment.char = "")
+
+# 读取样本元数据表（假设名为"metadata"）包含批次信息（假设名为"batch"）和组信息（假设名为"group"）
+metadata <- read.table(paste0("result/metadata",type,".txt"),sep="\t", row.names = 1, header = TRUE)
+
+metadata = metadata[colnames(otu_table),]
+ad.metadata = metadata
+# 计算样本间的距离矩阵（假设使用Bray-Curtis距离）
+distance_matrix <- vegdist(t(otu_table), method = "bray")
+#View(as.matrix(distance_matrix))
+# 执行PERMANOVA并校正批次效应
+set.seed(18);(result = adonis2(distance_matrix ~ Group, data = metadata))
+set.seed(18);print(adonis2(distance_matrix ~ Batch, data = metadata))
+set.seed(18);print(adonis2(distance_matrix ~ Group*Batch, data = metadata))
+# 查看PERMANOVA结果
+print(result)
+```
+
+### MMUPHin校正
+```{r}
+#BiocManager::install("MMUPHin",force=T)
+library(MMUPHin)
+#browseVignettes("MMUPHin")
+abd_adj <- adjust_batch(feature_abd = otu_table,
+														batch = "Batch",
+														covariates = "Group",
+														data = metadata)$feature_abd_adj
+
+# 计算样本间的距离矩阵（假设使用Bray-Curtis距离）
+distance_matrix1 <- vegdist(t(abd_adj), method = "bray")
+# 执行PERMANOVA并校正批次效应
+set.seed(18);(result1 = adonis2(distance_matrix1 ~ Group, data = metadata))
+set.seed(18);print(adonis2(distance_matrix1 ~ Batch, data = metadata))
+set.seed(18);print(adonis2(distance_matrix1 ~ Group*Batch, data = metadata))
+
+# 查看PERMANOVA结果
+print(result1)
+otu=as.data.frame(abd_adj)
+
+abd_adj <- t(abd_adj)[,apply(t(abd_adj),2,sd)!=0]
+ad.pca <- pca(abd_adj, ncomp = 3, scale = TRUE)
+pdf("result/rm_batch/MMUPHin_rm_batch_PCA.pdf",onefile = F)
+Scatter_Density(object = ad.pca,batch = ad.batch, trt = ad.trt,
+                title = '', trt.legend.title = 'Group')
+dev.off()
+write.table(t(otu),"result/rm_batch/otu_MMUPHin_rm_batch.txt",
+						col.names = NA,row.names = T,sep="\t",quote = F)
+
+library(vegan)
+estimateR = t(estimateR(otu))[,c(1,2,4)]
+colnames(estimateR) = c("richness", "chao1", "ACE")
+# vegan::diversity计算多样性指数shannon, simpson和invsimpson
+shannon = diversity(otu, index = "shannon")
+simpson = diversity(otu, index = "simpson")
+invsimpson = diversity(otu, index = "invsimpson")
+# 合并6种指数
+alpha_div = cbind(estimateR, shannon, simpson, invsimpson)
+
+plotdata = data.frame(cbind(rownames(alpha_div),alpha_div,
+								 ad.metadata[rownames(alpha_div),"Group"]))
+colnames(plotdata) = c("Sample",colnames(alpha_div),"Group")
+plot1 = reshape2::melt(plotdata,id.vars=c("Sample","Group"))
+plot1$value = as.numeric(plot1$value)
+
+library(ggpubr)
+p1 = list()
+for(j in c("richness","chao1","ACE","shannon", "simpson", "invsimpson")){
+	subset(plot1,variable==j)
+	compareL = list(c("EB","MB"))
+	p = ggboxplot(subset(plot1,variable==j), x="Group", y="value", color = "Group",
+											palette = c('#ED0000FF','#0099B4FF','#42B540FF'),add="jitter")
+	p1[[j]] = p + 
+				stat_compare_means(aes(label = ..p.signif..),
+														 comparisons=compareL,
+														 paired = F,
+														 method ="wilcox") + 
+				theme(plot.title = element_text(hjust = 0.5)) +
+				labs(title = j,x=NULL)
+}
+p2 = ggarrange(p1[["richness"]],p1[["shannon"]],p1[["simpson"]],p1[["invsimpson"]],p1[["chao1"]],p1[["ACE"]],ncol = 6)
+p2
+ggsave("result/rm_batch/alpha_boxplot_MMUPHin_rm_batch.pdf",p2,height =6,width = 16)
+
+```
+
+
+### 不删除异常样本 PCA
+```{r}
+cran.pkgs <- c('pheatmap', 'vegan', 'ruv', 'UpSetR', 'gplots', 
+               'ggplot2', 'gridExtra', 'performance', 'Rdpack', 'pROC')
+# Bioconductor
+bioc.pkgs <- c('mixOmics', 'sva', 'limma', 'Biobase', 'metagenomeSeq')
+sapply(c(cran.pkgs, bioc.pkgs), require, character.only = TRUE)
+library(PLSDAbatch)
+
+# 检查批次
+ad.clr <- logratio.transfo(X = t(otu_table), logratio = 'CLR', offset = 1) 
+class(ad.clr) = 'matrix'
+ad.clr = t(otu_table)[,apply(t(otu_table),2,sd)!=0]
+ad.metadata = metadata
+ad.trt = as.factor(ad.metadata$Group)
+ad.batch = as.factor(ad.metadata$Batch)
+names(ad.batch) <- names(ad.trt) <- rownames(ad.metadata)
+
+ad.pca.before <- pca(ad.clr, ncomp = 3, scale = TRUE)
+Scatter_Density(object = ad.pca.before,batch = ad.batch, trt = ad.trt,
+                title = '', trt.legend.title = 'Group')
+pdf("result/rm_batch/Before_PCA.pdf",onefile = F)
+Scatter_Density(object = ad.pca.before,batch = ad.batch, trt = ad.trt,
+                title = '', trt.legend.title = 'Group')
+dev.off()
+
+ad.mod <- model.matrix( ~ ad.trt)
+ad.mod0 <- model.matrix( ~ 1, data = ad.trt)
+```
+
+### 删除异常样本
+```{r}
+cran.pkgs <- c('pheatmap', 'vegan', 'ruv', 'UpSetR', 'gplots', 
+               'ggplot2', 'gridExtra', 'performance', 'Rdpack', 'pROC')
+# Bioconductor
+bioc.pkgs <- c('mixOmics', 'sva', 'limma', 'Biobase', 'metagenomeSeq')
+sapply(c(cran.pkgs, bioc.pkgs), require, character.only = TRUE)
+library(PLSDAbatch)
+
+# 检查批次
+otu_table1 = otu_table[,!colnames(otu_table)%in%c("P1G3","PN21")]
+metadata1 = metadata[colnames(otu_table1),]
+
+ad.clr <- logratio.transfo(X = t(otu_table1), logratio = 'CLR', offset = 1) 
+class(ad.clr) = 'matrix'
+ad.metadata = metadata1
+
+
+ad.trt = as.factor(ad.metadata$Group)
+ad.batch = as.factor(ad.metadata$Batch)
+names(ad.batch) <- names(ad.trt) <- rownames(ad.metadata)
+
+ad.pca.before <- pca(ad.clr, ncomp = 3, scale = TRUE)
+Scatter_Density(object = ad.pca.before,batch = ad.batch, trt = ad.trt,
+                title = '', trt.legend.title = 'Group')
+```
+
+### removeBatchEffect校正
+```{r}
+# removeBatchEffect校正
+ad.rBE <- t(removeBatchEffect(t(ad.clr), batch = ad.batch, 
+                              design = ad.mod))
+ad.rBE <- t(removeBatchEffect(otu_table, batch = ad.batch, 
+                              design = ad.mod))
+
+ad.rBE <- ad.rBE[,apply(ad.rBE,2,sd)!=0]
+ad.pca <- pca(ad.rBE, ncomp = 3, scale = TRUE)
+Scatter_Density(object = ad.pca,batch = ad.batch, trt = ad.trt,
+                title = '', trt.legend.title = 'Group')
+
+distance_matrix1 <- vegdist(ad.rBE, method = "euclidean")
+set.seed(18);(result1 = adonis2(distance_matrix1 ~ Group, data = ad.metadata))
+set.seed(18);print(adonis2(distance_matrix1 ~ Batch, data = ad.metadata))
+set.seed(18);print(adonis2(distance_matrix1 ~ Group*Batch, data = ad.metadata))
+```
+
+### ComBat
+```{r}
+# ComBat
+ad.ComBat <- t(ComBat(t(ad.clr), batch = ad.batch, 
+                      mod = ad.mod, par.prior = FALSE))
+ad.ComBat <- t(ComBat(otu_table, batch = ad.batch, 
+                      mod = ad.mod, par.prior = FALSE))
+ad.ComBat <- ad.ComBat[,apply(ad.ComBat,2,sd)!=0]
+ad.pca <- pca(ad.ComBat, ncomp = 3, scale = TRUE)
+Scatter_Density(object = ad.pca,batch = ad.batch, trt = ad.trt,
+                title = '', trt.legend.title = 'Group')
+
+distance_matrix1 <- vegdist(ad.ComBat, method = "euclidean")
+set.seed(18);(result1 = adonis2(distance_matrix1 ~ Group, data = ad.metadata))
+set.seed(18);print(adonis2(distance_matrix1 ~ Batch, data = ad.metadata))
+set.seed(18);print(adonis2(distance_matrix1 ~ Group*Batch, data = ad.metadata))
+
+otu=as.data.frame(ad.ComBat)
+shannon = vegan::diversity(otu, index = "shannon")
+simpson = vegan::diversity(otu, index = "simpson")
+invsimpson = vegan::diversity(otu, index = "invsimpson")
+richness = apply(otu,1,function(x){table(x!=0)["TRUE"]})
+alpha_div = cbind(richness,shannon, 1-simpson, invsimpson)
+colnames(alpha_div) = c("richness","shannon", "simpson", "invsimpson")
+plotdata = data.frame(cbind(rownames(alpha_div),alpha_div,
+								 ad.metadata[rownames(alpha_div),"Group"]))
+colnames(plotdata) = c("Sample",colnames(alpha_div),"Group")
+plot1 = reshape2::melt(plotdata,id.vars=c("Sample","Group"))
+plot1$value = as.numeric(plot1$value)
+
+library(ggpubr)
+p1 = list()
+for(j in c("shannon", "simpson", "invsimpson")){
+	subset(plot1,variable==j)
+	compareL = list(c("PG","PN"),c("PH","PN"),c("PG","PH"))
+	p = ggboxplot(subset(plot1,variable==j), x="Group", y="value", color = "Group",
+											palette = c('#ED0000FF','#0099B4FF','#42B540FF'),add="jitter")
+	p1[[j]] = p + 
+				stat_compare_means(aes(label = ..p.signif..),
+														 comparisons=compareL,
+														 paired = F,
+														 method ="wilcox") + 
+				theme(plot.title = element_text(hjust = 0.5)) +
+				labs(title = j,x=NULL)
+}
+ggarrange(p1[["shannon"]],p1[["simpson"]],p1[["invsimpson"]],nrow = 3)
+```
+
+### Percentile Normalisation
+```{r}
+# Percentile Normalisation
+ad.PN <- percentile_norm(data = t(otu_table), batch = ad.batch, 
+                         trt = ad.trt, ctrl.grp = 'EB')
+# 
+distance_matrix1 <- vegdist(ad.PN, method = "bray")
+set.seed(18);(result1 = adonis2(distance_matrix1 ~ Group, data = ad.metadata))
+set.seed(18);print(adonis2(distance_matrix1 ~ Batch, data = ad.metadata))
+set.seed(18);print(adonis2(distance_matrix1 ~ Group*Batch, data = ad.metadata))
+otu=as.data.frame(ad.PN)
+ad.PN <- ad.PN[,apply(ad.PN,2,sd)!=0]
+ad.pca <- pca(ad.PN, ncomp = 3, scale = TRUE)
+
+Scatter_Density(object = ad.pca,batch = ad.batch, trt = ad.trt,
+                title = '', trt.legend.title = 'Group')
+pdf("result/rm_batch/Percentile_Normalisati_rm_batch_PCA.pdf",onefile = F)
+Scatter_Density(object = ad.pca,batch = ad.batch, trt = ad.trt,
+                title = '', trt.legend.title = 'Group')
+dev.off()
+write.table(t(otu),"result/rm_batch/otu_Percentile_Normalisati_rm_batch.txt",
+						col.names = NA,row.names = T,sep="\t",quote = F)
+
+shannon = vegan::diversity(otu, index = "shannon")
+simpson = vegan::diversity(otu, index = "simpson")
+invsimpson = vegan::diversity(otu, index = "invsimpson")
+richness = apply(otu,1,function(x){table(x!=0)["TRUE"]})
+alpha_div = cbind(shannon, 1-simpson, invsimpson,richness)
+colnames(alpha_div) = c("shannon", "simpson", "invsimpson","richness")
+plotdata = data.frame(cbind(rownames(alpha_div),alpha_div,
+								 ad.metadata[rownames(alpha_div),"Group"]))
+colnames(plotdata) = c("Sample",colnames(alpha_div),"Group")
+plot1 = reshape2::melt(plotdata,id.vars=c("Sample","Group"))
+plot1$value = as.numeric(plot1$value)
+
+library(ggpubr)
+p1 = list()
+for(j in c("richness","shannon", "simpson", "invsimpson")){
+	subset(plot1,variable==j)
+	compareL = list(c("EB","MB"))
+	p = ggboxplot(subset(plot1,variable==j), x="Group", y="value", color = "Group",
+											palette = c('#ED0000FF','#0099B4FF','#42B540FF'),add="jitter")
+	p1[[j]] = p + 
+				stat_compare_means(aes(label = ..p.signif..),
+														 comparisons=compareL,
+														 paired = F,
+														 method ="wilcox") + 
+				theme(plot.title = element_text(hjust = 0.5)) +
+				labs(title = j,x=NULL)
+}
+p2 = ggarrange(p1[["richness"]],p1[["shannon"]],p1[["simpson"]],p1[["invsimpson"]],ncol = 4)
+p2 = ggarrange(p1[["shannon"]],p1[["simpson"]],p1[["invsimpson"]],ncol = 3)
+p2
+ggsave("result/rm_batch/alpha_boxplot_Percentile_Normalisati_rm_batch.pdf",p2,height =5,width = 10)
+```
+
+### 去除批次的Beta多样性
+```{bash}
+usearch -beta_div result/rm_batch/otu_Percentile_Normalisati_rm_batch.txt -tree result/otus.tree \
+      -filename_prefix result/rm_batch/Percentile_Normalisation_
+      
+usearch -beta_div result/rm_batch/otu_MMUPHin_rm_batch.txt -tree result/otus.tree \
+      -filename_prefix result/rm_batch/MMUPHin_
+
+for i in bray_curtis euclidean jaccard unifrac bray_curtis_binary unifrac_binary
+do
+    # -P添加行注释文件，-Q添加列注释
+    bash ${db}/script/sp_pheatmap.sh \
+      -f result/rm_batch/Percentile_Normalisation_${i}.txt \
+      -H 'TRUE' -u 18 -v 16 -d "none" \
+      -P temp/group.txt -Q temp/group.txt
+    bash ${db}/script/sp_pheatmap.sh \
+      -f result/rm_batch/MMUPHin_${i}.txt \
+      -H 'TRUE' -u 18 -v 16 -d "none" \
+      -P temp/group.txt -Q temp/group.txt
+    rm result/rm_batch/*.r
+
+    # 添加样本标签 --label TRUE
+    Rscript ${db}/script/beta_pcoa.R \
+      --input result/rm_batch/Percentile_Normalisation_${i}.txt --design result/metadata${type}.txt \
+      --group Group --label TRUE --width 89 --height 59 \
+      --output result/rm_batch/Percentile_Normalisation_${i}.pcoa.label.pdf
+    Rscript ${db}/script/beta_pcoa.R \
+      --input result/rm_batch/MMUPHin_${i}.txt --design result/metadata${type}.txt \
+      --group Group --label TRUE --width 89 --height 59 \
+      --output result/rm_batch/MMUPHin_${i}.pcoa.label.pdf
+      
+done
+    # 添加样本标签 --label TRUE
+    Rscript ${db}/script/beta_cpcoa.R \
+      --input result/rm_batch/${i}.txt --design result/metadata1.txt \
+      --group Group --label TRUE --width 89 --height 59 \
+      --output result/rm_batch/${i}.cpcoa.label.pdf
+done
+    
+mv beta_pcoa_stat.txt result/rm_batch/
+```

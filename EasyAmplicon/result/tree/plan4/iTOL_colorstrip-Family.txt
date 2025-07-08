@@ -1,0 +1,98 @@
+DATASET_COLORSTRIP
+SEPARATOR TAB
+BORDER_WIDTH	0
+COLOR	#bebada
+DATASET_LABEL	Family
+LEGEND_COLORS	#9e693f	#9147d5	#c9d747	#9482d3	#61913d	#4d4040	#6dd85e	#d049a4	#76d0b6	#d5493c	#6897bb	#d7993d	#553291	#c7cb8a	#472f5b	#cd7993	#496340	#ccb8bc	#7f2c3a
+LEGEND_LABELS	Bacillaceae_1	Bradyrhizobiaceae	Caulobacteraceae	Comamonadaceae	Flavobacteriaceae	Kribbellaceae	Microbacteriaceae	Micromonosporaceae	Nocardioidaceae	Oxalobacteraceae	Pseudomonadaceae	Pseudonocardiaceae	Rhizobiaceae	Sphingomonadaceae	Steroidobacteraceae	Streptomycetaceae	Thermomonosporaceae	Unassigned	Xanthomonadaceae
+LEGEND_SHAPES	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+LEGEND_TITLE	Family
+MARGIN	5
+STRIP_WIDTH	25
+DATA
+ASV_1	#ccb8bc	Unassigned
+ASV_2	#9482d3	Comamonadaceae
+ASV_3	#9482d3	Comamonadaceae
+ASV_4	#9482d3	Comamonadaceae
+ASV_8	#cd7993	Streptomycetaceae
+ASV_6	#ccb8bc	Unassigned
+ASV_7	#61913d	Flavobacteriaceae
+ASV_9	#d049a4	Micromonosporaceae
+ASV_10	#553291	Rhizobiaceae
+ASV_11	#d5493c	Oxalobacteraceae
+ASV_14	#9482d3	Comamonadaceae
+ASV_12	#9482d3	Comamonadaceae
+ASV_15	#9147d5	Bradyrhizobiaceae
+ASV_13	#61913d	Flavobacteriaceae
+ASV_16	#cd7993	Streptomycetaceae
+ASV_17	#9482d3	Comamonadaceae
+ASV_18	#d7993d	Pseudonocardiaceae
+ASV_20	#d7993d	Pseudonocardiaceae
+ASV_19	#d7993d	Pseudonocardiaceae
+ASV_23	#ccb8bc	Unassigned
+ASV_21	#4d4040	Kribbellaceae
+ASV_22	#c7cb8a	Sphingomonadaceae
+ASV_25	#ccb8bc	Unassigned
+ASV_26	#d7993d	Pseudonocardiaceae
+ASV_28	#496340	Thermomonosporaceae
+ASV_29	#d049a4	Micromonosporaceae
+ASV_30	#ccb8bc	Unassigned
+ASV_24	#d7993d	Pseudonocardiaceae
+ASV_31	#ccb8bc	Unassigned
+ASV_27	#9147d5	Bradyrhizobiaceae
+ASV_33	#ccb8bc	Unassigned
+ASV_32	#ccb8bc	Unassigned
+ASV_35	#ccb8bc	Unassigned
+ASV_34	#ccb8bc	Unassigned
+ASV_36	#d5493c	Oxalobacteraceae
+ASV_38	#ccb8bc	Unassigned
+ASV_37	#ccb8bc	Unassigned
+ASV_40	#9e693f	Bacillaceae_1
+ASV_42	#d5493c	Oxalobacteraceae
+ASV_41	#ccb8bc	Unassigned
+ASV_39	#d7993d	Pseudonocardiaceae
+ASV_47	#9482d3	Comamonadaceae
+ASV_44	#d7993d	Pseudonocardiaceae
+ASV_45	#9482d3	Comamonadaceae
+ASV_54	#ccb8bc	Unassigned
+ASV_46	#553291	Rhizobiaceae
+ASV_52	#d049a4	Micromonosporaceae
+ASV_48	#472f5b	Steroidobacteraceae
+ASV_43	#ccb8bc	Unassigned
+ASV_51	#d7993d	Pseudonocardiaceae
+ASV_50	#6dd85e	Microbacteriaceae
+ASV_53	#d5493c	Oxalobacteraceae
+ASV_49	#61913d	Flavobacteriaceae
+ASV_55	#ccb8bc	Unassigned
+ASV_57	#9482d3	Comamonadaceae
+ASV_58	#ccb8bc	Unassigned
+ASV_62	#76d0b6	Nocardioidaceae
+ASV_56	#9482d3	Comamonadaceae
+ASV_59	#9482d3	Comamonadaceae
+ASV_61	#ccb8bc	Unassigned
+ASV_60	#d5493c	Oxalobacteraceae
+ASV_67	#553291	Rhizobiaceae
+ASV_64	#ccb8bc	Unassigned
+ASV_66	#ccb8bc	Unassigned
+ASV_65	#d7993d	Pseudonocardiaceae
+ASV_68	#c9d747	Caulobacteraceae
+ASV_63	#6897bb	Pseudomonadaceae
+ASV_70	#ccb8bc	Unassigned
+ASV_69	#9147d5	Bradyrhizobiaceae
+ASV_82	#ccb8bc	Unassigned
+ASV_72	#ccb8bc	Unassigned
+ASV_71	#7f2c3a	Xanthomonadaceae
+ASV_74	#ccb8bc	Unassigned
+ASV_76	#472f5b	Steroidobacteraceae
+ASV_73	#9482d3	Comamonadaceae
+ASV_75	#76d0b6	Nocardioidaceae
+ASV_77	#7f2c3a	Xanthomonadaceae
+ASV_83	#ccb8bc	Unassigned
+ASV_84	#ccb8bc	Unassigned
+ASV_81	#7f2c3a	Xanthomonadaceae
+ASV_93	#6897bb	Pseudomonadaceae
+ASV_79	#d5493c	Oxalobacteraceae
+ASV_78	#9482d3	Comamonadaceae
+ASV_85	#ccb8bc	Unassigned
+ASV_80	#ccb8bc	Unassigned
+ASV_88	#ccb8bc	Unassigned

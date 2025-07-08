@@ -1,0 +1,85 @@
+# 下载minconda
+wget -c https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+# 安装
+bash Miniconda3-latest-Linux-x86_64.sh -b -f
+# 加载环境
+~/miniconda3/condabin/conda init
+source ~/.bashrc
+
+# lefse安装方法1
+# 要求版本python=2.7 r=3.6
+conda create -n lefse -c bioconda lefse
+# conda install -c "bioconda/label/cf201901" lefse
+
+# 激活lefse环境
+source activate lefse
+
+# 测试
+lefse-format_input.py -h
+run_lefse.py -h
+lefse-plot_res.py -h
+
+# 分析代码
+mkdir -p temp
+lefse-format_input.py LEfSe2.txt \
+      temp/input.in -c 1 -o 1000000
+
+# 运行lefse(样本无重复、分组将报错)
+run_lefse.py temp/input.in \
+      temp/input.res
+    
+# 绘制物种树注释差异
+lefse-plot_cladogram.py temp/input.res lefse_cladogram.pdf --format pdf
+    
+# 绘制所有差异features柱状图
+lefse-plot_res.py temp/input.res lefse_res.pdf --format pdf
+
+
+# lefse安装方法2
+
+# 创建虚拟环境并安装python2.7和R3.6，R版本不能低于3.5，因为mvtnorm包要求
+conda create -n lefse python=2.7 r=3.6
+# 激活lefse环境
+source activate lefse
+# 下载lefse脚本(假设已经安装hg)
+hg clone https://bitbucket.org/nsegata/lefse
+
+# 安装相关的R包
+cat > installr.R << EOF
+options("repos" = c(CRAN="https://mirrors.tuna.tsinghua.edu.cn/CRAN/"))
+package_list <- c("splines","stats4","survival", "mvtnorm", "modeltools", "coin", "MASS")
+for(p in package_list){
+ if(!suppressWarnings(suppressMessages(require(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))){
+ install.packages(p)
+ suppressWarnings(suppressMessages(library(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))
+ }
+}
+EOF
+# 运行安装脚本依赖R包就安装好了
+Rscript installr.R
+
+# 安装python包
+conda install numpy matplotlib
+# 安装rpy2
+# 需要取网上下载安装包手动安装，也尝试用conda安装，失败
+# rpy2包不能太高，我用的2.8.6
+wget -c https://files.pythonhosted.org/packages/32/54/d102eec14f9cabd0df60682a38bd45c36169a1ec8fb8a690bf436cb6d758/rpy2-2.8.6.tar.gz
+# 解压并进入
+tar xzvf rpy2-2.8.6.tar.gz
+cd rpy2-2.8.6
+python2 setup.py install
+# 如果到这里没出问题就OK了
+
+# 报错解决
+# Unknown property axis_bgcolor：https://www.codeleading.com/article/9346772840/
+pip uninstall matplotlib
+pip install matplotlib==1.5.3
+
+# 修改颜色
+## colors r b g m 应该就是红蓝绿
+colors = ['r','b','g','m','c',[1.0,0.5,0.0],[0.33,0.125,0.0],[0.0,1.0,0.0],[0.75,0.75,0.75],'k']
+
+## dark_colors 应该是前三个背景色，对应后面几个点的颜色（就是上面的color）
+dark_colors = [[0.4,0.0,0.0],[0.0,0.2,0.0],[0.0,0.0,0.4],'m','c',[1.0,0.5,0.0],[0.0,1.0,0.0],[0.33,0.125,0.0],[0.75,0.75,0.75],'k']
+
+

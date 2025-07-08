@@ -1,0 +1,15 @@
+var	estimate	statistic	p.value	conf.low	conf.high	method	alternative
+Bacteria|Actinobacteria|Actinobacteria|Propionibacteriales|Kribbellaceae	-0.268753726604485	5	0.0411255411255411	-0.554175915230017	-0.00643500357590698	Wilcoxon rank sum exact test	two.sided
+Bacteria|Actinobacteria|Actinobacteria|Streptomycetales|Streptomycetaceae	-1.53863418072003	0	0.00216450216450216	-3.15370914341799	-0.38743735868072	Wilcoxon rank sum exact test	two.sided
+Bacteria|Actinobacteria|Actinobacteria|Unassigned|Unassigned	-2.49851676947898	4	0.025974025974026	-4.04510691652985	-0.44068167387131	Wilcoxon rank sum exact test	two.sided
+Bacteria|Actinobacteria|Unassigned|Unassigned|Unassigned	-0.32815201002776	4	0.025974025974026	-0.694842001979773	-0.1776506233716	Wilcoxon rank sum exact test	two.sided
+Bacteria|Bacteroidetes|Chitinophagia|Chitinophagales|Chitinophagaceae	-0.273969044346625	0	0.00216450216450216	-0.330143382944069	-0.104070980517409	Wilcoxon rank sum exact test	two.sided
+Bacteria|Bacteroidetes|Cytophagia|Cytophagales|Unassigned	-0.571072987985089	1	0.00432900432900433	-0.733556894787662	-0.237057827465507	Wilcoxon rank sum exact test	two.sided
+Bacteria|Bacteroidetes|Unassigned|Unassigned|Unassigned	-0.166683844262784	2	0.00865800865800866	-0.242024152989884	-0.061152763063116	Wilcoxon rank sum exact test	two.sided
+Bacteria|Proteobacteria|Alphaproteobacteria|Caulobacterales|Caulobacteraceae	0.336978042129961	35	0.00432900432900433	0.13649833762204	0.51286517526512	Wilcoxon rank sum exact test	two.sided
+Bacteria|Proteobacteria|Alphaproteobacteria|Rhizobiales|Devosiaceae	0.454903613985376	34	0.00865800865800866	0.141030671099974	1.2144331685635	Wilcoxon rank sum exact test	two.sided
+Bacteria|Proteobacteria|Alphaproteobacteria|Rhizobiales|Hyphomicrobiaceae	0.26804721073298	31	0.0411255411255411	0.0638318314373449	0.487354460993337	Wilcoxon rank sum exact test	two.sided
+Bacteria|Proteobacteria|Alphaproteobacteria|Rhizobiales|Unassigned	1.09622098128782	36	0.00216450216450216	0.5335267073485	2.12980300667555	Wilcoxon rank sum exact test	two.sided
+Bacteria|Proteobacteria|Alphaproteobacteria|Sphingomonadales|Sphingomonadaceae	0.786921644998206	34	0.00865800865800866	0.198906026763288	1.22913269851898	Wilcoxon rank sum exact test	two.sided
+Bacteria|Proteobacteria|Betaproteobacteria|Burkholderiales|Unassigned	2.22468388529221	35	0.00432900432900433	0.80319682660058	3.97929611520642	Wilcoxon rank sum exact test	two.sided
+Bacteria|Proteobacteria|Gammaproteobacteria|Unassigned|Unassigned	-0.387600088253005	3	0.0151515151515152	-0.703597836765579	-0.0736808822814399	Wilcoxon rank sum exact test	two.sided

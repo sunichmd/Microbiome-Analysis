@@ -1,0 +1,98 @@
+DATASET_COLORSTRIP
+SEPARATOR TAB
+BORDER_WIDTH	0
+COLOR	#bebada
+DATASET_LABEL	Order
+LEGEND_COLORS	#823f35	#77d952	#6d44c4	#78d5a1	#cf4a70	#4d4040	#ca53bd	#69923c	#6d7fc4	#d1d04e	#532b63	#d64d31	#4b623d	#ca96b7	#78b5c2	#ccbf9b	#c58741
+LEGEND_LABELS	Bacillales	Burkholderiales	Caulobacterales	Flavobacteriales	Micrococcales	Micromonosporales	Nevskiales	Propionibacteriales	Pseudomonadales	Pseudonocardiales	Rhizobiales	Rhodospirillales	Sphingomonadales	Streptomycetales	Streptosporangiales	Unassigned	Xanthomonadales
+LEGEND_SHAPES	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+LEGEND_TITLE	Order
+MARGIN	5
+STRIP_WIDTH	25
+DATA
+ASV_1	#ccbf9b	Unassigned
+ASV_2	#77d952	Burkholderiales
+ASV_3	#77d952	Burkholderiales
+ASV_4	#77d952	Burkholderiales
+ASV_8	#ca96b7	Streptomycetales
+ASV_6	#77d952	Burkholderiales
+ASV_7	#78d5a1	Flavobacteriales
+ASV_9	#4d4040	Micromonosporales
+ASV_10	#532b63	Rhizobiales
+ASV_11	#77d952	Burkholderiales
+ASV_14	#77d952	Burkholderiales
+ASV_12	#77d952	Burkholderiales
+ASV_15	#532b63	Rhizobiales
+ASV_13	#78d5a1	Flavobacteriales
+ASV_16	#ca96b7	Streptomycetales
+ASV_17	#77d952	Burkholderiales
+ASV_18	#d1d04e	Pseudonocardiales
+ASV_20	#d1d04e	Pseudonocardiales
+ASV_19	#d1d04e	Pseudonocardiales
+ASV_23	#ccbf9b	Unassigned
+ASV_21	#69923c	Propionibacteriales
+ASV_22	#4b623d	Sphingomonadales
+ASV_25	#532b63	Rhizobiales
+ASV_26	#d1d04e	Pseudonocardiales
+ASV_28	#78b5c2	Streptosporangiales
+ASV_29	#4d4040	Micromonosporales
+ASV_30	#ccbf9b	Unassigned
+ASV_24	#d1d04e	Pseudonocardiales
+ASV_31	#532b63	Rhizobiales
+ASV_27	#532b63	Rhizobiales
+ASV_33	#ccbf9b	Unassigned
+ASV_32	#ccbf9b	Unassigned
+ASV_35	#ccbf9b	Unassigned
+ASV_34	#77d952	Burkholderiales
+ASV_36	#77d952	Burkholderiales
+ASV_38	#77d952	Burkholderiales
+ASV_37	#ccbf9b	Unassigned
+ASV_40	#823f35	Bacillales
+ASV_42	#77d952	Burkholderiales
+ASV_41	#77d952	Burkholderiales
+ASV_39	#d1d04e	Pseudonocardiales
+ASV_47	#77d952	Burkholderiales
+ASV_44	#d1d04e	Pseudonocardiales
+ASV_45	#77d952	Burkholderiales
+ASV_54	#ccbf9b	Unassigned
+ASV_46	#532b63	Rhizobiales
+ASV_52	#4d4040	Micromonosporales
+ASV_48	#ca53bd	Nevskiales
+ASV_43	#ccbf9b	Unassigned
+ASV_51	#d1d04e	Pseudonocardiales
+ASV_50	#cf4a70	Micrococcales
+ASV_53	#77d952	Burkholderiales
+ASV_49	#78d5a1	Flavobacteriales
+ASV_55	#ccbf9b	Unassigned
+ASV_57	#77d952	Burkholderiales
+ASV_58	#532b63	Rhizobiales
+ASV_62	#69923c	Propionibacteriales
+ASV_56	#77d952	Burkholderiales
+ASV_59	#77d952	Burkholderiales
+ASV_61	#d64d31	Rhodospirillales
+ASV_60	#77d952	Burkholderiales
+ASV_67	#532b63	Rhizobiales
+ASV_64	#532b63	Rhizobiales
+ASV_66	#ccbf9b	Unassigned
+ASV_65	#d1d04e	Pseudonocardiales
+ASV_68	#6d44c4	Caulobacterales
+ASV_63	#6d7fc4	Pseudomonadales
+ASV_70	#4b623d	Sphingomonadales
+ASV_69	#532b63	Rhizobiales
+ASV_82	#77d952	Burkholderiales
+ASV_72	#77d952	Burkholderiales
+ASV_71	#c58741	Xanthomonadales
+ASV_74	#ccbf9b	Unassigned
+ASV_76	#ca53bd	Nevskiales
+ASV_73	#77d952	Burkholderiales
+ASV_75	#69923c	Propionibacteriales
+ASV_77	#c58741	Xanthomonadales
+ASV_83	#ccbf9b	Unassigned
+ASV_84	#ccbf9b	Unassigned
+ASV_81	#c58741	Xanthomonadales
+ASV_93	#6d7fc4	Pseudomonadales
+ASV_79	#77d952	Burkholderiales
+ASV_78	#77d952	Burkholderiales
+ASV_85	#ccbf9b	Unassigned
+ASV_80	#ccbf9b	Unassigned
+ASV_88	#ccbf9b	Unassigned

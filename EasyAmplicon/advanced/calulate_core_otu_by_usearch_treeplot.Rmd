@@ -1,0 +1,203 @@
+# 计算核心物种-usearch11
+
+usearch10 物种太多
+```{bash}
+usearch -calc_distmx result/otus.fa -tabbedout result/distmx.txt \
+-sparsemx_minid 0.9 -termid 0.8
+
+for i in L R S;do
+for j in A B C;do
+awk -v loc=$i -v time=$j 'BEGIN{OFS=FS="\t"}ARGIND==1{if($5=="KP") {a[$1]=1}}\
+ARGIND==2{if(FNR==1) {printf $1;for(i=2;i<=NF;i++) if(a[$i]==1) {printf "\t"$i;b[i]=1};print ""}\
+else{printf $1;for(i=2;i<=NF;i++) if(b[i]==1) printf "\t"$i;print ""}}' result/metadata_${i}_${j}.txt result/${i}/otutab.txt >result/${i}/otutab_KP_${j}.txt
+
+awk 'BEGIN{OFS=FS="\t"}FNR==1{print $0}\
+FNR>1{cont[$1]=$1;sum[$1]=0;for(i=2;i<=NF;i++) {sum[$1]=sum[$1]+$i;cont[$1]=cont[$1]"\t"$i}}\
+END{for(i in sum) if(sum[i]>0) print cont[i]}' result/${i}/otutab_KP_${j}.txt >result/${i}/otutab_KP_${j}_rm0.txt
+
+wc -l result/${i}/otutab_KP_${j}_rm0.txt
+
+usearch11 -otutab_core result/${i}/otutab_KP_${j}_rm0.txt -sintaxin result/otus.sintax -tabbedout result/${i}/core_KP_${j}.txt
+
+cp result/${i}/core_KP_${j}.txt ../result4/core-otu/bac
+
+done
+done
+
+```
+挑选合适的数据
+
+```{r}
+i="L"
+j="A"
+
+for(i in c("L","R","S")){
+	for(j in c("A","B","C")){
+		filter_data = read.table(paste0("result/",i,"/core_KP_",j,".txt"),header = T)
+		# 保留前30个有属水平注释的物种
+		n=40
+		filter_data1 = filter_data[grepl(",g:",filter_data$Taxonomy),][1:n,]
+		View(filter_data1)
+		write.table(filter_data1,paste0("result/",i,"/core_KP_",j,"_plot.txt"),quote = F,row.names = F,col.names = T,sep="\t")
+	}
+}
+```
+
+建树
+```{r}
+# 提取OTU序列
+for i in L R S;do
+for j in A B C;do
+cut -f 1 result/${i}/core_KP_${j}_plot.txt | tail -n+2 > result/${i}/core_KP_${j}_plot.id
+usearch -fastx_getseqs result/otus.fa \
+-labels result/${i}/core_KP_${j}_plot.id -fastaout result/${i}/core_KP_${j}_plot.fasta
+
+muscle -in  result/${i}/core_KP_${j}_plot.fasta  -out result/${i}/core_KP_${j}_plot_aligned.fas
+
+rm -rf result/${i}/core_KP_${j}_plot_aligned_otus_s*
+iqtree -s result/${i}/core_KP_${j}_plot_aligned.fas \
+-bb 1000 -redo -alrt 1000 -nt AUTO \
+-pre result/${i}/core_KP_${j}_plot_aligned_otus_s
+done
+done
+```
+
+ggtree绘制进化树
+```{r}
+for(i in c("L","R","S")){
+	for(j in c("A","B","C")){
+library(ggtree)
+tree <- read.tree(paste0("result/",i,"/core_KP_",j,"_plot_aligned_otus_s.contree"))
+tax <- read.table("result/taxonomy.txt", row.names=1,sep="\t",header = T)
+tax_tax_rm = tax[tree$tip.label,]
+
+
+# 按属水平建树并上色
+groupInfo <- split(row.names(tax_tax_rm), tax_tax_rm$Genus)
+## 将分组信息添加到树中
+tree <- groupOTU(tree, groupInfo)
+# library(RColorBrewer)
+# color_sample = brewer.pal(length(unique(tax$Genus)),"Set2")
+
+# ggtree(tree,layout = "circular")+xlim(0,20)+geom_text(aes(label=node))+geom_tiplab2(offset=0.1, size=2)
+# ggtree(tree,layout = "circular") +
+# 	geom_text(aes(label=node))
+# 
+# str(tree)
+# groupInfo
+# library(stringr)
+# 
+# attributes(tree)
+# 
+# ggtree(tree,aes(color=group),size=1,branch.length = "none",ladderize = T)+
+# 	theme(legend.position = "None") +
+# 	geom_tiplab(aes(label=str_replace(label, "_", " ")),offset = 0.01, font="bold",size=3.5,vjust=0.5) + 
+# 	xlim(NA,15) +
+# 	geom_text(aes(label=node)) +
+# 	geom_cladelabel(node=32,label="A",
+# 															 offset=4,barsize =3,hjust=-1,
+# 															 vjust=-0.5,color="red")+
+# 	geom_cladelabel(node=34,label="B",
+# 									offset=4,barsize =3,
+# 									hjust=1.5,vjust=-0.5,color="blue")+
+# 	geom_cladelabel(node=27,label="C",
+# 									offset=4,barsize=3,
+# 									hjust=6,color="orange")
+library(ggtreeExtra) # 设置叠加的包
+library(ggstar) # 提供几何图形
+library(ggplot2) #
+library(ggtree) # 绘制进化树
+library(treeio)
+library(ggnewscale)
+
+tax_tax_rm$ID=rownames(tax_tax_rm)
+
+pdf(paste0("result/",i,"/core_KP_",j,"_plot.pdf"),width=20,height=11)
+print(ggtree(tree,size=1,branch.length = "none",ladderize = T,layout = "circular") +
+	geom_tiplab(aes(label=label),offset = 0.01, font="bold",size=3.5,vjust=0.5) + 
+	xlim(NA,40) +
+	theme(legend.position = "right") +
+	new_scale_fill() + 
+	geom_fruit(
+		data=tax_tax_rm,
+		geom=geom_tile,
+		mapping=aes(y=ID, x=1, fill=Phylum),
+		offset=0.05,   # 外部层之间的距离，默认为树的 x 范围的0.03倍。
+		pwidth=0.5 # 外部层的宽度，默认为树的 x 范围的0.2倍。
+	) + 
+	scale_fill_manual(
+		values=color20[1:length(unique(tax_tax_rm$Phylum))],
+		guide=guide_legend(
+			keywidth=0.5,
+			keyheight=0.5, 
+			order=3
+		)
+	) +
+	new_scale_fill() + 
+	geom_fruit(
+		data=tax_tax_rm,
+		geom=geom_tile,
+		mapping=aes(y=ID, x=1, fill=Class),
+		offset=0.05,   # 外部层之间的距离，默认为树的 x 范围的0.03倍。
+		pwidth=0.1  # 外部层的宽度，默认为树的 x 范围的0.2倍。
+	) + 
+	scale_fill_manual(
+		values=color20[1:length(unique(tax_tax_rm$Class))],
+		guide=guide_legend(
+			keywidth=0.5,
+			keyheight=0.5, 
+			order=3
+		)
+	)+
+	new_scale_fill() + 
+	geom_fruit(
+		data=tax_tax_rm,
+		geom=geom_tile,
+		mapping=aes(y=ID, x=1, fill=Order),
+		offset=0.05,   # 外部层之间的距离，默认为树的 x 范围的0.03倍。
+		pwidth=0.1  # 外部层的宽度，默认为树的 x 范围的0.2倍。
+	) + 
+	scale_fill_manual(
+		values=color20[1:length(unique(tax_tax_rm$Order))],
+		guide=guide_legend(
+			keywidth=0.5,
+			keyheight=0.5, 
+			order=3
+		)
+	)+
+	new_scale_fill() + 
+	geom_fruit(
+		data=tax_tax_rm,
+		geom=geom_tile,
+		mapping=aes(y=ID, x=1, fill=Family),
+		offset=0.05,   # 外部层之间的距离，默认为树的 x 范围的0.03倍。
+		pwidth=0.1  # 外部层的宽度，默认为树的 x 范围的0.2倍。
+	) + 
+	scale_fill_manual(
+		values=color20[1:length(unique(tax_tax_rm$Family))],
+		guide=guide_legend(
+			keywidth=0.5,
+			keyheight=0.5, 
+			order=3
+		)
+	)+
+	new_scale_fill() + 
+	geom_fruit(
+		data=tax_tax_rm,
+		geom=geom_tile,
+		mapping=aes(y=ID, x=1, fill=Genus),
+		offset=0.05,   # 外部层之间的距离，默认为树的 x 范围的0.03倍。
+		pwidth=0.1  # 外部层的宽度，默认为树的 x 范围的0.2倍。
+	) + 
+	scale_fill_manual(
+		values=color20[1:length(unique(tax_tax_rm$Genus))],
+		guide=guide_legend(
+			keywidth=0.5,
+			keyheight=0.5, 
+			order=3
+		)
+	))
+dev.off()
+
+	}
+}

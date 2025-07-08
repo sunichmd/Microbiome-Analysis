@@ -1,0 +1,306 @@
+# version 2020.8.23
+rm(list=ls())
+t0=Sys.time() # 计算所用时间
+
+# 1 # 设置文件夹路径和文件名，请根据您计算机中的文件夹路径和文件名进行更改
+# 保存输入文件的文件夹
+wd="H:/icamp"
+
+# OTU表文件(Tab分隔的txt文件)
+com.file="otus.txt"
+
+# 系统发育树文件
+tree.file="tree.nwk"
+
+# 分组信息表
+treat.file="treatment.txt"
+
+# 环境变量
+env.file="environment.txt"
+# 如果没有env文件或env可能不代表小生境，请跳过步骤7和8，但请检查确定bin设置的替代方法，例如bin.size.limit。
+
+# 用于保存输出的文件夹。即使只是测试示例数据，也请更改到新文件夹。
+save.wd="H:/icamp/output"
+if(!dir.exists(save.wd)){dir.create(save.wd)}
+
+# 2 # 关键参数设置
+prefix="HL"  # 输出文件名的前缀。通常使用项目ID。
+rand.time=1000  # 随机化时间，1000通常就足够了。例如test，您可以将其设置为100或更少以节省时间。
+nworker=4 # nworker是用于并行计算的线程数，它取决于计算机的CPU核数
+memory.G=100 # 根据需要设置内存大小(但应该小于硬盘中的可用空间)，以便计算大的树不受物理内存的限制。单位是Gb。
+
+# 3 # 加载R包和数据
+library(iCAMP)
+library(ape)
+setwd(wd)
+comm=t(read.table(com.file, header = TRUE, sep = "\t", row.names = 1,
+                  as.is = TRUE, stringsAsFactors = FALSE, comment.char = "",
+                  check.names = FALSE))
+tree=read.tree(file = tree.file)
+treat=read.table(treat.file, header = TRUE, sep = "\t", row.names = 1,
+                 as.is = TRUE, stringsAsFactors = FALSE, comment.char = "",
+                 check.names = FALSE)
+
+env=read.table(env.file, header = TRUE, sep = "\t", row.names = 1,
+               as.is = TRUE, stringsAsFactors = FALSE, comment.char = "",
+               check.names = FALSE) # 如果没有env.file，则跳过此步骤
+
+# 4 # 匹配OTU表和处理信息表中的样品id
+sampid.check=match.name(rn.list=list(comm=comm,treat=treat,env=env))
+# sampid.check=match.name(rn.list=list(comm=comm,treat=treat)) # 如果没有环境因子 env.file 则用这一步
+# 对于示例数据，输出应该是“All match very well”。
+# 如果你没有匹配他们的id，不匹配的样本将被删除。
+treat=sampid.check$treat
+comm=sampid.check$comm
+comm=comm[,colSums(comm)>0,drop=FALSE] # 如果一些不匹配的样本被删除，一些OTUs可能成为幽灵，那么你可以使用这条线删除他们，如果必要的话。
+env=sampid.check$env # 如果没有env.file，则跳过此步骤
+
+# 5 # 匹配OTU表和树文件中的OTU id
+spid.check=match.name(cn.list=list(comm=comm),tree.list=list(tree=tree))
+# 对于示例数据，输出应该是“All match very well”。
+# 如果你没有匹配他们的id，不匹配的样本将被删除。
+comm=spid.check$comm
+tree=spid.check$tree
+
+# 6 # 计算成对的系统发育距离矩阵。
+# 由于微生物群落数据通常有大量的物种(otu或asv)，我们使用“big.matrix”。矩阵”在R包“bigmemory”处理大的系统发育距离矩阵。
+setwd(save.wd)
+if(!file.exists("pd.desc")) 
+{
+  pd.big=iCAMP::pdist.big(tree = tree, wd=save.wd, nworker = nworker, memory.G = memory.G)
+  # 输出文件:
+  # path.rda: 一个R对象，列出所有节点和从根到每个尖端的边长度。保存为R数据格式。在计算系统发育距离矩阵时的中间输出。
+  # pd.bin: BIN 文件 (backingfile) 由R包 bigmemory 的 big.matix函数功能计算得到。这是储存成对系统发育距离值的大矩阵。通过使用这个大内存格式文件，我们在调用大矩阵进行计算时不需要内存而需要硬盘。
+  # pd.desc:  DESC 文件 (descriptorfile) 保持 backingfile (pd.bin) 的描述。
+  # pd.taxon.name.csv: 逗号分隔的csv文件，存储树尖(OTUs)的id，作为大系统发育距离矩阵的行/列名称。
+}else{
+  # 如果你已经在之前的运行中计算了系统发育距离矩阵
+  pd.big=list()
+  pd.big$tip.label=read.csv(paste0(save.wd,"/pd.taxon.name.csv"),row.names = 1,stringsAsFactors = FALSE)[,1]
+  pd.big$pd.wd=save.wd
+  pd.big$pd.file="pd.desc"
+  pd.big$pd.name.file="pd.taxon.name.csv"
+}
+
+####################
+# 如iCAMP论文(Ning et al 2020 Nature Communications)方法部分所述，如果基于随机性的“替代方法”适用，则可以跳过步骤7-8。
+# 7 # 评估物种间的生态位偏好差异
+# 该步骤需要使用Env（环境因子数据）
+# 由于微生物群落数据通常有大量的物种(otu或asv)，我们使用“big.matrix”。在R包“bigmemory”处理大生态位差分矩阵。
+setwd(save.wd)
+niche.dif=iCAMP::dniche(env = env,comm = comm,method = "niche.value",
+                        nworker = nworker,out.dist=FALSE,bigmemo=TRUE,
+                        nd.wd=save.wd)
+
+# 8 # bin内系统发育信号评估。
+# 对于真实的数据，您可以尝试几种不同的分类设置，并选择一个导致最佳的分类箱内系统发育信号。
+# 该步骤需要使用Env（环境因子数据）
+# 8.1 # 尝试使用当前设置的系统发育分类。
+ds = 0.2 # 设置可以改变，探索最佳选择
+bin.size.limit = 12 # 设置可以改变，探索最佳选择 # 这里设置为5只是为了小的示例数据集。对于真实的数据，通常尝试12到48。
+phylobin=taxa.binphy.big(tree = tree, pd.desc = pd.big$pd.file,pd.spname = pd.big$tip.label,
+                         pd.wd = pd.big$pd.wd, ds = ds, bin.size.limit = bin.size.limit,
+                         nworker = nworker)
+# 8.2 # 检测bin内系统发育信号。
+sp.bin=phylobin$sp.bin[,3,drop=FALSE]
+sp.ra=colMeans(comm/rowSums(comm))
+abcut=3 # 你可以删除一些物种，如果它们太稀少，无法进行可靠的相关性测试。
+commc=comm[,colSums(comm)>=abcut,drop=FALSE]
+dim(commc)
+spname.use=colnames(commc)
+binps=iCAMP::ps.bin(sp.bin = sp.bin,sp.ra = sp.ra,spname.use = spname.use,
+                    pd.desc = pd.big$pd.file, pd.spname = pd.big$tip.label, pd.wd = pd.big$pd.wd,
+                    nd.list = niche.dif$nd,nd.spname = niche.dif$names,ndbig.wd = niche.dif$nd.wd,
+                    cor.method = "pearson",r.cut = 0.1, p.cut = 0.05, min.spn = 5)
+if(file.exists(paste0(prefix,".PhyloSignalSummary.csv"))){appendy=TRUE;col.namesy=FALSE}else{appendy=FALSE;col.namesy=TRUE}
+write.table(data.frame(ds=ds,n.min=bin.size.limit,binps$Index),file = paste0(prefix,".PhyloSignalSummary.csv"),
+            append = appendy, quote=FALSE, sep=",", row.names = FALSE,col.names = col.namesy)
+if(file.exists(paste0(prefix,".PhyloSignalDetail.csv"))){appendy2=TRUE;col.namesy2=FALSE}else{appendy2=FALSE;col.namesy2=TRUE}
+write.table(data.frame(ds=ds,n.min=bin.size.limit,binID=rownames(binps$detail),binps$detail),file = paste0(prefix,".PhyloSignalDetail.csv"),
+            append = appendy2, quote = FALSE, sep = ",", row.names = FALSE, col.names = col.namesy2)
+# 因为这个例子中的小数据是随机生成的，所以相关性应该非常弱。
+# 通常，你正在寻找一个bininning设置导致更高的RAsig.abj(具有显著系统发育信号的bin的相对丰度)和相对较高的meanR(bins间的平均相关系数)。
+# 输出含义参见函数“ps.bin”的帮助文档。
+
+####################
+# 9 # iCAMP 分析
+# 9.1 # 不要遗漏小的 bins.
+# 通常用法# 设置 sig.index as Confidence 而不是 SES.RC (betaNRI/NTI + RCbray)
+bin.size.limit = 12 # 对于真实的数据，通常根据系统发育信号检验选择合适的数字，或尝试一些设置，然后选择合理的随机水平。我们的经验是12，24，48。但是对于这个数据集太小的例子，必须使用5。
+sig.index="Confidence" # 参见icamp.big的帮助文档中的其他选项。
+icres=iCAMP::icamp.big(comm=comm, pd.desc = pd.big$pd.file, pd.spname=pd.big$tip.label,
+                       pd.wd = pd.big$pd.wd, rand = rand.time, tree=tree,
+                       prefix = prefix, ds = 0.2, pd.cut = NA, sp.check = TRUE,
+                       phylo.rand.scale = "within.bin", taxa.rand.scale = "across.all",
+                       phylo.metric = "bMPD", sig.index=sig.index, bin.size.limit = bin.size.limit, 
+                       nworker = nworker, memory.G = memory.G, rtree.save = FALSE, detail.save = TRUE, 
+                       qp.save = FALSE, detail.null = FALSE, ignore.zero = TRUE, output.wd = save.wd, 
+                       correct.special = TRUE, unit.sum = rowSums(comm), special.method = "depend",
+                       ses.cut = 1.96, rc.cut = 0.95, conf.cut=0.975, omit.option = "no",meta.ab = NULL)
+# 这个函数的参数比较多，请查看“icamp.big”的帮助文档。
+# 输出文件:
+# Test.iCAMP.detail.rda: 目标"icres" 保存为 R 数据格式。是一个列表文件。
+#第一个元素 bNRIiRCa 是每个装配过程在每次成对比较中相对重要性的结果。
+#第二个元素 "detail" 包括分类信息 (命名为 taxabin), 系统发育和分类指标在每个bin中的结果 (命名为 bNRIi, RCa, etc.), 每个bin的相对丰度 (bin.weight), 每个过程在每次群落过程 (processes), 输入设置 (setting), 和输入群落数据矩阵(comm)之间周转的相对重要性.
+#参见 icamp.big 函数的帮助文件
+
+############################
+# 9.2到9.4是你可以探索的一些可选的特殊设置。
+# 9.2 # 探索零模型显著性检验的不同方法。
+# 9.2.1 # 设置的细节。null=TRUE，输出所有空值，方便正常性测试和不同选项之间的切换
+detail.null=TRUE
+bin.size.limit = 5 
+sig.index="SES.RC" # 这是传统的方法，假设系统发育指标的零值服从正态分布。
+prefixb="TestB"
+
+icres2=iCAMP::icamp.big(comm=comm, pd.desc = pd.big$pd.file, pd.spname=pd.big$tip.label,
+                        pd.wd = pd.big$pd.wd, rand = rand.time, tree=tree,
+                        prefix = prefixb, ds = 0.2, pd.cut = NA, sp.check = TRUE,
+                        phylo.rand.scale = "within.bin", taxa.rand.scale = "across.all",
+                        phylo.metric = "bMPD", sig.index=sig.index, bin.size.limit = bin.size.limit, 
+                        nworker = nworker, memory.G = memory.G, rtree.save = FALSE, detail.save = TRUE, 
+                        qp.save = FALSE, detail.null = detail.null, ignore.zero = TRUE, output.wd = save.wd, 
+                        correct.special = TRUE, unit.sum = rowSums(comm), special.method = "depend",
+                        ses.cut = 1.96, rc.cut = 0.95, conf.cut=0.975, omit.option = "no",meta.ab = NULL)
+# 9.2.2 # 正检验
+nntest=iCAMP::null.norm(icamp.output=icres2, p.norm.cut=0.05, detail.out=FALSE)
+# 输出显示每个bins的非正态分布比例，即具有零值的周转量的比例显著偏离正态分布。
+# 如果某些比率值非常高，可能需要更改为使用“Confidence”作为sig.index。
+
+# 9.2.3 ## 改变 sig.index 为 "Confidence".
+icres3=iCAMP::change.sigindex(icamp.output = icres2, sig.index = "Confidence", detail.save = TRUE, detail.null = FALSE, conf.cut = 0.975)
+head(icres3$CbMPDiCBraya)
+
+# 9.2.4 # 将系统发育和分类学指标的sig.index更改为“RC”。
+icres4=iCAMP::change.sigindex(icamp.output = icres2, sig.index = "RC", detail.save = TRUE, detail.null = FALSE, rc.cut = 0.95)
+head(icres4$RCbMPDiRCbraya)
+
+# 9.2.5 # 该函数还可以改变显著性阈值
+icres5=iCAMP::change.sigindex(icamp.output = icres2, sig.index = "SES.RC", detail.save = TRUE, detail.null = FALSE, ses.cut = 1.64, rc.cut = 0.9)
+head(icres5$bNRIiRCbraya)
+
+# 9.3 # 您可以指定区域池中每个物种的相对丰度，如果它与您输入的“comm”中的平均相对丰度不相同。
+meta.ab=rep(1,ncol(comm)) # 在这里，我假设所有的物种实际上在区域池中拥有相同的相对丰度。
+prefix2=paste0(prefix,".MetaCrct")
+sig.index="Confidence" # 参见icamp.big的帮助文档中的其他选项。
+icres.meta=iCAMP::icamp.big(comm=comm, pd.desc = pd.big$pd.file, pd.spname=pd.big$tip.label,
+                            pd.wd = pd.big$pd.wd, rand = rand.time, tree=tree,
+                            prefix = prefix2, ds = 0.2, pd.cut = NA, sp.check = TRUE,
+                            phylo.rand.scale = "within.bin", taxa.rand.scale = "across.all",
+                            phylo.metric = "bMPD", sig.index=sig.index, bin.size.limit = bin.size.limit, 
+                            nworker = nworker, memory.G = memory.G, rtree.save = FALSE, detail.save = TRUE, 
+                            qp.save = FALSE, detail.null = FALSE, ignore.zero = TRUE, output.wd = save.wd, 
+                            correct.special = TRUE, unit.sum = rowSums(comm), special.method = "depend",
+                            ses.cut = 1.96, rc.cut = 0.95, conf.cut=0.975, omit.option = "no",meta.ab=meta.ab)
+
+# 9.4 # 考虑省略小的bins
+# 9.4.1 # 如果您想省略小的箱子，而不是将它们合并到最近的亲戚，请设置omit.option as "test" 以检查将被省略的内容.
+omit.option = "test"
+icres.omit=iCAMP::icamp.big(comm=comm, pd.desc = pd.big$pd.file, pd.spname=pd.big$tip.label,
+                            pd.wd = pd.big$pd.wd, rand = rand.time, tree=tree,
+                            prefix = prefix, ds = 0.2, pd.cut = NA, sp.check = TRUE,
+                            phylo.rand.scale = "within.bin", taxa.rand.scale = "across.all",
+                            phylo.metric = "bMPD", sig.index=sig.index, bin.size.limit = bin.size.limit, 
+                            nworker = nworker, memory.G = memory.G, rtree.save = FALSE, detail.save = TRUE, 
+                            qp.save = FALSE, detail.null=FALSE, ignore.zero = TRUE, output.wd = save.wd, 
+                            correct.special = TRUE, unit.sum = rowSums(comm), special.method = "depend",
+                            ses.cut = 1.96, rc.cut = 0.95, conf.cut=0.975, omit.option = omit.option)
+# "test"将返回被省略物种的详细表。
+
+# 9.4.2 # 然后将其设置为“omit”以省略小的bins。
+omit.option = "omit"
+icres.omit2=iCAMP::icamp.big(comm=comm, pd.desc = pd.big$pd.file, pd.spname=pd.big$tip.label,
+                             pd.wd = pd.big$pd.wd, rand = rand.time, tree=tree,
+                             prefix = prefix, ds = 0.2, pd.cut = NA, sp.check = TRUE,
+                             phylo.rand.scale = "within.bin", taxa.rand.scale = "across.all",
+                             phylo.metric = "bMPD", sig.index=sig.index, bin.size.limit = bin.size.limit, 
+                             nworker = nworker, memory.G = memory.G, rtree.save = FALSE, detail.save = TRUE, 
+                             qp.save = FALSE, detail.null=FALSE, ignore.zero = TRUE, output.wd = save.wd, 
+                             correct.special = TRUE, unit.sum = rowSums(comm), special.method = "depend",
+                             ses.cut = 1.96, rc.cut = 0.95, conf.cut=0.975, omit.option = omit.option)
+# 在这个简单的例子中，因为所有的bins都很小，所以"omit"应该返回一个错误。在实际数据中，这将继续使用足够大的严格的容器(>bin.size.limit)进行iCAMP分析。
+###############################
+
+
+# 10 # iCAMP bin 级别统计
+icbin=icamp.bins(icamp.detail = icres$detail,treat = treat,
+                 clas=NULL,silent=FALSE, boot = TRUE,
+                 rand.time = rand.time,between.group = TRUE)
+save(icbin,file = paste0(prefix,".iCAMP.Summary.rda")) # just to archive the result. rda file is automatically compressed, and easy to load into R.
+write.csv(icbin$Pt,file = paste0(prefix,".ProcessImportance_EachGroup.csv"),row.names = FALSE)
+write.csv(icbin$Ptk,file = paste0(prefix,".ProcessImportance_EachBin_EachGroup.csv"),row.names = FALSE)
+write.csv(icbin$Ptuv,file = paste0(prefix,".ProcessImportance_EachTurnover.csv"),row.names = FALSE)
+write.csv(icbin$BPtk,file = paste0(prefix,".BinContributeToProcess_EachGroup.csv"),row.names = FALSE)
+
+# 输出文件:
+# Test.iCAMP.Summary.rda: 对象“icbin”保存为R数据格式。参见icamp.bins函数的帮助文档。对象中每个元素的描述
+# Test.ProcessImportance_EachGroup.csv: 在一组样品中，每种过程在控制周转率方面的相对重要性。
+# Test.ProcessImportance_EachBin_EachGroup.csv: 在一组样品中，每个过程在控制每个bins的周转率方面的相对重要性。
+# Test.ProcessImportance_EachTurnover.csv: 每个过程在控制每对群落(样本)之间的周转率方面的相对重要性。
+# Test.BinContributeToProcess_EachGroup.csv: Bin对每个过程的贡献，衡量每个Bin对每个过程在一组社区集合中的相对重要性的贡献。
+
+# 11 # 显著性检验？
+# 请在treatment.txt中注明哪一栏。
+i=1
+treat.use=treat[,i,drop=FALSE]
+icamp.result=icres$CbMPDiCBraya
+icboot=iCAMP::icamp.boot(icamp.result = icamp.result,treat = treat.use,rand.time = rand.time,
+                         compare = TRUE,silent = FALSE,between.group = TRUE,ST.estimation = TRUE)
+save(icboot,file=paste0(prefix,".iCAMP.Boot.",colnames(treat)[i],".rda"))
+write.csv(icboot$summary,file = paste0(prefix,".iCAMP.BootSummary.",colnames(treat)[i],".csv"),row.names = FALSE)
+write.csv(icboot$compare,file = paste0(prefix,".iCAMP.Compare.",colnames(treat)[i],".csv"),row.names = FALSE)
+
+# 输出文件:
+# Test.iCAMP.Boot.Management.rda: 对象“icboot”保存为R数据格式。参见icamp函数的帮助文档。启动，以获取对象中每个元素的描述。
+# Test.BootSummary.Management.csv: 一个汇总bootstrapping结果的表。参见icamp函数的帮助文档。引导输出元素“summary”的描述。
+# Test.Compare.Management.csv: 两组间比较指标、效应量及显著性总结表。参见icamp函数的帮助文档。引导输出元素“compare”的描述。
+
+# 12 # Other 方法: QPEN (quantifying community assembly processes based on entire-community null model analysis)（基于全社群零模型分析的社群装配过程量化）
+qpout=iCAMP::qpen(comm=comm,pd=pd.big$pd.file,pd.big.wd=pd.big$pd.wd,
+                  pd.big.spname=pd.big$tip.label,ab.weight=TRUE,
+                  rand.time=rand.time, nworker=nworker,project=prefix,
+                  wd=save.wd, save.bNTIRC=TRUE)
+
+# 13 # 其他方法: Neutral taxa percentage中性类群比例
+snmout=iCAMP::snm.comm(comm = comm, treat = treat, 
+                       rand=rand.time, alpha=0.05)
+write.csv(snmout$stats,file = paste0(prefix,".NeutralModel.Stats.csv"))
+write.csv(snmout$ratio.summary,file = paste0(prefix,".NeutralModel.TypeRatio.csv"))
+
+# 14 # 其他方法: tNST and pNST (taxonomic and phylogenetic normalized stochasticity ratio)分类和系统发育归一化随机比
+# need to install package NST if not yet
+if(!("NST" %in% installed.packages()[,"Package"])){install.packages("NST")}
+library(NST)
+i=1
+treat.use=treat[,i,drop=FALSE]
+
+# 14.1a # tNST
+tnstout=NST::tNST(comm=comm, group=treat.use, dist.method="bray", 
+                  abundance.weighted=TRUE, rand=rand.time,  
+                  nworker=nworker, null.model="PF", output.rand = TRUE,
+                  SES = TRUE, RC = TRUE)
+write.csv(tnstout$index.grp,file = paste0(prefix,".tNST.summary.",colnames(treat)[i],".csv"))
+write.csv(tnstout$index.pair.grp,file = paste0(prefix,".tNST.pairwise.",colnames(treat)[i],".csv"))
+
+# 14.1b # bootstrapping test for tNST
+tnst.bt=NST::nst.boot(nst.result=tnstout, group=treat.use,
+                      rand=rand.time, nworker=nworker)
+write.csv(tnst.bt$NST.summary,file = paste0(prefix,".tNST.bootstr.",colnames(treat)[i],".csv"))
+write.csv(tnst.bt$NST.compare,file = paste0(prefix,".tNST.compare.",colnames(treat)[i],".csv"))
+
+# 14.2a # pNST
+pnstout=NST::pNST(comm=comm, pd.desc=pd.big$pd.file, pd.wd=pd.big$pd.wd, 
+                  pd.spname=pd.big$tip.label, group=treat.use, abundance.weighted=TRUE,
+                  rand=rand.time, phylo.shuffle=TRUE, nworker=nworker,
+                  output.rand = TRUE, SES=FALSE, RC=FALSE)
+write.csv(pnstout$index.grp,file = paste0(prefix,".pNST.summary.",colnames(treat)[i],".csv"))
+write.csv(pnstout$index.pair.grp,file = paste0(prefix,".pNST.pairwise.",colnames(treat)[i],".csv"))
+
+pnst.bt=NST::nst.boot(nst.result=pnstout, group=treat.use,
+                      rand=rand.time, nworker=nworker)
+write.csv(pnst.bt$NST.summary,file = paste0(prefix,".pNST.bootstr.",colnames(treat)[i],".csv"))
+write.csv(pnst.bt$NST.compare,file = paste0(prefix,".pNST.compare.",colnames(treat)[i],".csv"))
+
+(t=format(Sys.time()-t0)) # to calculate time cost
+
+# End #

@@ -1,0 +1,420 @@
+# 网络分析
+```{bash}
+wd=/c/0amplicon/EasyAmplicon # ctrl +enter
+db=/c/0amplicon/EasyMicrobiome
+PATH=$PATH:${db}/win 
+cd ${wd}
+```
+
+## 快速分析
+
+### 单文件网络分析
+
+- 计算每组相关性网络
+- 可视化网络
+- 计算zipi
+- 计算网络属性+可视化网络边数
+- 可进行网络模块分析
+- 网络稳定性评估
+- 基于qgraph包实现类graph的布局
+
+分析速度与网络节点数有关
+```{bash}
+# -s Normliazed -t filter
+# -a Bonferroni, Holm, Hochberg, SidakSS, SidakSD, BH, BY, ABH, TSBH,None
+# -S size
+
+${db}/script/network_analyse_ansi.R -i result/otutab.txt -d result/metadata.txt -n Group \
+-l result/taxonomy.txt -L 6 -p 0.05 -r 0.8 -m spearman -a Bonferroni -s TRUE \
+-t 0.0001 -M FALSE -N TRUE -w 14 -e 7 -o cor
+```
+
+#### 特异性分析：标注出差异基因信息
+```{bash}
+Rscript ${db}/script/network_analyse_ansi.R -i ../tax/sum_g.txt -d metadata.tsv -n Group1 -p 0.05 -r 0.8 -m spearman -a None -M TRUE -w 13 -e 9
+
+compare.R --input ../tax/sum_g.txt --design metadata.tsv --group Group1 --compare CX-BG --output DE_genus_ --method edgeR 
+
+awk 'BEGIN{OFS=FS="\t"}$0~/Enriched/{print $1,$1}' DE_genus_CX-BG.txt> de_cx_genus.txt
+Rscript ${db}/script/network_analyse_ansi.R -i ../tax/sum_g.txt -d metadata.tsv -n Group1 -p 0.05 -r 0.8 -l de_cx_genus.txt -L 1 -m spearman -a None -M TRUE -w 13 -e 9 -o de_cx_enrich_ -g CX
+
+
+awk 'BEGIN{OFS=FS="\t"}$0~/Depleted/{print $1,$1}' DE_genus_CX-BG.txt> de_bg_genus.txt
+Rscript ${db}/script/network_analyse_ansi.R-i ../tax/sum_g.txt -d metadata.tsv -n Group1 -p 0.05 -r 0.8 -l de_bg_genus.txt -L 1 -m spearman -a None -M TRUE -w 13 -e 9 -o de_ -g BG
+```
+##### 图形解释
+
+###### CX组OTU水平的菌群共存网络
+
+在OTU水平上对CX组计算菌群间关系，首先通过spearman方法计算CX组的OTU的相关性，然后挑选了相关性强于0.09，p value < 0.05的OTU来绘制菌群共存网络，并在科水平对每个OTU进行注释。下图为菌群共存网络（spearman，cor > 0.9,p value < 0.05），图中每个点表示一个OTU，每个点的大小表示OTU的丰度高低，每个点上的标签表示该OTU在科水平上的注释，边的颜色如果是红色，说明两个OTU正相关，边的颜色如果是蓝色，说明两个OTU负相关；并对网络计算模块，依据不同模块对每个OTU进行上色。
+
+####### CX组OTU水平的菌群共存网络--标注差异OTU
+
+下图每个点表示一个OTU，每个点的大小表示OTU的丰度高低，每个点若有标签，表示该OTU在CX组中显著丰度更高（edgeR，P < 0.05），标签为该OTU在科水平上的注释，边的颜色如果是红色，说明两个OTU正相关，边的颜色如果是蓝色，说明两个OTU负相关；并对网络计算模块，依据不同模块对每个OTU进行上色。
+
+
+##### 结果文件解释
+
+* CX组所有OTU的相关性结果：[otutab_rare.txt_de_cx_enrich_CX_spearmanall_correlation_result.txt](otutab_rare.txt_de_cx_enrich_CX_spearmanall_correlation_result.txt)
+* CX组所有OTU的相关性P值结果：[otutab_rare.txt_de_cx_enrich_CX_spearman_Noneall_correlationPvlaue_result](otutab_rare.txt_de_cx_enrich_CX_spearman_Noneall_correlationPvlaue_result)
+* CX组OTU水平菌群共存网络属性：[otutab_rare.txt_de_cx_enrich_CX_igraph_networkAttributes.txt](otutab_rare.txt_de_cx_enrich_CX_igraph_networkAttributes.txt)
+* CX组OTU水平菌群共存网络节点属性：[otutab_rare.txt_de_cx_enrich_CX_module_igraph_nodeAttributes.txt](otutab_rare.txt_de_cx_enrich_CX_module_igraph_nodeAttributes.txt)
+* 相关性强于0.08，p value < 0.05的OTU的相关性结果：[otutab_rare.txt.CX_moduleigraph_col.txt](./otutab_rare.txt.CX_moduleigraph_col.txt)
+* 对相关性强于0.08，p value < 0.05的OTU在科水平进行注释的菌群共存网络图[otutab_rare.txt.CX_module_co-occurrence_network.pdf](./otutab_rare.txt.CX_module_co-occurrence_network.pdf)
+* 对相关性强于0.08，p value < 0.05的并在CX组显著丰度更高的OTU在科水平进行注释的菌群共存网络图：[otutab_rare.txt_de_cx_enrich.CX_module_co-occurrence_network.pdf](./otutab_rare.txt_de_cx_enrich.CX_module_co-occurrence_network.pdf)
+* CX-BG组差异OTU分析结果：[DE_CX-BG.txt](./DE_CX-BG.txt)
+* CX组显著差异OTU在科水平上的注释：[de_cx.txt](./de_cx.txt)
+
+
+### 两个文件网络分析
+
+#### 预处理数据避免ASV名重复
+```{bash}
+awk 'BEGIN{OFS=OFS="\t"}{if(FNR>1) $1="Bac_"$1; print $0}' result/L/otutab.txt > result/L/otutab1.txt
+head -n2 result/L/otutab1.txt
+
+awk 'BEGIN{OFS=OFS="\t"}{if(FNR>1) $1="Fung_"$1; print $0}' ../fungi/result/L/otutab.txt > ../fungi/result/L/otutab1.txt
+head -n2 ../fungi/result/L/otutab1.txt
+
+awk 'BEGIN{OFS=OFS="\t"}ARGIND==1{if(FNR>1) $1="Bac_"$1; print $0}\
+ARGIND==2{if(FNR>1) {$1="Fung_"$1; print $0}}' result/taxonomy.txt ../fungi/result/taxonomy.txt > result/taxonomy1.txt
+head -n2 result/taxonomy1.txt
+tail -n2 result/taxonomy1.txt
+```
+
+#### 分析
+```{bash}
+network_analyse_ansi.R -i result/L/otutab1.txt  -I ../fungi/result/L/otutab1.txt \
+-d result/metadata_L_${time}.txt -n Treat \
+-l result/taxonomy1.txt -L 1 -p 0.05 -r 0.8 -m spearman -a fdr \
+-s TRUE -t ${value} -M FALSE -N TRUE -w 14 -e 7 -o .${time}
+```
+
+### 整理成GEPHI需要的格式
+```{bash}
+
+for time in A B C;do
+for treat in CK KP PY;do 
+
+awk 'BEGIN{OFS=",";FS="\t|,"}ARGIND==1{if($2!="Unassigned") {a[$4]=1;b[$4]=$0}}\
+ARGIND==2{if(FNR==1) print b["v_name"],"type","size";if(a[$1]==1) print b[$1],$6,$7}' \
+result/L/${time}-${treat}-node.csv result/L/otutab1.txt.${time}_${treat}_igraph_nodeAttributes.txt >result/L/${time}-${treat}-node-gephi.csv
+
+wc -l result/L/${time}-${treat}-node.csv result/L/otutab1.txt.${time}_${treat}_igraph_nodeAttributes.txt result/L/${time}-${treat}-node-gephi.csv
+
+awk 'function abs(v) {return v < 0 ? -v : v}BEGIN{OFS=",";FS=",| "}ARGIND==1&&FNR>1{a[$1]=1;b[$4]=$1}\
+ARGIND==2{if(b[$1]!="" && b[$2]!="") {c[b[$1]b[$2]]=$3;c[b[$2]b[$1]]=$3}}\
+ARGIND==3{if(FNR==1) print $0,"cor,abs_cor,line_type";if(a[$1]==1 && a[$2]==1) {line_type=c[$1$2]>0?"pos":"neg";print $0,c[$1$2],abs(c[$1$2]),line_type}}' \
+result/L/${time}-${treat}-node-gephi.csv result/L/otutab1.txt.${time}_${treat}_igraph_col.txt result/L/${time}-${treat}.csv >result/L/${time}-${treat}-gephi.csv
+
+wc -l result/L/${time}-${treat}-node-gephi.csv result/L/otutab1.txt.${time}_${treat}_igraph_col.txt result/L/${time}-${treat}.csv result/L/${time}-${treat}-gephi.csv
+awk 'BEGIN{OFS=",";FS=","}ARGIND==1&&FNR>1{a[$1]=1;a[$2]=1}\
+ARGIND==2{if(FNR==1) print $0;if(a[$1]==1) print $0}' \
+result/L/${time}-${treat}-gephi.csv result/L/${time}-${treat}-node-gephi.csv >result/L/${time}-${treat}-node-gephi1.csv
+
+wc -l result/L/${time}-${treat}-gephi.csv result/L/${time}-${treat}-node-gephi.csv result/L/${time}-${treat}-node-gephi1.csv
+
+done
+done
+```
+
+### 使用R调用cytoscape进行可视化
+```{r}
+setwd("D:/0project/0016S-王秋水-常规分析+多时间点+真细菌分析/amplicon/bac")
+library(RCy3)
+library(scales)
+
+## 生成网络--------
+for(i in c("A","B","C")){
+	for(j in c("CK","PY","KP")){
+		abu = read.table("result/L/otutab.txt",,sep="\t",header = T,comment.char="",row.names = 1)
+		rownames(abu)=paste0("Bac_",rownames(abu))
+		abu1 = abu[,grepl(paste0(j,"ML",i),colnames(abu))]
+		abu1 = as.data.frame(t(t(abu1)/colSums(abu1)*100))
+		abu1_mean = as.data.frame(apply(abu1,1,mean))
+		colnames(abu1_mean)="size"
+		
+		fungi_abu = read.table("../fungi/result/L/otutab.txt",,sep="\t",header = T,comment.char="",row.names = 1)
+		rownames(fungi_abu)=paste0("Fung_",rownames(fungi_abu))
+		fungi_abu1 = fungi_abu[,grepl(paste0(j,"ML",i),colnames(fungi_abu))]
+		fungi_abu1 = as.data.frame(t(t(fungi_abu1)/colSums(fungi_abu1)*100))
+		fungi_abu1_mean = as.data.frame(apply(fungi_abu1,1,mean))
+		colnames(fungi_abu1_mean)="size"
+		
+		abu2 = rbind(abu1_mean,fungi_abu1_mean)
+		
+		filename = paste0("result/L/otutab1.txt.",i,"_",j,"_igraph_col.txt")
+		file = read.table(filename,sep=" ",header = F)
+		
+		# 生成点的信息
+		id = unique(c(file[,1],file[,2]))
+		
+		# 增加边的信息
+		edges = file
+		edges = edges[edges$V1!=edges$V2,]
+		
+		edges[,4]="inter"
+		colnames(edges) = c("source","target","cor","interaction")
+		
+		edges$labelCol = ifelse(edges$cor<0,"Neg","Pos")
+		table(edges$labelCol)
+		
+		# 生成点的属性信息（table from file）
+		att = read.table("result/taxonomy1.txt",sep="\t",header = T,row.names = 1)
+		
+		nodes = cbind(id,att[id,])
+		
+		# 点的颜色属性
+		#https://www.jingege.wang/2022/05/13/r-%e5%a6%82%e4%bd%95%e5%bf%ab%e9%80%9f%e7%94%9f%e6%88%90%e8%ae%b8%e5%a4%9a%e5%b7%ae%e5%bc%82%e6%98%8e%e6%98%be%e7%9a%84%e9%a2%9c%e8%89%b2%ef%bc%9f/
+		spec = "Kingdom"
+		library(RColorBrewer)
+		#qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
+		#col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+		#433种，颜色名字，不是rgb
+		color433 = grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = T)]
+		set.seed(68+147456);bar_fill_color = col2hcl(sample(color433, length(unique(nodes[[spec]])), replace = FALSE))
+		
+		col_table = eval(parse(text=
+													 	paste0('data.frame(',spec,' = unique(nodes[[spec]]),color = bar_fill_color)')
+		))
+		
+		nodes_att = merge(nodes,col_table,all.x=T,by=spec)
+		nodes_att$Kingdom = ifelse(is.na(nodes_att$Kingdom),ifelse(grepl("Fung",nodes_att$Kingdom),"Fungi","Bacteria"),nodes_att$Kingdom)
+		
+		nodes_att$size = abu2[nodes_att$id,"size"]
+		
+		# 创建网络，title对应每个collection里的小项目的名字，也是代码的network
+		createNetworkFromDataFrames(nodes_att, edges)
+		#getLayoutNames()
+		## 推荐attributes-layout（自动变圆，点也比较大）、cose（像yfile的cir）、force-directed-cl
+		getLayoutNames()
+		layoutNetwork("attribute-circle defaultSpringCoefficient=.00006 defaultSpringLength=80")
+		setLayoutProperties('force-directed', list(defaultSpringLength=89, defaultSpringCoefficient=6E-04))
+		
+		# 设置形状
+		setVisualPropertyDefault(list(visualProperty = "NODE_SHAPE",value='circle'))
+		# 形状确定圆和锁定长宽比
+		lockNodeDimensions(T)
+		
+		# 标签位置
+		if(F){
+			setVisualPropertyDefault(list(visualProperty = "NODE_LABEL_POSITION",
+																		value="N,SE,c,0.0,0.0"))
+		}else{
+			updateStyleDefaults('default',list("NODE_LABEL_POSITION"="N,SE,c,10,0"))
+		}
+		
+		# 设置点的颜色
+		length(unique(nodes[[spec]]))
+		
+		if(T){
+			# 按照值来一一赋颜色
+			setNodeColorMapping(
+				spec, # node的列名
+				table.column.values = unique(nodes[[spec]]),
+				colors = bar_fill_color, # 颜色
+				mapping.type = "d", # (char) continuous, discrete or passthrough (c,d,p); default is continuous
+				default.color = NULL,
+				style.name = NULL,
+				network = NULL
+			)
+		}else{
+			# 这个颜色一般不超过10个，可能不够
+			setNodeColorMapping(
+				spec, # node的列名
+				colors=paletteColorBrewerRdBu, # 颜色
+				mapping.type = "d", # (char) continuous, discrete or passthrough (c,d,p); default is continuous
+				default.color = NULL,
+				style.name = NULL,
+				network = NULL
+			)
+		}
+		# 设置线的颜色
+		setEdgeColorMapping(
+			'labelCol', 
+			c("Neg","Pos"),
+			c('#969696','#FF7755'), # 灰色和红色
+			mapping.type = "d", # (char) continuous, discrete or passthrough (c,d,p); default is continuous
+		)
+		
+		# 设置点的大小
+		setNodeSizeMapping(
+			'size', 
+			style.name = NULL,
+			network = NULL
+		)
+		
+		# 设置标签颜色
+		# setNodeLabelColorMapping(
+		# 	spec,
+		# 	colors=paletteColorBrewerRdBu,
+		# 	mapping.type = "d")
+		
+		# 设置标签值
+		setNodeLabelMapping(
+			spec,
+			style.name = NULL,
+			network = NULL
+		)
+		
+		# 居中展示且保存
+		fitContent(selected.only = F)
+		exportImage(filename = paste0("D:/",i,"_",j,"cytoscape.pdf"),type = "PDF", # 文件名为绝对路径
+								resolution = NULL, # 分辨率
+								units = NULL,
+								height = NULL,
+								width = NULL,
+								zoom = NULL,
+								network = NULL,
+								overwriteFile = TRUE
+		)
+		# 生成legend文件
+		addCyNodes('Node')
+		
+		# 保存cys文件
+		saveSession(filename = paste0("D:/",i,"_",j,"cytoscape.cys"),
+								overwriteFile = TRUE)
+	}
+}
+
+## 统计网络边的个数------------
+for(i in c("A","B","C")){
+	edge_plot = c()
+	for(j in c("KP","PY","CK")){
+		filename2 = paste0("result/L/otutab1.txt.",i,"_",j,"_spearman_Bonferroni_0.8_correlationPvlaue_result.txt")
+		cor_table = read.table(filename2,sep="\t",header = T,row.names = 1)
+		edge_plot_temp = data.frame(type = c("Pos","Neg"),
+																value=c(table(cor_table>0)["TRUE"],table(cor_table<0)["TRUE"]),
+																Group=j)
+		edge_plot_temp$perce = edge_plot_temp$value/table(cor_table!=0)["TRUE"]
+		edge_plot <- rbind(edge_plot,edge_plot_temp)
+	}
+	edge_plot$Group[edge_plot$Group=="CK"] <- "WM"
+	edge_plot$Group[edge_plot$Group=="KP"] <- "MixOS"
+	edge_plot$Group[edge_plot$Group=="PY"] <- "RT"
+	(p1 = ggplot(edge_plot, aes(x=Group, y = value)) +
+			geom_bar(aes(fill=type,group=Group),stat = "identity",position="stack", width=0.6)+
+			#scale_y_continuous(labels = scales::percent) +
+			theme(strip.background = element_blank())+
+			theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+			xlab("")+ylab("Count of edges")+
+			theme_classic()+theme(axis.text.x=element_text(angle=0))+
+			theme(text=element_text(family="sans", size=13))+
+			scale_fill_manual(values=c('#969696','#FF7755')))# 调整颜色和cytoscape网络颜色一致
+	p1
+	ggsave(paste0("result/L/",i,"_network_edges_count.pdf"),p1)
+	
+	## 统计网络度的信息-------
+	att_table_plot = c()
+	for(j in c("KP","PY","CK")){
+		filename3 = paste0("result/L/otutab1.txt.",i,"_",j,"_igraph_nodeAttributes.txt")
+		att_table = read.table(filename3,sep="\t",header = T,row.names = 1)
+		att_table$Group = j
+		att_table_plot <- rbind(att_table_plot,att_table)
+	}
+	
+	att_table_plot$Group[att_table_plot$Group=="CK"] <- "WM"
+	att_table_plot$Group[att_table_plot$Group=="KP"] <- "MixOS"
+	att_table_plot$Group[att_table_plot$Group=="PY"] <- "RT"
+	colnames(att_table_plot)
+	library(ggpubr)
+	
+	compareL = list(c("MixOS","WM"),c("MixOS","RT"),c("RT","WM"))
+	p2 = ggboxplot(att_table_plot, x="Group", y="igraph.degree", color = "Group",
+								 palette = c('#ED0000FF','#0099B4FF','#42B540FF'),add="jitter")+
+		stat_compare_means(aes(label = ..p.signif..),
+											 comparisons=compareL,
+											 paired = F,
+											 method ="wilcox") + 
+		theme(plot.title = element_text(hjust = 0.5)) +
+		labs(x=NULL,y="Degree")
+	p2
+	ggsave(paste0("result/L/",i,"_network_degree_count.pdf"),p2)
+	p4 = ggarrange(p1,p2,ncol = 2)
+	ggsave(paste0("result/L/",i,"network_att.pdf"),p4,height = 5,width = 10)
+}
+
+##  提取网络核心节点的注释信息---------------
+function_file = read.table("result/L/faprotax_report.func_otu",sep="\t")
+colnames(function_file) = c("fun","nodes_id")
+
+fun_plot = c()
+for(j in c("KP","PY","CK")){
+	print(j)
+	filename1 = paste0("result/L/otutab.txt.",i,".",j,"_z_c_score_result.txt")
+	
+	file1 = read.table(filename1,sep="\t",header=T)
+	
+	file2 = subset(merge(file1,function_file,all.x=T,by="nodes_id"),type!="Peripherals")
+	print(dim(file2))
+	
+	if(nrow(na.omit(cbind(data.frame(table(file2$fun)))))>0){
+		fun_plot_temp = na.omit(cbind(data.frame(table(file2$fun)),
+																	type = j))
+		fun_plot = rbind(fun_plot,fun_plot_temp)
+	}
+}
+#fun_plot = merge(fun_plot,fun_plot$)
+fun_plot$type[fun_plot$type=="CK"] <- "WM"
+fun_plot$type[fun_plot$type=="KP"] <- "MixOS"
+fun_plot$type[fun_plot$type=="PY"] <- "RT"
+
+p3 = ggplot(fun_plot,aes(Var1,Freq)) +
+	geom_bar(aes(fill=type),stat = "identity",
+					 position=position_dodge(),width = 0.8) +
+	theme_bw() + 
+	theme(legend.title= element_blank(),
+				axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5)) +
+	scale_fill_manual(values=c('#ED0000FF','#0099B4FF','#42B540FF')) +
+	xlab("") +
+	ylab("") 
+p3
+ggsave(paste0("result/L/",i,"_core_otu_function_count.pdf"),p3,height = 5)
+
+p4 = ggarrange(p1,p2,p3,ncol = 3)
+ggsave(paste0("result/L/",i,"network_att.pdf"),p4,height = 5,width = 10)
+```
+
+### 提取网络核心节点的注释信息并可视化
+```{r}
+##  提取网络核心节点的注释信息---------------
+function_file = read.table("result/L/faprotax_report.func_otu",sep="\t")
+colnames(function_file) = c("fun","nodes_id")
+
+	fun_plot = c()
+	for(j in c("KP","PY","CK")){
+	print(j)
+	filename1 = paste0("result/L/otutab.txt.",i,".",j,"_z_c_score_result.txt")
+	
+	file1 = read.table(filename1,sep="\t",header=T)
+
+	file2 = subset(merge(file1,function_file,all.x=T,by="nodes_id"),type!="Peripherals")
+	print(dim(file2))
+	
+	if(nrow(na.omit(cbind(data.frame(table(file2$fun)))))>0){
+		fun_plot_temp = na.omit(cbind(data.frame(table(file2$fun)),
+													type = j))
+		fun_plot = rbind(fun_plot,fun_plot_temp)
+	}
+	}
+	#fun_plot = merge(fun_plot,fun_plot$)
+	fun_plot$type[fun_plot$type=="CK"] <- "WM"
+	fun_plot$type[fun_plot$type=="KP"] <- "MixOS"
+	fun_plot$type[fun_plot$type=="PY"] <- "RT"
+	
+	p3 = ggplot(fun_plot,aes(Var1,Freq)) +
+		geom_bar(aes(fill=type),stat = "identity",
+						 position=position_dodge(),width = 0.8) +
+		theme_bw() + 
+		theme(legend.title= element_blank(),
+					axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5)) +
+		scale_fill_manual(values=c('#ED0000FF','#0099B4FF','#42B540FF')) +
+		xlab("") +
+		ylab("") 
+	p3
+	ggsave(paste0("result/L/",i,"_core_otu_function_count.pdf"),p3,height = 5)
+	
+	p4 = ggarrange(p1,p2,p3,ncol = 3)
+	ggsave(paste0("result/L/",i,"network_att.pdf"),p4,height = 5,width = 10)
+
+```

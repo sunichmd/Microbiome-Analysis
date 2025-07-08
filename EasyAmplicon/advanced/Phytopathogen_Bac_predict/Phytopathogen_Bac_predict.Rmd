@@ -1,0 +1,100 @@
+# 功能预测
+## 表型
+```{bash}
+awk 'BEGIN{OFS=FS="\t"}FNR==1{print "OTUID\tKingdom\tPhylum\tClass\tOrder\tFamily\tGenus\tSpecies"}
+FNR>1{delete a; a["k"]="Unassigned";a["p"]="Unassigned";a["c"]="Unassigned";
+a["o"]="Unassigned";a["f"]="Unassigned";a["g"]="Unassigned";a["s"]="Unassigned";\
+split($2,x,"; ");for(i in x){split(x[i],b,"__");a[b[1]]=b[2];} \
+print $1,a["d"],a["p"],a["c"],a["o"],a["f"],a["g"],a["s"];}' otutable/taxonomy.tsv >result/taxonomy.txt
+
+awk 'BEGIN{OFS=FS="\t"}ARGIND==1{id=$1;$1="";if(FNR==1) name=$0;else a[id]=$0}
+ARGIND==2{if(FNR==1) print $0""name;else print $0""a[$1]}' result/taxonomy.txt result/otutab.txt >result/otutab2.txt
+```
+
+## 分析
+```{r}
+library(dplyr)
+setwd("C:/Users/10605/Desktop/lu/B16S")
+pbbdassign <- function(otu){
+	rawlist <- otu %>%
+		left_join(PBB_Database, by = 'Genus') %>%
+		left_join(Phytopathogen, by = 'Species')
+}
+
+PBB_Database <- read.csv("PBB_Database.csv")
+Phytopathogen <- read.csv("Phytopathogen_list.csv")
+
+otu <- read.table("result/otutab2.txt",sep="\t",header = T,
+								check.names = F,comment.char = "")
+
+otu$Species = gsub("_"," ",otu$Species)
+result <- pbbdassign(otu)
+intersect(otu$Genus,PBB_Database$Genus)
+intersect(otu$Species,Phytopathogen$Species)
+write.csv(result,"result/function/Phytopathogen/Annotation_data.csv")
+
+# 整体数据的注释信息统计
+plot1 = result[,c(1,285:300)]
+plot1 = plot1[!is.na(plot1$Guild3),]
+plot1 = as.data.frame(plot1$Guild3)
+
+p1 = ggplot(plot1, aes(x = Guild3,fill=Guild3)) +
+	geom_bar(stat = "count") +  # 使用stat = "count" 生成柱状图
+	geom_text(stat = "count", aes(label = ..count..), 
+						vjust = 0.5,hjust=0.8, size = 3,color="black") +  # 添加计数值作为标签
+	facet_grid(Guild1~Guild2+.,scales = "free") +  # 按照group列进行分面
+	theme_bw() +  # 简化主题
+	theme(legend.position = "none") +
+	coord_flip()+
+	labs(x = "Guild3") 
+
+ggsave("result/function/Phytopathogen/all_bar_plot.pdf",p1,
+			 width = 30,height = 13)
+
+p2 = ggplot(plot1, aes(x = Guild3,fill=Guild3)) +
+	geom_bar(stat = "count") +  # 使用stat = "count" 生成柱状图
+	geom_text(stat = "count", aes(label = ..count..), 
+						vjust = 0.5, size = 3,color="black") +  # 添加计数值作为标签
+	facet_grid(Guild1~.,scales = "free") +  # 按照group列进行分面
+	theme_bw() +  # 简化主题
+	theme(legend.position = "none") +
+	coord_flip()+
+	labs(x = "Guild3") 
+p2
+ggsave("result/function/Phytopathogen/all_bar_plot_Guild3_Guild1.pdf",p2,
+			 width = 10,height = 12)
+```
+
+### 按照分组比较
+```{r}
+for(i in c("b1","b2","b3","b4")){
+	metadata = read.table(paste0("../metadata_bac_",i,".txt"),sep="\t",
+												header = T,row.names = 1)
+	count_matrix_a = c()
+	for(j in unique(metadata$oldGroup)){
+		metadata1 = subset(metadata,oldGroup==j)
+		plot2 = cbind(result[,c(1,285:300)],result[,rownames(metadata1)])
+		plot2 = plot2[apply(plot2[,rownames(metadata1)],1,sum)>0,]
+		
+		count_matrix <- as.data.frame(table(plot2$Guild1,plot2$Guild3))
+		count_matrix = subset(count_matrix,Freq!=0)
+		count_matrix$group = j
+		
+		count_matrix_a = rbind(count_matrix_a,count_matrix)
+	}
+	write.csv(count_matrix_a,
+						paste0("result/function/Phytopathogen/",i,"_bar_plot_Guild3_Guild1.csv"))
+		p3 = ggplot(count_matrix_a, aes(x = Var2,y=Freq,fill=group)) +
+			geom_bar(stat = "identity", position = "dodge") +  # 使用position_dodge设置柱子并排
+			geom_text(aes(label = Freq), 
+								position = position_dodge(width = 0.9),  # 确保文本与柱子对齐
+								size = 2, vjust = 0.5, color = "black") +
+		facet_wrap(Var1~.,scales = "free",nrow=1) +  # 按照group列进行分面
+		theme_bw() + coord_flip()+
+		labs(x = "Guild3") 
+	p3
+	if(j == "b1" | j == "b3"){wi = 15}else{wi = 30}
+	ggsave(paste0("result/function/Phytopathogen/",i,"_bar_plot_Guild3_Guild1.pdf"),p3,
+				 width = wi,height = 20)
+}
+```

@@ -1,0 +1,688 @@
+### 提取第一组的分组信息并挑选核心OTU
+```{r}
+# 提取第一组的分组信息
+metadata_all = read.table("../metadata_s.txt",sep="\t",row.names = 1,header=T)
+metadata_all[1:3,1:3]
+metadata_s1 = subset(metadata_all,Depth=="0-10cm"&Time=="June")
+dim(metadata_s1);View(metadata_s1)
+bac = read.table("../bac_abu.txt",sep="\t",row.names = 1,header=T,comment.char = "")
+bac[1:3,1:3]
+
+fung = read.table("../fung_abu.txt",sep="\t",row.names = 1,header=T,comment.char = "")
+fung[1:3,1:3]
+
+ori = read.table("../ori_abu.txt",sep="\t",row.names = 1,header=T,comment.char = "")
+ori[1:3,1:3]
+
+# 提取细菌的丰度信息并且挑选核心OTU（60%样本都有的OTU，且平均相对丰度大于0.1%）
+fun1 = function(x,y){
+  idx = table(x!=0)["TRUE"]/length(x)>=0.6 & mean(as.numeric(x)/y*100)>0.1
+  return(idx)
+}
+
+for(i in unique(metadata_s1$Group)){
+  metadata1 = subset(metadata_s1,Group==i)
+bac_metadata = bac[,rownames(metadata1)]
+y = colSums(bac)[rownames(metadata1)]
+idx = apply(bac_metadata,1,fun1,y=y)
+core_otu = names(which(idx==TRUE))
+print(length(core_otu))
+bac_metadata_core = bac_metadata[core_otu,]
+rownames(bac_metadata_core) = paste0("Bac_",rownames(bac_metadata_core))
+
+# 提取真菌的丰度信息并且挑选核心OTU（60%样本都有的OTU，且平均相对丰度大于0.1%）
+
+fung_metadata = fung[,rownames(metadata1)]
+y = colSums(fung)[rownames(metadata1)]
+idx = apply(fung_metadata,1,fun1,y=y)
+core_otu = names(which(idx==TRUE))
+print(length(core_otu))
+fung_metadata_core = fung_metadata[core_otu,]
+rownames(fung_metadata_core) = paste0("Fung_",rownames(fung_metadata_core))
+
+# 提取原生的丰度信息并且挑选核心OTU（60%样本都有的OTU，且平均相对丰度大于0.1%）
+
+ori_metadata = ori[,rownames(metadata1)]
+y = colSums(ori)[rownames(metadata1)]
+idx = apply(ori_metadata,1,fun1,y=y)
+core_otu = names(which(idx==TRUE))
+print(length(core_otu))
+ori_metadata_core = ori_metadata[core_otu,]
+rownames(ori_metadata_core) = paste0("Ori_",rownames(ori_metadata_core))
+
+m1_core = rbind(bac_metadata_core,fung_metadata_core,ori_metadata_core)
+write.table(m1_core,paste0("m1_",i,"_three.txt"),sep="\t",col.names = T,quote = F)
+}
+```
+
+### sparcc计算网络
+sparcc脚本：1. 计算相关系数 2. 排序计算p值 
+```{bash}
+# 在windows子系统里
+#conda install numpy=1.9.2 -y
+#conda install numpy=1.9.2 -y
+#conda install pandas=0.16.2 -y
+#conda install -c bioconda sparcc
+dirName=m1
+cd OTU丰度表/${dirName}
+conda activate SparCC
+for i in ${dirName}_NT ${dirName}_QG ${dirName}_YS;do 
+SparCC.py ${i}_three.txt -i 20 --cor_file=${i}_sparcc.tsv > sparcc.log
+MakeBootstraps.py ${i}_three.txt -n 100 -t ${i}_bootstrap_#.txt -p pvals/ >> sparcc.log
+for n in {0..99}; do SparCC.py pvals/${i}_bootstrap_${n}.txt -i 20 --cor_file=pvals/${i}_bootstrap_cor_${n}.txt >> sparcc.log; done
+PseudoPvals.py ${i}_sparcc.tsv pvals/${i}_bootstrap_cor_#.txt 100 -o ${i}_pvals.two_sided.txt -t two_sided >> sparcc.log
+done;
+
+mkdir -p FigA FigB FigC FigD Spearman Core_net
+```
+
+```{r}
+library(stringr)
+bac_ra = read.table("../bac_abu_re.txt",sep="\t",row.names = 1,header=T,comment.char = "")
+bac_tax = read.table("../bac_tax_format.txt",sep="\t",row.names = 1,header=T,comment.char = "")
+bac_ra[1:3,1:3]
+fung_ra = read.table("../fung_abu_re.txt",sep="\t",row.names = 1,header=T,comment.char = "")
+fung_tax = read.table("../fung_tax_format.txt",sep="\t",row.names = 1,header=T,comment.char = "")
+fung_ra[1:3,1:3]
+ori_ra = read.table("../ori_abu_re.txt",sep="\t",row.names = 1,header=T,comment.char = "")
+ori_tax = read.table("../ori_tax_format.txt",sep="\t",row.names = 1,header=T,comment.char = "")
+ori_ra[1:3,1:3]
+metadata_all = read.table("../metadata_s.txt",sep="\t",row.names = 1,header=T)
+metadata_all[1:3,1:3]
+## 选择分组
+metadata_s1 = subset(metadata_all,Depth=="0-10cm"&Time=="June")
+dim(metadata_s1)
+for(i in unique(metadata_s1$Group)){
+  metadata1 = subset(metadata_s1,Group==i)
+  #观测值的相关矩阵
+  cor_sparcc <- read.delim(paste0("m1_",i,"_sparcc.tsv"), row.names = 1, sep = '\t', check.names = FALSE)
+  #伪 p 值矩阵
+  pvals <- read.delim(paste0("m1_",i,"_pvals.two_sided.txt"), row.names = 1, sep = '\t', check.names = FALSE)
+
+  #保留 |相关性|≥0.6且 p<0.01的值
+  table(abs(cor_sparcc) < 0.6)
+  cor_sparcc[abs(cor_sparcc) < 0.6] <- 0
+ 
+pvals[pvals>=0.01] <- -1
+pvals[pvals<0.01 & pvals>=0] <- 1
+pvals[pvals==-1] <- 0
+ 
+#筛选后的邻接矩阵
+adj <- as.matrix(cor_sparcc) * as.matrix(pvals)
+diag(adj) <- 0    #将相关矩阵中对角线中的值（代表了自相关）转为 0
+write.table(data.frame(adj, check.names = FALSE), paste0("m1_",i,"_selected_cor.txt"), col.names = NA, sep = '\t', quote = FALSE)
+library(igraph)
+library(ggplot2)
+source('../zi_pi.r')
+## 计算核心菌群
+#kinless hubs（z-score > 2.5；c-score > 0.62）、provincial hubs （z-score > 2.5；c-score ≤ 0.62）、connectors（z-score ≤ 2.5；c-score > 0.62）peripherals（z-score ≤ 2.5；c-score ≤ 0.62）是根据它们的模块内度（z-score）和参与系数（c-score）
+igraph <- graph_from_adjacency_matrix(adj,mode="undirected",weighted=TRUE,diag=FALSE)
+V(igraph)$degree <- degree(igraph)
+V(igraph)$modularity <- membership(cluster_fast_greedy(igraph,weights =NULL))
+nodes_list <- data.frame(
+    nodes_id = V(igraph)$name, 
+        degree = V(igraph)$degree, 
+        modularity = V(igraph)$modularity,
+    row.names = V(igraph)$name 
+)
+nodes_list = nodes_list[rownames(adj),]
+zi_pi <- zi.pi(nodes_list, adj, degree = 'degree', modularity_class = 'modularity')
+zi_pi <- na.omit(zi_pi)   #NA 值最好去掉，不要当 0 处理
+zi_pi[which(zi_pi$within_module_connectivities < 2.5 & zi_pi$among_module_connectivities < 0.62),'type'] <- 'Peripherals'
+zi_pi[which(zi_pi$within_module_connectivities < 2.5 & zi_pi$among_module_connectivities > 0.62),'type'] <- 'Connectors'
+zi_pi[which(zi_pi$within_module_connectivities > 2.5 & zi_pi$among_module_connectivities < 0.62),'type'] <- 'Provincial hubs '
+zi_pi[which(zi_pi$within_module_connectivities > 2.5 & zi_pi$among_module_connectivities > 0.62),'type'] <- 'Kinless hubs'
+write.table(zi_pi, paste0('Core_net/m1_three_',i,'_z_c_score_result.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
+
+p = ggplot(zi_pi, aes(among_module_connectivities, within_module_connectivities)) +
+		geom_point(aes(color = type), alpha = 0.5, size = 4) +
+		scale_color_manual(values = c('green','red','blue','purple'),
+		    limits = c('Peripherals', 'Connectors', 'Provincial hubs ', 'Kinless hubs'))+
+		theme(panel.border = element_rect(fill=NA,color="black"),
+					panel.grid = element_blank(), axis.line = element_line(colour = 'black'),
+		     panel.background = element_blank(), legend.key = element_blank()) +
+		labs(x = 'Among-module connectivities', y = 'Within-module connectivities', color = '') +
+		geom_vline(xintercept = 0.62) +
+		geom_hline(yintercept = 2.5)
+
+ggsave(paste0('Core_net/m1_three_',i,'_core_net.pdf'),p)
+table(cor_sparcc>0)
+table(cor_sparcc<0)
+
+# 统计绘制网络的表格的组内和组间相关性的个数并绘制堆积柱状图（p<0.01,cor>0.6）
+table(adj>0)
+bac_name = colnames(adj)[grep("Bac_",colnames(cor_sparcc))]
+fung_name = colnames(adj)[grep("Fung_",colnames(cor_sparcc))]
+ori_name = colnames(adj)[grep("Ori_",colnames(cor_sparcc))]
+BB = adj[bac_name,bac_name]
+BF = adj[bac_name,fung_name]
+BP = adj[bac_name,ori_name]
+FF = adj[fung_name,fung_name]
+FP = adj[fung_name,ori_name]
+PP = adj[ori_name,ori_name]
+
+table(BB>0);table(BB<0)
+table(BF>0);table(BF<0)
+table(BP>0);table(BP<0)
+table(FF>0);table(FF<0)
+table(FP>0);table(FP<0)
+table(PP>0);table(PP<0)
+pos = c(table(BB>0)["TRUE"],table(BF>0)["TRUE"],table(BP>0)["TRUE"],
+        table(FF>0)["TRUE"],table(FP>0)["TRUE"],table(PP>0)["TRUE"])
+neg = c(table(BB<0)["TRUE"],table(BF<0)["TRUE"],table(BP<0)["TRUE"],
+        table(FF<0)["TRUE"],table(FP<0)["TRUE"],table(PP<0)["TRUE"])
+g1 = c("B","BF","BP","F","FP","P")
+g2 = c("Intra-kingdom","Inter-kingdom","Inter-kingdom","Intra-kingdom","Inter-kingdom","Intra-kingdom")
+stack_v = data.frame(g1=rep(g1,2),value=c(pos,neg),g2=rep(g2,2),fill=c(rep("pos",6),rep("neg",6)))
+stack_v$g2 <-factor(g2,levels=c("Intra-kingdom","Inter-kingdom"))
+library(ggplot2)
+# B图
+(p = ggplot(stack_v, aes(x=g1, y = value/table(adj!=0)["TRUE"])) +
+    geom_bar(aes(fill=fill),stat = "identity",position="stack", width=0.6)+
+    #scale_y_continuous(labels = scales::percent) +
+    facet_grid(~ g2, scales = "free_x", switch = "x",drop=F) +
+    theme(strip.background = element_blank())+
+    theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+    xlab("")+ylab("Percentage of edges")+
+    theme_classic()+theme(axis.text.x=element_text(angle=0))+
+    theme(text=element_text(family="sans", size=13)))
+ p = p + scale_fill_manual(values=c("#000000","#990033"))# 调整颜色和cytoscape网络颜色一致
+ p
+ggsave(paste0("FigB/m1_FigB_",i,"_stackplot_edges.pdf"),p)
+colnames(stack_v)=c("Network","Edges","Network_Type","Edges_Type")
+write.table(stack_v,paste0("FigB/m1_FigB_",i,"_edges_count.txt"),sep="\t",quote=F,row.names =F)
+## 准备绘制网络图的文件：A图
+BB_long = subset(reshape2::melt(BB),value!=0)
+BB_long$lineType = ifelse(BB_long$value>0,"Intra-kingdom positive","Intra-kingdom negative")
+FF_long = subset(reshape2::melt(FF),value!=0)
+FF_long$lineType = ifelse(FF_long$value>0,"Intra-kingdom positive","Intra-kingdom negative")
+PP_long = subset(reshape2::melt(PP),value!=0)
+PP_long$lineType = ifelse(PP_long$value>0,"Intra-kingdom positive","Intra-kingdom negative")
+
+BF_long = subset(reshape2::melt(BF),value!=0)
+BF_long$lineType = ifelse(BF_long$value>0,"Inter-kingdom positive","Inter-kingdom negative")
+BP_long = subset(reshape2::melt(BP),value!=0)
+BP_long$lineType = ifelse(BP_long$value>0,"Inter-kingdom positive","Inter-kingdom negative")
+FP_long = subset(reshape2::melt(FP),value!=0)
+FP_long$lineType = ifelse(FP_long$value>0,"Inter-kingdom positive","Inter-kingdom negative")
+
+abu_ra = as.data.frame(c(apply(bac_ra[gsub("Bac_","",bac_name),rownames(metadata1)],1,mean),
+                       apply(fung_ra[gsub("Fung_","",fung_name),rownames(metadata1)],1,mean),
+                       apply(ori_ra[gsub("Ori_","",ori_name),rownames(metadata1)],1,mean)))
+rownames(abu_ra)=c(bac_name,fung_name,ori_name)
+attr = data.frame(Name=c(bac_name,fung_name,ori_name),
+                  Type=c(rep("Bacterial OTUs",length(bac_name)),
+                         rep("Fungal OTUs",length(fung_name)),
+                         rep("Protist OTUs",length(ori_name))),
+                  RA=abu_ra[,1])
+
+write.table(rbind(BB_long,FF_long,PP_long,BP_long,BF_long,FP_long),paste0("FigA/m1_FigA_",i,"_cor_plot_net_file.txt"),sep="\t",quote = F,row.names = F)
+write.table(attr,paste0("FigA/m1_FigA_",i,"_cor_plot_net_attr_file.txt"),sep="\t",quote = F,row.names = F)
+
+## 计算网络属性文件并绘制D图（分别对不同界的正负相关的OTU，计算介数中心性和相关性的频率）
+library(igraph)
+library(ggplot2)
+fun2 = function(x){
+  if(is.na(table(x!=0)["TRUE"])){
+    y=0
+  }else{
+    y=table(x!=0)["TRUE"]/length(x)
+  }
+  return(y)
+}
+
+expand.matrix <- function(A){
+  m <- nrow(A)
+  n <- ncol(A)
+  B <- matrix(0,nrow = m, ncol = m)
+  rownames(B)=rownames(A)
+  C <- matrix(0,nrow = n, ncol = n)
+  rownames(C)=colnames(A)
+  cbind(rbind(B,t(A)),rbind(A,C))
+}
+type_names = c("BF","BP","FP")
+color_type = list(c("#00CCCC","#99CC00"),c("#00CCCC","#FF9966"),c("#99CC00","#FF9966"))
+j=1
+for(i1 in list(BF,BP,FP)){
+pos <- i1
+neg <- i1
+pos[pos<0] = 0
+pos = expand.matrix(pos)
+igraph_pos <- graph_from_adjacency_matrix(pos,mode="undirected",weighted=TRUE,diag=FALSE)
+pos_betweenness <- data.frame(name=names(V(igraph_pos)),
+                              BE=centralization.betweenness(igraph_pos)$re,
+                              Freq=apply(pos,1,fun2),
+                              fill=ifelse(grepl("Bac_",names(V(igraph_pos))),
+                                          "Bacterial OTUs",
+                                          ifelse(grepl("Fung_",names(V(igraph_pos))),
+                                          "Fungal OTUs","Protist OTUs")))
+(p1 = ggplot(pos_betweenness, aes(x=Freq, y=BE)) +
+  geom_point(aes(color=fill),size=5) +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab(paste0("Frequency of positive ",type_names[j]," connections")) +
+  ylab(paste0("Betweenness centrality (",type_names[j],")"))+
+  theme_classic() + theme(axis.text.x=element_text(angle=0))+
+  scale_color_manual(values=color_type[j][[1]]))
+ggsave(paste0("FigD/m1_FigD_",i,"_",type_names[j],"_pos.pdf"),p1)
+write.table(pos_betweenness,paste0("FigD/m1_FigD_",i,"_",type_names[j],"_pos.txt"),row.names=F,sep="\t",quote=F)
+neg[neg>0] = 0
+neg = expand.matrix(neg)
+igraph_neg <- graph_from_adjacency_matrix(neg,mode="undirected",weighted=TRUE,diag=FALSE)
+neg_betweenness <- data.frame(name=names(V(igraph_neg)),
+                              BE=centralization.betweenness(igraph_neg)$re,
+                              Freq=apply(neg,1,fun2),
+                              fill=ifelse(grepl("Bac_",names(V(igraph_neg))),
+                                          "Bacterial OTUs",
+                                          ifelse(grepl("Fung_",names(V(igraph_neg))),
+                                          "Fungal OTUs","Protist OTUs")))
+(p2 = ggplot(data=neg_betweenness, aes(x=Freq, y=BE)) +
+  geom_point(aes(color=fill),size=5) +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab(paste0("Frequency of positive ",type_names[j]," connections")) +
+  ylab(paste0("Betweenness centrality (",type_names[j],")"))+
+  theme_classic() + theme(axis.text.x=element_text(angle=0))+
+  scale_color_manual(values=color_type[j][[1]]))
+ggsave(paste0("FigD/m1_FigD_",i,"_",type_names[j],"_neg.pdf"),p2)
+write.table(neg_betweenness,paste0("FigD/m1_FigD_",i,"_",type_names[j],"_neg.txt"),row.names=F,sep="\t",quote=F)
+
+## 计算核心菌群
+#kinless hubs（z-score > 2.5；c-score > 0.62）、provincial hubs （z-score > 2.5；c-score ≤ 0.62）、connectors（z-score ≤ 2.5；c-score > 0.62）peripherals（z-score ≤ 2.5；c-score ≤ 0.62）是根据它们的模块内度（z-score）和参与系数（c-score）
+all = expand.matrix(i1)
+igraph <- graph_from_adjacency_matrix(all,mode="undirected",weighted=TRUE,diag=FALSE)
+
+V(igraph)$degree <- degree(igraph)
+V(igraph)$modularity <- membership(cluster_fast_greedy(igraph,weights =NULL))
+nodes_list <- data.frame(
+    nodes_id = V(igraph)$name, 
+        degree = V(igraph)$degree, 
+        modularity = V(igraph)$modularity,
+    row.names = V(igraph)$name 
+)
+nodes_list = nodes_list[rownames(all),]
+zi_pi <- zi.pi(nodes_list, all, degree = 'degree', modularity_class = 'modularity')
+zi_pi <- na.omit(zi_pi)   #NA 值最好去掉，不要当 0 处理
+zi_pi[which(zi_pi$within_module_connectivities < 2.5 & zi_pi$among_module_connectivities < 0.62),'type'] <- 'Peripherals'
+zi_pi[which(zi_pi$within_module_connectivities < 2.5 & zi_pi$among_module_connectivities > 0.62),'type'] <- 'Connectors'
+zi_pi[which(zi_pi$within_module_connectivities > 2.5 & zi_pi$among_module_connectivities < 0.62),'type'] <- 'Provincial hubs '
+zi_pi[which(zi_pi$within_module_connectivities > 2.5 & zi_pi$among_module_connectivities > 0.62),'type'] <- 'Kinless hubs'
+write.table(zi_pi, paste0('Core_net/m1_two_',i,"_",type_names[j],'_z_c_score_result.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
+
+p = ggplot(zi_pi, aes(among_module_connectivities, within_module_connectivities)) +
+		geom_point(aes(color = type), alpha = 0.5, size = 4) +
+		scale_color_manual(values = c('green','red','blue','purple'),
+		    limits = c('Peripherals', 'Connectors', 'Provincial hubs ', 'Kinless hubs'))+
+		theme(panel.border = element_rect(fill=NA,color="black"),
+					panel.grid = element_blank(), axis.line = element_line(colour = 'black'),
+		     panel.background = element_blank(), legend.key = element_blank()) +
+		labs(x = 'Among-module connectivities', y = 'Within-module connectivities', color = '') +
+		geom_vline(xintercept = 0.62) +
+		geom_hline(yintercept = 2.5)
+ggsave(paste0('Core_net/m1_two_',i,"_",type_names[j],'_core_net.pdf'),p)
+
+j=j+1
+}
+## 整理在纲水平的网络并绘制C图
+BF_long$tax = bac_tax[gsub("Bac_","",BF_long$Var1),3]
+class5 = names(table(BF_long$tax)[table(BF_long$tax)>5])
+BF_long_class5 = subset(BF_long,tax%in%class5)
+if(length(BF_long_class5$tax)!=0){
+  table(BF_long_class5$tax)
+  BF_sum = aggregate(x=BF_long_class5$value, by=list(BF_long_class5$tax,BF_long_class5$Var2),sum)
+  (p3 = ggplot(data=BF_sum, aes(x=Group.1, y=x)) +
+  geom_boxplot(fill="#00CCCC") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab("") +
+  ylab("Cumulative correlation to fungal OTUs")+
+  theme_classic() + theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1)))+
+  guides(fill=FALSE)
+  ggsave(paste0("FigC/m1_FigC_",i,"_BF_class.pdf"),p3)
+}
+
+BP_long$tax = bac_tax[gsub("Bac_","",BP_long$Var1),3]
+class5 = names(table(BP_long$tax)[table(BP_long$tax)>5])
+BP_long_class5 = subset(BP_long,tax%in%class5)
+if(length(BP_long_class5$tax)!=0){
+  table(BP_long_class5$tax)
+  BP_sum = aggregate(x=BP_long_class5$value, by=list(BP_long_class5$tax,BP_long_class5$Var2),sum)
+  (p4 = ggplot(data=BP_sum, aes(x=Group.1, y=x)) +
+  geom_boxplot(fill="#00CCCC") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab("") +
+  ylab("Cumulative correlation to protist OTUs")+
+  theme_classic() + theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1)))+
+  guides(fill=FALSE)
+  ggsave(paste0("FigC/m1_FigC_",i,"_BP_class.pdf"),p4)
+}
+
+FP_long$tax = fung_tax[gsub("Fung_","",FP_long$Var1),3]
+table(FP_long$tax)
+class5 = names(table(FP_long$tax)[table(FP_long$tax)>5])
+FP_long_class5 = subset(FP_long,tax%in%class5)
+if(length(FP_long_class5$tax)!=0){
+  table(FP_long_class5$tax)
+  FP_sum = aggregate(x=FP_long_class5$value, by=list(FP_long_class5$tax,FP_long_class5$Var2),sum)
+(p5 = ggplot(data=FP_sum, aes(x=Group.1, y=x)) +
+  geom_boxplot(fill="#99CC00") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab("") +
+  ylab("Cumulative correlation to protist OTUs")+
+  theme_classic() + theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1)))+
+  guides(fill=FALSE)
+ggsave(paste0("FigC/m1_FigC_",i,"_FP_class.pdf"),p5)
+}
+
+BF_long$tax = fung_tax[gsub("Fung_","",BF_long$Var2),3]
+class5 = names(table(BF_long$tax)[table(BF_long$tax)>5])
+BF_long_class5 = subset(BF_long,tax%in%class5)
+if(length(BF_long_class5$tax)!=0){
+  table(BF_long_class5$tax)
+  BF_sum = aggregate(x=BF_long_class5$value, by=list(BF_long_class5$tax,BF_long_class5$Var1),sum)
+  (p6 = ggplot(data=BF_sum, aes(x=Group.1, y=x)) +
+  geom_boxplot(fill="#99CC00") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab("") +
+  ylab("Cumulative correlation to bacterial OTUs")+
+  theme_classic() + theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1)))+
+  guides(fill=FALSE)
+  ggsave(paste0("FigC/m1_FigC_",i,"_FB_class.pdf"),p6)
+}
+
+BP_long$tax = ori_tax[gsub("Ori_","",BP_long$Var2),3]
+class5 = names(table(BP_long$tax)[table(BP_long$tax)>5])
+BP_long_class5 = subset(BP_long,tax%in%class5)
+if(length(BP_long_class5$tax)!=0){
+  table(BP_long_class5$tax)
+  BP_sum = aggregate(x=BP_long_class5$value, by=list(BP_long_class5$tax,BP_long_class5$Var1),sum)
+  (p7 = ggplot(data=BP_sum, aes(x=Group.1, y=x)) +
+  geom_boxplot(fill="#FF9966") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab("") +
+  ylab("Cumulative correlation to bacterial OTUs")+
+  theme_classic() + theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1)))+
+  guides(fill=FALSE)
+  ggsave(paste0("FigC/m1_FigC_",i,"_PB_class.pdf"),p7)
+}
+
+FP_long$tax = ori_tax[gsub("Ori_","",FP_long$Var2),3]
+class5 = names(table(FP_long$tax)[table(FP_long$tax)>5])
+FP_long_class5 = subset(FP_long,tax%in%class5)
+if(length(FP_long_class5$tax)!=0){
+  table(FP_long_class5$tax)
+  FP_sum = aggregate(x=FP_long_class5$value, by=list(FP_long_class5$tax,FP_long_class5$Var1),sum)
+  (p8 = ggplot(data=FP_sum, aes(x=Group.1, y=x)) +
+  geom_boxplot(fill="#FF9966") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab("") +
+  ylab("Cumulative correlation to fungal OTUs")+
+  theme_classic() + theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1)))+
+  guides(fill=FALSE)
+  ggsave(paste0("FigC/m1_FigC_",i,"_PF_class.pdf"),p8)
+}
+		
+## spearman验证Sparcc相关性
+library(WGCNA)
+library(multtest)
+cor_method = "spearman"
+p_adjMethod = "fdr"
+reabu = read.table(paste0("m1_",i,"_three.txt"),header = T,sep="\t",row.names = 1)
+reabu = reabu/colSums(reabu)*100
+occor = corAndPvalue(t(reabu),method = cor_method)
+mtadj <- mt.rawp2adjp(unlist(occor$p),proc="BH")
+adpcor <- mtadj$adjp[order(mtadj$index),2]
+occor.p <- matrix(adpcor,dim(reabu)[1])
+colnames(occor.p) = rownames(reabu)
+rownames(occor.p) = rownames(reabu)
+occor.r<-occor$cor
+write.table(cbind(data.frame(cor=rownames(occor.r)),occor.r), paste0("Spearman/m1_", i, "_", cor_method,"_all_correlation_result.txt"),col.names = T, row.names = F, quote = F, sep ="\t")
+write.table(cbind(data.frame(cor_pvlaue=rownames(occor.r)),occor.p), paste0("Spearman/m1_", i, "_", cor_method, "_", p_adjMethod, "_all_correlationPvlaue_result.txt"),col.names = T, row.names = F, quote = F, sep ="\t")
+#保留 |相关性|≥0.6且 p<0.01的值
+table(occor$p>0.01)
+table(occor$cor<0.6)
+occor.r[occor$p>0.01|abs(occor$cor)<0.6] = 0 
+diag(occor.r) <- 0 
+table(occor.r!=0)
+write.table(cbind(data.frame(cor=rownames(occor.r)),occor.r), paste0("Spearman/m1_", i, "_", cor_method,"_0.6_0.01_correlation_result.txt"),col.names = T, row.names = F, quote = F, sep ="\t")
+
+# Fig SF
+adj_long = subset(reshape2::melt(adj),value!=0)
+occor_long = subset(reshape2::melt(occor.r),value!=0)
+occorp_long = reshape2::melt(occor.p)
+dir.create("Spearman/FigSF",showWarnings = F)
+
+fun3=function(x){
+  if(grepl("Bac_",x)){
+    if(table(grepl("Bac_",str_split(x,"-",simplify = T)))["TRUE"]==2){
+      y="B"
+    }else if(table(grepl("Bac_",str_split(x,"-",simplify = T)))["TRUE"]==1){
+      if(!is.na(table(grepl("Fung_",str_split(x,"-",simplify = T)))["TRUE"])){
+        y="BF"
+      }else{
+        y="BP"
+      }
+    }
+  }else if(grepl("Fung_",x)){
+    if(table(grepl("Fung_",str_split(x,"-",simplify = T)))["TRUE"]==2){
+      y="F"
+      }else{
+        y="FP"
+      }
+  }else{
+      y="P"
+  }
+  return(y)
+}
+
+occ_pos = paste0(occor_long[occor_long$value>0,"Var1"],"-",occor_long[occor_long$value>0,"Var2"])
+spar_pos = paste0(adj_long[adj_long$value>0,"Var1"],"-",adj_long[adj_long$value>0,"Var2"])
+share_pos = intersect(occ_pos,spar_pos)
+share_pos_type = paste(apply(as.data.frame(share_pos),1,fun3),"pos")
+only_spar_pos = setdiff(spar_pos,occ_pos)
+only_spar_pos_type = paste(apply(as.data.frame(only_spar_pos),1,fun3),"pos")
+only_occ_pos = setdiff(occ_pos,spar_pos)
+only_occ_pos_type = paste(apply(as.data.frame(only_occ_pos),1,fun3),"pos")
+
+occ_neg = paste0(occor_long[occor_long$value<0,"Var1"],"-",occor_long[occor_long$value<0,"Var2"])
+spar_neg = paste0(adj_long[adj_long$value<0,"Var1"],"-",adj_long[adj_long$value<0,"Var2"])
+share_neg = intersect(occ_neg,spar_neg)
+share_neg_type = paste(apply(as.data.frame(share_neg),1,fun3),"neg")
+only_spar_neg = setdiff(spar_neg,occ_neg)
+only_spar_neg_type = paste(apply(as.data.frame(only_spar_neg),1,fun3),"neg")
+only_occ_neg = setdiff(occ_neg,spar_neg)
+only_occ_neg_type = paste(apply(as.data.frame(only_occ_neg),1,fun3),"neg")
+
+share_plot = rbind(
+  data.frame(Edges = share_pos,Type = share_pos_type,Group="shared"),
+  data.frame(Edges = share_neg,Type = share_neg_type,Group="shared"),
+  data.frame(Edges = only_spar_pos,Type = only_spar_pos_type,Group="only SparCC"),
+  data.frame(Edges = only_spar_neg,Type = only_spar_neg_type,Group="only SparCC"),
+  data.frame(Edges = only_occ_pos,Type = only_occ_pos_type,Group="only Spearman"),
+  data.frame(Edges = only_occ_neg,Type = only_occ_neg_type,Group="only Spearman")
+)
+
+(p = ggplot(share_plot, aes(x=Type)) +
+    geom_bar(aes(fill=Group),position="stack", width=0.6)+
+    #scale_y_continuous(labels = scales::percent) +
+    #facet_grid(~ g2, scales = "free_x", switch = "x",drop=F) +
+    theme(strip.background = element_blank())+
+    theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+    xlab("")+ylab("Number of edges")+
+    theme_classic()+theme(axis.text.x=element_text(angle=90))+
+    theme(text=element_text(family="sans", size=13)))
+ #p = p + scale_fill_manual(values=c("#000000","#990033"))# 调整颜色和cytoscape网络颜色一致
+ p
+ggsave(paste0("Spearman/FigSF/m1_",i,"_stackplot_edges_in_diff_methods.pdf"),p)
+write.table(share_plot,paste0("Spearman/FigSF/m1_",i,"_edges_count_in_diff_methods.txt"),sep="\t",quote=F,row.names =F)
+
+dir.create("Spearman/FigSG",showWarnings = F)
+bac_name = colnames(occor.r)[grep("Bac_",colnames(occor.r))]
+fung_name = colnames(occor.r)[grep("Fung_",colnames(occor.r))]
+ori_name = colnames(occor.r)[grep("Ori_",colnames(occor.r))]
+BB = occor.r[bac_name,bac_name]
+BF = occor.r[bac_name,fung_name]
+BP = occor.r[bac_name,ori_name]
+FF = occor.r[fung_name,fung_name]
+FP = occor.r[fung_name,ori_name]
+PP = occor.r[ori_name,ori_name]
+BB_long = subset(reshape2::melt(BB),value!=0)
+BB_long$lineType = ifelse(BB_long$value>0,"Intra-kingdom positive","Intra-kingdom negative")
+FF_long = subset(reshape2::melt(FF),value!=0)
+FF_long$lineType = ifelse(FF_long$value>0,"Intra-kingdom positive","Intra-kingdom negative")
+PP_long = subset(reshape2::melt(PP),value!=0)
+PP_long$lineType = ifelse(PP_long$value>0,"Intra-kingdom positive","Intra-kingdom negative")
+
+BF_long = subset(reshape2::melt(BF),value!=0)
+BF_long$lineType = ifelse(BF_long$value>0,"Inter-kingdom positive","Inter-kingdom negative")
+BP_long = subset(reshape2::melt(BP),value!=0)
+BP_long$lineType = ifelse(BP_long$value>0,"Inter-kingdom positive","Inter-kingdom negative")
+FP_long = subset(reshape2::melt(FP),value!=0)
+FP_long$lineType = ifelse(FP_long$value>0,"Inter-kingdom positive","Inter-kingdom negative") 
+# type_names = c("BF","BP","FP","BB","FF","PP")
+# color_type = list(c("#00CCCC","#99CC00"),c("#00CCCC","#FF9966"),c("#99CC00","#FF9966"),
+#                   c("#00CCCC","#00CCCC"),c("#99CC00","#99CC00"),c("#FF9966","#FF9966"))
+## 整理在纲水平的网络并绘制SG图
+
+BF_long$tax = bac_tax[gsub("Bac_","",BF_long$Var1),3]
+class5 = names(table(BF_long$tax)[table(BF_long$tax)>5])
+BF_long_class5 = subset(BF_long,tax%in%class5)
+if(length(BF_long_class5$tax)!=0){
+  table(BF_long_class5$tax)
+  BF_sum = aggregate(x=BF_long_class5$value, by=list(BF_long_class5$tax,BF_long_class5$Var2),sum)
+  (p3 = ggplot(data=BF_sum, aes(x=Group.1, y=x)) +
+  geom_boxplot(fill="#00CCCC") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab("") +
+  ylab("Cumulative correlation to fungal OTUs")+
+  theme_classic() + theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1)))+
+  guides(fill=FALSE)
+  ggsave(paste0("Spearman/FigSG/m1_FigSG_",i,"_BF_class.pdf"),p3)
+}
+
+BP_long$tax = bac_tax[gsub("Bac_","",BP_long$Var1),3]
+class5 = names(table(BP_long$tax)[table(BP_long$tax)>5])
+BP_long_class5 = subset(BP_long,tax%in%class5)
+if(length(BP_long_class5$tax)!=0){
+  table(BP_long_class5$tax)
+  BP_sum = aggregate(x=BP_long_class5$value, by=list(BP_long_class5$tax,BP_long_class5$Var2),sum)
+  (p4 = ggplot(data=BP_sum, aes(x=Group.1, y=x)) +
+  geom_boxplot(fill="#00CCCC") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab("") +
+  ylab("Cumulative correlation to protist OTUs")+
+  theme_classic() + theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1)))+
+  guides(fill=FALSE)
+  ggsave(paste0("Spearman/FigSG/m1_FigSG_",i,"_BP_class.pdf"),p4)
+}
+
+FP_long$tax = fung_tax[gsub("Fung_","",FP_long$Var1),3]
+table(FP_long$tax)
+class5 = names(table(FP_long$tax)[table(FP_long$tax)>5])
+FP_long_class5 = subset(FP_long,tax%in%class5)
+if(length(FP_long_class5$tax)!=0){
+  table(FP_long_class5$tax)
+  FP_sum = aggregate(x=FP_long_class5$value, by=list(FP_long_class5$tax,FP_long_class5$Var2),sum)
+(p5 = ggplot(data=FP_sum, aes(x=Group.1, y=x)) +
+  geom_boxplot(fill="#99CC00") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab("") +
+  ylab("Cumulative correlation to protist OTUs")+
+  theme_classic() + theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1)))+
+  guides(fill=FALSE)
+ggsave(paste0("Spearman/FigSG/m1_FigSG_",i,"_FP_class.pdf"),p5)
+}
+
+BF_long$tax = fung_tax[gsub("Fung_","",BF_long$Var2),3]
+class5 = names(table(BF_long$tax)[table(BF_long$tax)>5])
+BF_long_class5 = subset(BF_long,tax%in%class5)
+if(length(BF_long_class5$tax)!=0){
+  table(BF_long_class5$tax)
+  BF_sum = aggregate(x=BF_long_class5$value, by=list(BF_long_class5$tax,BF_long_class5$Var1),sum)
+  (p6 = ggplot(data=BF_sum, aes(x=Group.1, y=x)) +
+  geom_boxplot(fill="#99CC00") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab("") +
+  ylab("Cumulative correlation to bacterial OTUs")+
+  theme_classic() + theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1)))+
+  guides(fill=FALSE)
+  ggsave(paste0("Spearman/FigSG/m1_FigSG_",i,"_FB_class.pdf"),p6)
+}
+
+BP_long$tax = ori_tax[gsub("Ori_","",BP_long$Var2),3]
+class5 = names(table(BP_long$tax)[table(BP_long$tax)>5])
+BP_long_class5 = subset(BP_long,tax%in%class5)
+if(length(BP_long_class5$tax)!=0){
+  table(BP_long_class5$tax)
+  BP_sum = aggregate(x=BP_long_class5$value, by=list(BP_long_class5$tax,BP_long_class5$Var1),sum)
+  (p7 = ggplot(data=BP_sum, aes(x=Group.1, y=x)) +
+  geom_boxplot(fill="#FF9966") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab("") +
+  ylab("Cumulative correlation to bacterial OTUs")+
+  theme_classic() + theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1)))+
+  guides(fill=FALSE)
+  ggsave(paste0("Spearman/FigSG/m1_FigSG_",i,"_PB_class.pdf"),p7)
+}
+
+FP_long$tax = ori_tax[gsub("Ori_","",FP_long$Var2),3]
+class5 = names(table(FP_long$tax)[table(FP_long$tax)>5])
+FP_long_class5 = subset(FP_long,tax%in%class5)
+if(length(FP_long_class5$tax)!=0){
+  table(FP_long_class5$tax)
+  FP_sum = aggregate(x=FP_long_class5$value, by=list(FP_long_class5$tax,FP_long_class5$Var1),sum)
+  (p8 = ggplot(data=FP_sum, aes(x=Group.1, y=x)) +
+  geom_boxplot(fill="#FF9966") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())+
+  xlab("") +
+  ylab("Cumulative correlation to fungal OTUs")+
+  theme_classic() + theme(axis.text.x=element_text(angle=45,hjust=1,vjust=1)))+
+  guides(fill=FALSE)
+  ggsave(paste0("Spearman/FigSG/m1_FigSG_",i,"_PF_class.pdf"),p8)
+}
+
+dir.create("Spearman/FigSH",showWarnings = F)
+dir.create("Spearman/FigSI",showWarnings = F)
+all_reab = rbind(bac_ra[,row.names(metadata1)],fung_ra[,row.names(metadata1)],ori_ra[,row.names(metadata1)])
+rownames(all_reab) = c(paste0("Bac_",rownames(bac_ra)),
+                       paste0("Fung_",rownames(fung_ra)),
+                       paste0("Ori_",rownames(ori_ra)))
+occor_long1 = merge(occor_long,occorp_long,by=c("Var1","Var2"))
+top_occor_pos = occor_long1[order(occor_long1$value.x,decreasing = T)[1:10],c(1:4)]
+colnames(top_occor_pos)[3:4]=c("cor","pvalue")
+
+top_occor_neg = occor_long1[order(occor_long1$value.x,decreasing = F)[1:10],c(1:4)]
+colnames(top_occor_neg)[3:4]=c("cor","pvalue")
+write.table(top_occor_pos,paste0("Spearman/FigSH/m1_FigSH_",i,"_top_pos_cor.txt"),sep="\t",quote=F,row.names = F)
+write.table(top_occor_neg,paste0("Spearman/FigSI/m1_FigSI_",i,"_top_neg_cor.txt"),sep="\t",quote=F,row.names = F)
+for(n in 1:10){
+  xname = as.vector(top_occor_pos$Var1[n])
+  yname = as.vector(top_occor_pos$Var2[n])
+  top_sub = data.frame(x=t(all_reab[xname,]),y=t(all_reab[yname,]))
+  p = ggplot(top_sub,aes(x=top_sub[[xname]],y= top_sub[[yname]])) +
+	geom_point() + geom_smooth(method = "lm", color = "red", fill = "lightgray")+
+  theme_classic() +
+  labs(title=paste0('r=',round(top_occor_pos$cor[n],2)," p=",round(top_occor_pos$pvalue[n],5)))+
+  xlab(xname) +
+  ylab(yname)
+  ggsave(paste0("Spearman/FigSH/m1_FigSH_",i,"_top",n,"_pos_cor.pdf"),p)
+  
+  xname = as.vector(top_occor_neg$Var1[n])
+  yname = as.vector(top_occor_neg$Var2[n])
+  top_sub = data.frame(x=t(all_reab[xname,]),y=t(all_reab[yname,]))
+  p = ggplot(top_sub,aes(x=top_sub[[xname]],y= top_sub[[yname]])) +
+	geom_point() + geom_smooth(method = "lm", color = "red", fill = "lightgray")+
+  theme_classic() +
+  labs(title=paste0('r=',round(top_occor_neg$cor[n],2)," p=",round(top_occor_neg$pvalue[n],5)))+
+  xlab(xname) +
+  ylab(yname)
+  ggsave(paste0("Spearman/FigSI/m1_FigSI_",i,"_top",n,"_neg_cor.pdf"),p)
+  
+  }
+
+
+}
+
+```
+
+
+
+
+

@@ -1,0 +1,25 @@
+# 真菌功能注释
+
+```{r}
+devtools::install_github("ropenscilabs/datastorr",force = TRUE)
+devtools::install_github("traitecoevo/fungaltraits",force = TRUE)
+library(fungaltraits)
+fungal_traits()
+
+otu = read.table("../fungi/result/L/otutab.txt",sep="\t",header=T,comment.char = "",row.names = 1)
+tax = read.table("../fungi/result/taxonomy2.txt",sep="\t",header=T,comment.char = "",row.names = 1)
+
+otu$taxonomy = tax[rownames(otu),1]
+otu = na.omit(otu)
+otu = otu[otu$taxonomy!="k__Fungi",]
+otu$taxonomy = gsub(";","|",otu$taxonomy)
+head(otu$taxonomy)
+write.table(otu,"../fungi/result/L/otutab2.txt",sep="\t",quote = F)
+```
+
+
+```{bash}
+# funguild注释，最后一列列名必须为taxonomy
+python Guilds_v1.1.py -otu fungi/result/L/otutab2.txt 
+```
+

@@ -1,0 +1,311 @@
+Row.names	z	module	p	roles	label	role_7	Kingdom	Phylum	Class	Order	Family	Genus	Species
+ASV_10	1.23160472132287	4	0.5	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Rhizobiaceae	Rhizobium	Unassigned
+ASV_100	-1.22474487139159	30	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Unassigned	Unassigned
+ASV_101	1.009270597654	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_103	-1.06422781852132	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Phyllobacteriaceae	Phyllobacterium	Phyllobacterium_bourgognense
+ASV_104	-0.230925885248038	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Unassigned	Unassigned
+ASV_105	-0.914785690639585	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Devosia	Devosia_chinhatensis
+ASV_106	1.3770653874284	3	0.382934443288241	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Streptomycetaceae	Streptomyces	Unassigned
+ASV_107	0.409332617182361	7	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Burkholderiales_incertae_sedis	Aquabacterium	Unassigned
+ASV_109	-0.52285889315973	5	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Pseudonocardiaceae	Unassigned	Unassigned
+ASV_11	0	28	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Noviherbaspirillum	Unassigned
+ASV_110	-0.914785690639585	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_111	0.716175621448705	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Unassigned	Unassigned
+ASV_112	-0.505150373980083	4	0	Peripherals		ultra peripheral	Bacteria	Bacteroidetes	Sphingobacteriia	Sphingobacteriales	Chitinophagaceae	Niastella	Unassigned
+ASV_114	0.528256525580605	2	0.375	Peripherals		peripheral	Bacteria	Proteobacteria	Deltaproteobacteria	Myxococcales	Sandaracinaceae	Sandaracinus	Sandaracinus_amylolyticus
+ASV_116	0	32	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Pseudonocardiaceae	Kibdelosporangium	Kibdelosporangium_phytohabitans
+ASV_119	0	19	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Steroidobacter_denitrificans
+ASV_120	-0.32233404815872	4	0.622837370242215	Connectors	ASV_120	non hub connector	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Nocardioidaceae	Aeromicrobium	Aeromicrobium_ginsengisoli
+ASV_1208	0.730296743340221	25	0.279296875	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Unassigned	Unassigned	Unassigned
+ASV_121	-0.577350269189626	20	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_122	1.43508079186394	5	0.5	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Unassigned	Unassigned	Unassigned
+ASV_123	0.419224754018754	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Burkholderiales_incertae_sedis	Aquabacterium	Unassigned
+ASV_127	-0.674278654602886	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Unassigned	Unassigned	Unassigned
+ASV_1275	-1.51064016599758	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Ramlibacter	Unassigned
+ASV_128	0.419224754018754	1	0.5	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Unassigned	Unassigned
+ASV_129	0.287749489543907	2	0.375	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Rhizobiaceae	Rhizobium	Rhizobium_alvei
+ASV_130	0	14	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_133	-0.577350269189626	16	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Xanthomonadaceae	Lysobacter	Lysobacter_panaciterrae
+ASV_137	-0.596558536890765	4	0.62	Connectors		non hub connector	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Nocardioidaceae	Nocardioides	Unassigned
+ASV_14	0.528256525580605	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Unassigned	Unassigned	Unassigned
+ASV_140	2.93332688594759	2	0	Module hubs	ASV_140	provincial hub	Bacteria	Proteobacteria	Alphaproteobacteria	Sphingomonadales	Erythrobacteraceae	Altererythrobacter	Unassigned
+ASV_141	0.317523092216052	4	0.375	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Massilia	Massilia_namucuonensis
+ASV_143	2.86120265963109	6	0	Module hubs	ASV_143	provincial hub	Bacteria	Proteobacteria	Gammaproteobacteria	Pseudomonadales	Pseudomonadaceae	Permianibacter	Permianibacter_aggregans
+ASV_148	-0.191909934487451	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Unassigned	Unassigned	Unassigned
+ASV_15	-0.299362040745304	3	0.444444444444444	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Bradyrhizobiaceae	Bradyrhizobium	Bradyrhizobium_neotropicale
+ASV_151	-0.433771618566188	2	0.46875	Peripherals		peripheral	Bacteria	Chloroflexi	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_152	-0.577350269189626	11	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Methylophilales	Methylophilaceae	Unassigned	Unassigned
+ASV_153	0	19	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Unassigned
+ASV_156	0.538851673341546	3	0.0713305898491083	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Hyphomicrobium	Hyphomicrobium_vulgare
+ASV_157	-0.433771618566188	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Bradyrhizobiaceae	Bosea	Bosea_eneae
+ASV_158	-1.01234381441565	5	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Unassigned	Unassigned
+ASV_16	0	33	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Streptomycetaceae	Streptomyces	Streptomyces_ederensis
+ASV_161	0.538851673341546	3	0	Peripherals		ultra peripheral	Bacteria	Bacteroidetes	Cytophagia	Cytophagales	Unassigned	Ohtaekwangia	Ohtaekwangia_koreensis
+ASV_162	0.730296743340221	25	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhodospirillales	Unassigned	Reyranella	Reyranella_soli
+ASV_163	2.90353555563169	5	0.5	Module hubs	ASV_163	connector hub	Bacteria	Actinobacteria	Actinobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_164	1.9712987418008	2	0.444444444444444	Peripherals		peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_165	0	30	0	Peripherals		ultra peripheral	Bacteria	Bacteroidetes	Flavobacteriia	Flavobacteriales	Flavobacteriaceae	Flavobacterium	Unassigned
+ASV_1654	-0.0333739719038126	5	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Dactylosporangium	Unassigned
+ASV_166	0.768763561617304	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Unassigned	Unassigned	Unassigned
+ASV_167	2.04666308591181	7	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Unassigned	Unassigned
+ASV_169	-1.22474487139159	28	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Unassigned	Unassigned
+ASV_17	0.865972069680142	4	0.459183673469388	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Unassigned	Unassigned
+ASV_170	0	13	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Caulobacterales	Hyphomonadaceae	Hyphomonas	Unassigned
+ASV_172	1.2497776336907	2	0	Peripherals		ultra peripheral	Bacteria	Firmicutes	Bacilli	Bacillales	Bacillaceae_1	Bacillus	Unassigned
+ASV_173	-0.914785690639585	2	0.32	Peripherals		peripheral	Bacteria	Firmicutes	Bacilli	Bacillales	Paenibacillaceae_1	Paenibacillus	Paenibacillus_panacisoli
+ASV_174	0.707106781186547	15	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Streptomycetaceae	Streptomyces	Unassigned
+ASV_175	0.957380232590824	4	0.48	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Massilia	Unassigned
+ASV_178	-1.08019013019584	8	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Microbacteriaceae	Agromyces	Unassigned
+ASV_181	-0.174676980841147	1	0.571428571428571	Peripherals		peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Steroidobacter_denitrificans
+ASV_182	0.945595870608022	5	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Sphingomonadales	Sphingomonadaceae	Sphingomonas	Sphingomonas_soli
+ASV_183	0	29	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_184	1.9712987418008	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Xanthomonadaceae	Lysobacter	Lysobacter_terrae
+ASV_185	-1.05359935144417	4	0.3456	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Unassigned	Unassigned
+ASV_186	-1.22799785154708	7	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Kineosporiaceae	Unassigned	Unassigned
+ASV_187	0.865972069680142	4	0.541420118343195	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Unassigned	Unassigned
+ASV_188	1.15470053837925	11	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Bradyrhizobiaceae	Bradyrhizobium	Bradyrhizobium_neotropicale
+ASV_190	0	21	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Bradyrhizobiaceae	Bosea	Bosea_eneae
+ASV_191	-1.14500751435485	4	0.485207100591716	Peripherals		peripheral	Bacteria	Bacteroidetes	Cytophagia	Cytophagales	Unassigned	Ohtaekwangia	Unassigned
+ASV_192	1.9712987418008	2	0.444444444444444	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Unassigned	Unassigned	Unassigned
+ASV_194	0	27	0	Peripherals		ultra peripheral	Bacteria	Chloroflexi	Chloroflexia	Chloroflexales	Chloroflexaceae	Roseiflexus	Unassigned
+ASV_195	0.409332617182361	7	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Sphingomonadales	Sphingomonadaceae	Sphingomonas	Sphingomonas_daechungensis
+ASV_198	0	18	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Promicromonosporaceae	Promicromonospora	Promicromonospora_xylanilytica
+ASV_1983	-0.433771618566188	2	0.18	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Rhizobiaceae	Unassigned	Unassigned
+ASV_2	1.32301288423355	4	0.375	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Pelomonas	Pelomonas_puraquae
+ASV_20	1.15470053837925	12	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Pseudonocardiaceae	Amycolatopsis	Unassigned
+ASV_200	0	22	0	Peripherals		ultra peripheral	Bacteria	Chloroflexi	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_201	0.22611492930537	4	0.321995464852608	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Massilia	Massilia_namucuonensis
+ASV_203	-0.174676980841147	1	0.568047337278107	Peripherals		peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Unassigned
+ASV_204	-1.05359935144417	4	0	Peripherals		ultra peripheral	Bacteria	Bacteroidetes	Flavobacteriia	Flavobacteriales	Cryomorphaceae	Unassigned	Unassigned
+ASV_206	0.287749489543907	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Bradyrhizobiaceae	Bosea	Unassigned
+ASV_209	1.15470053837925	17	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Nocardiaceae	Nocardia	Unassigned
+ASV_21	-0.144025350692779	8	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Nocardioidaceae	Kribbella	Kribbella_catacumbae
+ASV_210	-0.191909934487451	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Deltaproteobacteria	Myxococcales	Unassigned	Unassigned	Unassigned
+ASV_214	-0.174676980841147	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Unassigned	Unassigned	Unassigned
+ASV_215	0	31	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Unassigned	Unassigned
+ASV_2157	0	30	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Pseudomonadales	Pseudomonadaceae	Pseudomonas	Unassigned
+ASV_216	-0.914785690639585	2	0.444444444444444	Peripherals		peripheral	Bacteria	Chloroflexi	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_2195	-0.674278654602886	2	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Unassigned	Unassigned
+ASV_22	-1.09544511501033	25	0.32	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Unassigned	Unassigned	Unassigned
+ASV_220	0	21	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Burkholderiales_incertae_sedis	Aquabacterium	Unassigned
+ASV_2201	0	29	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Devosia	Unassigned
+ASV_222	0	13	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Massilia	Unassigned
+ASV_224	-0.914785690639585	2	0.5	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Pseudonocardiaceae	Saccharothrix	Saccharothrix_longispora
+ASV_225	1.72830420831335	8	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Deltaproteobacteria	Bdellovibrionales	Bacteriovoracaceae	Peredibacter	Peredibacter_starrii
+ASV_227	0.792139428810286	8	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Steroidobacter_denitrificans
+ASV_229	0.716175621448705	1	0.48	Peripherals		peripheral	Bacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_230	-0.191909934487451	6	0	Peripherals		ultra peripheral	Bacteria	Bacteroidetes	Sphingobacteriia	Sphingobacteriales	Sphingobacteriaceae	Unassigned	Unassigned
+ASV_2325	-0.0333739719038126	5	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Unassigned	Unassigned
+ASV_233	0	24	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Xanthomonadaceae	Lysobacter	Unassigned
+ASV_235	0.792139428810286	8	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Polymorphospora	Polymorphospora_rubra
+ASV_2368	-0.682221028637269	7	0.5	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Micromonospora	Unassigned
+ASV_238	-1.13757575483215	3	0.224609375	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Bradyrhizobiaceae	Bosea	Bosea_lathyri
+ASV_239	0.287749489543907	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Methylophilales	Methylophilaceae	Unassigned	Unassigned
+ASV_24	0.683155743858779	4	0.6328125	Connectors	ASV_24	non hub connector	Bacteria	Proteobacteria	Alphaproteobacteria	Sphingomonadales	Sphingomonadaceae	Sphingomonas	Unassigned
+ASV_240	0.700853409980064	5	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Nocardioidaceae	Nocardioides	Nocardioides_agariphilus
+ASV_241	-0.577350269189626	12	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_244	-0.433771618566188	2	0.375	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Unassigned	Unassigned
+ASV_245	-0.628068876504386	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Unassigned	Unassigned	Unassigned
+ASV_246	0.0472424535072085	2	0	Peripherals		ultra peripheral	Bacteria	Firmicutes	Bacilli	Bacillales	Bacillaceae_1	Bacillus	Bacillus_thuringiensis
+ASV_247	-0.962191188533491	4	0	Peripherals		ultra peripheral	Bacteria	Bacteroidetes	Sphingobacteriia	Sphingobacteriales	Chitinophagaceae	Niastella	Unassigned
+ASV_248	-0.19326458252949	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Unassigned	Unassigned	Unassigned
+ASV_249	-0.768578715701049	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Deltaproteobacteria	Bdellovibrionales	Bacteriovoracaceae	Peredibacter	Peredibacter_starrii
+ASV_250	0.866025403784439	26	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_251	0.77456390676946	4	0.0665873959571938	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Massilia	Massilia_namucuonensis
+ASV_253	0.500339418037415	4	0.297520661157025	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Unassigned	Unassigned	Unassigned
+ASV_255	-0.433771618566188	2	0.493827160493827	Peripherals		peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_257	-0.32233404815872	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Devosia	Devosia_insulae
+ASV_258	-1.08019013019584	8	0.5	Peripherals		peripheral	Bacteria	Bacteroidetes	Flavobacteriia	Flavobacteriales	Flavobacteriaceae	Flavobacterium	Unassigned
+ASV_259	-0.471627848271098	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Steroidobacter_denitrificans
+ASV_26	-0.767601353787689	5	0.444444444444444	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Pseudonocardiaceae	Actinophytocola	Actinophytocola_burenkhanensis
+ASV_260	-0.278116432531771	5	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhodospirillales	Rhodospirillaceae	Dongia	Dongia_mobilis
+ASV_265	-0.577350269189626	11	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Steroidobacter_denitrificans
+ASV_267	0.528256525580605	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Unassigned	Unassigned	Unassigned
+ASV_269	-0.52285889315973	5	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Devosia	Devosia_insulae
+ASV_27	-0.628068876504386	6	0.5	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Bradyrhizobiaceae	Bradyrhizobium	Bradyrhizobium_neotropicale
+ASV_271	1.009270597654	2	0.444444444444444	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Solirubrobacterales	Solirubrobacteraceae	Solirubrobacter	Unassigned
+ASV_273	-1.01234381441565	5	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Mycobacteriaceae	Mycobacterium	Unassigned
+ASV_278	1.3770653874284	3	0.34	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Devosia	Devosia_yakushimensis
+ASV_279	-0.278116432531771	5	0.32	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Unassigned	Unassigned
+ASV_28	-0.577350269189626	12	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Thermomonosporaceae	Actinocorallia	Actinocorallia_herbida
+ASV_282	0.538851673341546	3	0.277777777777778	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Devosia	Unassigned
+ASV_286	0.419224754018754	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhodospirillales	Rhodospirillaceae	Dongia	Dongia_mobilis
+ASV_287	0	22	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Unassigned	Unassigned
+ASV_289	-0.962191188533491	4	0.162570888468809	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micrococcaceae	Arthrobacter	Unassigned
+ASV_29	1.7307917057641	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Unassigned	Unassigned	Unassigned
+ASV_2902	1.01312648887866	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Unassigned	Unassigned	Unassigned
+ASV_291	0.244249007529483	6	0.444444444444444	Peripherals		peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Xanthomonadaceae	Rhodanobacter	Rhodanobacter_denitrificans
+ASV_294	0.500339418037415	4	0.357142857142857	Peripherals		peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_297	0	9	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Solirubrobacterales	Solirubrobacteraceae	Solirubrobacter	Unassigned
+ASV_299	-0.577350269189626	20	0	Peripherals		ultra peripheral	Bacteria	Chloroflexi	Chloroflexia	Chloroflexales	Oscillochloridaceae	Oscillochloris	Unassigned
+ASV_3	0.680407949546418	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Pseudomonadales	Pseudomonadaceae	Rhizobacter	Rhizobacter_bergeniae
+ASV_30	-1.06422781852132	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Burkholderiales_incertae_sedis	Unassigned	Unassigned
+ASV_300	-0.577350269189626	17	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Acidimicrobiales	Iamiaceae	Iamia	Iamia_majanohamensis
+ASV_301	0.538851673341546	3	0.0644444444444444	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Sphingomonadales	Sphingomonadaceae	Sphingomonas	Unassigned
+ASV_302	0.134706766394689	4	0.137174211248285	Peripherals		peripheral	Bacteria	Bacteroidetes	Cytophagia	Cytophagales	Unassigned	Unassigned	Unassigned
+ASV_303	0.0472424535072085	2	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Unassigned	Unassigned
+ASV_304	-1.065529583131	1	0.444444444444444	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Unassigned	Unassigned
+ASV_305	-1.065529583131	1	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Acidimicrobiales	Unassigned	Unassigned	Unassigned
+ASV_307	-1.4192320030869	4	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Nocardioidaceae	Aeromicrobium	Aeromicrobium_panaciterrae
+ASV_309	-0.278116432531771	5	0	Peripherals		ultra peripheral	Bacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_310	0	34	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Pseudomonadales	Pseudomonadaceae	Pseudomonas	Unassigned
+ASV_311	-1.32782384017622	4	0.5	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_312	-1.51064016599758	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Caulobacterales	Caulobacteraceae	Brevundimonas	Brevundimonas_basaltis
+ASV_314	-1.01234381441565	5	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Streptomycetaceae	Streptomyces	Unassigned
+ASV_317	0	32	0.5	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Rhizobiaceae	Unassigned	Unassigned
+ASV_318	-1.065529583131	1	0.197530864197531	Peripherals		peripheral	Bacteria	Spirochaetes	Spirochaetia	Spirochaetales	Leptospiraceae	Turneriella	Turneriella_parva
+ASV_319	-0.191909934487451	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Deltaproteobacteria	Myxococcales	Polyangiaceae	Unassigned	Unassigned
+ASV_32	0.419224754018754	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Kinneretia	Kinneretia_asaccharophila
+ASV_320	0	31	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Glycomycetaceae	Glycomyces	Unassigned
+ASV_324	-0.628068876504386	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Burkholderiales_incertae_sedis	Inhella	Inhella_inkyongensis
+ASV_326	2.79483169345836	1	0	Module hubs	ASV_326	provincial hub	Bacteria	Actinobacteria	Actinobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_327	-0.471627848271098	1	0.611111111111111	Peripherals		peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Unassigned
+ASV_329	-0.471627848271098	1	0	Peripherals		ultra peripheral	Bacteria	Bacteroidetes	Cytophagia	Cytophagales	Unassigned	Ohtaekwangia	Ohtaekwangia_koreensis
+ASV_33	1.31007735630861	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_330	-0.433771618566188	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Hydrogenophaga	Unassigned
+ASV_331	-0.174676980841147	1	0.21875	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Devosia	Unassigned
+ASV_332	0	27	0	Peripherals		ultra peripheral	Bacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_333	-0.174676980841147	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_334	-1.14500751435485	4	0.544423440453686	Peripherals		peripheral	Bacteria	Bacteroidetes	Cytophagia	Cytophagales	Unassigned	Unassigned	Unassigned
+ASV_335	-0.433771618566188	2	0.5	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Unassigned	Unassigned
+ASV_336	-1.32782384017622	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Hyphomicrobium	Unassigned
+ASV_337	0.0472424535072085	2	0.5	Peripherals		peripheral	Bacteria	Proteobacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_338	-0.32233404815872	4	0.13265306122449	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Paraherbaspirillum	Paraherbaspirillum_soli
+ASV_34	0.538851673341546	3	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Kineosporiaceae	Kineosporia	Kineosporia_rhamnosa
+ASV_340	-0.0333739719038126	5	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Streptomycetaceae	Streptomyces	Streptomyces_bangladeshensis
+ASV_341	1.15470053837925	20	0	Peripherals		ultra peripheral	Bacteria	Chloroflexi	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_344	-0.505150373980083	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Xanthomonadaceae	Unassigned	Unassigned
+ASV_345	1.19033833123598	5	0.375	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Unassigned	Unassigned
+ASV_347	-1.06422781852132	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_352	1.19033833123598	5	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Unassigned	Unassigned	Unassigned
+ASV_353	-0.914785690639585	2	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Nocardioidaceae	Nocardioides	Unassigned
+ASV_354	-1.065529583131	1	0	Peripherals		ultra peripheral	Bacteria	Firmicutes	Bacilli	Bacillales	Paenibacillaceae_1	Paenibacillus	Unassigned
+ASV_355	-0.433771618566188	2	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Unassigned	Unassigned	Unassigned
+ASV_36	1.98888477559722	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Unassigned	Unassigned
+ASV_361	0	10	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Xanthomonadaceae	Lysobacter	Unassigned
+ASV_362	-0.914785690639585	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Steroidobacter_denitrificans
+ASV_365	0.0472424535072085	2	0.48	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Caulobacterales	Caulobacteraceae	Asticcacaulis	Asticcacaulis_solisilvae
+ASV_366	0	24	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Nocardioidaceae	Nocardioides	Unassigned
+ASV_367	-0.191909934487451	6	0.444444444444444	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_37	0.122273886588803	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_370	-1.4192320030869	4	0.142011834319527	Peripherals		peripheral	Bacteria	Proteobacteria	Deltaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_374	-1.065529583131	1	0.444444444444444	Peripherals		peripheral	Bacteria	Proteobacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_376	-0.433771618566188	2	0	Peripherals		ultra peripheral	Bacteria	Firmicutes	Bacilli	Bacillales	Bacillaceae_1	Bacillus	Unassigned
+ASV_378	0.792139428810286	8	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Unassigned	Unassigned
+ASV_38	0.680407949546418	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Pseudoduganella	Pseudoduganella_violaceinigra
+ASV_383	-1.13757575483215	3	0.42	Peripherals		peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Steroidobacter_agariperforans
+ASV_385	0.792139428810286	8	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Sphingomonadales	Sphingomonadaceae	Sphingobium	Unassigned
+ASV_389	-0.299362040745304	3	0.567474048442907	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Phyllobacteriaceae	Mesorhizobium	Unassigned
+ASV_39	1.32301288423355	4	0.277777777777778	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Unassigned	Unassigned	Unassigned
+ASV_391	1.3770653874284	3	0.22375	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_392	1.55272583358029	6	0.5	Peripherals		peripheral	Bacteria	Proteobacteria	Deltaproteobacteria	Myxococcales	Unassigned	Unassigned	Unassigned
+ASV_393	-0.674278654602886	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Xanthomonadaceae	Lysobacter	Lysobacter_enzymogenes
+ASV_396	0.792139428810286	8	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Catellatospora	Unassigned
+ASV_397	-1.51064016599758	4	0.197530864197531	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Streptomycetaceae	Streptomyces	Unassigned
+ASV_399	0.244249007529483	6	0.444444444444444	Peripherals		peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Pseudomonadales	Pseudomonadaceae	Permianibacter	Permianibacter_aggregans
+ASV_40	-1.09544511501033	25	0.444444444444444	Peripherals		peripheral	Bacteria	Chloroflexi	Chloroflexia	Herpetosiphonales	Herpetosiphonaceae	Herpetosiphon	Unassigned
+ASV_400	0	23	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Nocardioidaceae	Nocardioides	Unassigned
+ASV_401	-1.13757575483215	3	0.627218934911243	Connectors	ASV_401	non hub connector	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Steroidobacter_denitrificans
+ASV_402	-0.914785690639585	2	0.32	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Devosia	Devosia_pacifica
+ASV_404	-0.433771618566188	2	0.5	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Gaiellales	Gaiellaceae	Gaiella	Gaiella_occulta
+ASV_405	0.77456390676946	4	0.408163265306122	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Unassigned	Unassigned
+ASV_406	-0.914785690639585	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Unassigned	Unassigned
+ASV_409	1.3770653874284	3	0.0587695133149678	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Sphingomonadales	Sphingomonadaceae	Sphingomonas	Sphingomonas_daechungensis
+ASV_41	2.054278187519	4	0.18	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Unassigned	Unassigned
+ASV_410	-0.87078302562281	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Rhizobiaceae	Rhizobium	Unassigned
+ASV_411	-0.866025403784439	26	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Xanthomonadaceae	Unassigned	Unassigned
+ASV_412	-0.767601353787689	5	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Phyllobacteriaceae	Mesorhizobium	Mesorhizobium_gobiense
+ASV_416	-0.914785690639585	2	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Pseudonocardiaceae	Actinophytocola	Unassigned
+ASV_421	-1.13757575483215	3	0.139917695473251	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Unassigned	Unassigned
+ASV_424	-0.962191188533491	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Unassigned
+ASV_425	-1.065529583131	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Deltaproteobacteria	Myxococcales	Polyangiaceae	Unassigned	Unassigned
+ASV_427	0	33	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Unassigned	Unassigned	Unassigned
+ASV_428	-0.433771618566188	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Deltaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_429	-0.674278654602886	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_43	1.7307917057641	2	0.244897959183674	Peripherals		peripheral	Bacteria	Firmicutes	Bacilli	Bacillales	Bacillaceae_1	Bacillus	Unassigned
+ASV_432	0.683155743858779	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Duganella	Duganella_radicis
+ASV_433	0	14	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_437	-0.866025403784439	26	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Gaiellales	Gaiellaceae	Gaiella	Gaiella_occulta
+ASV_438	-0.299362040745304	3	0.234404536862004	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Hyphomicrobium	Hyphomicrobium_sulfonivorans
+ASV_439	0	9	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Unassigned
+ASV_44	0.500339418037415	4	0.309917355371901	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Kinneretia	Kinneretia_asaccharophila
+ASV_443	-1.4192320030869	4	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Streptomycetaceae	Streptomyces	Unassigned
+ASV_447	-0.768578715701049	1	0	Peripherals		ultra peripheral	Bacteria	Bacteroidetes	Cytophagia	Cytophagales	Unassigned	Ohtaekwangia	Ohtaekwangia_kribbensis
+ASV_450	-0.674278654602886	2	0.244897959183674	Peripherals		peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Xanthomonadaceae	Unassigned	Unassigned
+ASV_452	0	23	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Microbacteriaceae	Microbacterium	Microbacterium_aerolatum
+ASV_46	-1.51064016599758	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Steroidobacter_denitrificans
+ASV_460	-0.505150373980083	4	0.152777777777778	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Sphingomonadales	Sphingomonadaceae	Sphingomonas	Unassigned
+ASV_465	-0.914785690639585	2	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Couchioplanes	Couchioplanes_caeruleus_subsp._azureus
+ASV_467	-0.707106781186547	15	0.5	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Actinoplanes	Unassigned
+ASV_468	-0.471627848271098	1	0.21875	Peripherals		peripheral	Bacteria	Nitrospirae	Nitrospira	Nitrospirales	Nitrospiraceae	Nitrospira	Unassigned
+ASV_469	0.500339418037415	4	0	Peripherals		ultra peripheral	Bacteria	Bacteroidetes	Cytophagia	Cytophagales	Unassigned	Ohtaekwangia	Ohtaekwangia_koreensis
+ASV_47	0.317523092216052	4	0.24	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Unassigned	Unassigned
+ASV_479	0	10	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Streptomycetaceae	Streptomyces	Unassigned
+ASV_480	-0.768578715701049	1	0.448979591836735	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Cellulomonadaceae	Cellulomonas	Cellulomonas_humilata
+ASV_486	-0.144025350692779	8	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Unassigned	Unassigned	Unassigned
+ASV_491	-0.278116432531771	5	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Rhizocola	Rhizocola_hellebori
+ASV_497	-0.136444205727454	7	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_50	0.408931255126734	4	0.5	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Pseudoduganella	Pseudoduganella_violaceinigra
+ASV_505	-0.136444205727454	7	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_507	0.730296743340221	25	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Acidimicrobiales	Acidimicrobiaceae	Ilumatobacter	Unassigned
+ASV_509	-0.687966699801446	4	0.59375	Peripherals		peripheral	Bacteria	Planctomycetes	Planctomycetia	Planctomycetales	Planctomycetaceae	Unassigned	Unassigned
+ASV_515	-1.065529583131	1	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Acidimicrobiales	Acidimicrobiaceae	Ilumatobacter	Ilumatobacter_fluminis
+ASV_523	-1.08019013019584	8	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Pseudonocardiaceae	Lechevalieria	Unassigned
+ASV_53	-1.08019013019584	8	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Microbacteriaceae	Agromyces	Unassigned
+ASV_534	-0.577350269189626	16	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Alcaligenaceae	Achromobacter	Unassigned
+ASV_535	-0.914785690639585	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Unassigned	Unassigned	Unassigned
+ASV_538	-1.06422781852132	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Acidovorax	Acidovorax_soli
+ASV_539	-1.13757575483215	3	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Unassigned	Unassigned
+ASV_54	2.21527910151525	3	0.110726643598616	Peripherals		peripheral	Bacteria	Proteobacteria	Unassigned	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_544	0.408931255126734	4	0	Peripherals		ultra peripheral	Bacteria	Chloroflexi	Chloroflexia	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_546	-0.19326458252949	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_547	-0.299362040745304	3	0.37603305785124	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Burkholderiales_incertae_sedis	Unassigned	Unassigned
+ASV_55	-0.628068876504386	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Burkholderiales_incertae_sedis	Piscinibacter	Piscinibacter_aquaticus
+ASV_555	-0.577350269189626	17	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Deltaproteobacteria	Myxococcales	Polyangiaceae	Unassigned	Unassigned
+ASV_556	-1.13757575483215	3	0.298676748582231	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Solirubrobacterales	Conexibacteraceae	Conexibacter	Conexibacter_arvalis
+ASV_56	0.865972069680142	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Devosia	Unassigned
+ASV_569	-0.767601353787689	5	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Rubrobacterales	Rubrobacteraceae	Rubrobacter	Rubrobacter_bracarensis
+ASV_57	0	28	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Unassigned	Unassigned
+ASV_573	-1.13757575483215	3	0.25765306122449	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Devosia	Unassigned
+ASV_575	-0.433771618566188	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Pseudomonadales	Pseudomonadaceae	Pseudomonas	Pseudomonas_soli
+ASV_588	-0.767601353787689	5	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Unassigned	Unassigned
+ASV_59	-1.13757575483215	3	0.0739644970414202	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Nocardioidaceae	Nocardioides	Unassigned
+ASV_6	1.50582921005491	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Unassigned	Unassigned	Unassigned
+ASV_60	1.41442104714423	4	0.75	Connectors	ASV_60	non hub connector	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Unassigned	Unassigned
+ASV_604	-0.628068876504386	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Deltaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_61	1.22474487139159	28	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Noviherbaspirillum	Noviherbaspirillum_suwonense
+ASV_618	-0.628068876504386	6	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_62	0.500339418037415	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Rhizobiaceae	Ensifer	Unassigned
+ASV_63	1.14019655841219	4	0.2208	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Caulobacterales	Caulobacteraceae	Phenylobacterium	Phenylobacterium_composti
+ASV_64	2.69281984991089	2	0	Module hubs	ASV_64	provincial hub	Bacteria	Proteobacteria	Deltaproteobacteria	Unassigned	Unassigned	Unassigned	Unassigned
+ASV_652	1.15470053837925	16	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Unassigned	Unassigned
+ASV_657	0.538851673341546	3	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Thermomonosporaceae	Unassigned	Unassigned
+ASV_658	1.04878839550151	4	0.446280991735537	Peripherals		peripheral	Bacteria	Bacteroidetes	Cytophagia	Cytophagales	Unassigned	Unassigned	Unassigned
+ASV_66	0.865972069680142	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhodospirillales	Rhodospirillaceae	Dongia	Dongia_mobilis
+ASV_669	0.538851673341546	3	0.458161865569273	Peripherals		peripheral	Bacteria	Bacteroidetes	Cytophagia	Cytophagales	Unassigned	Ohtaekwangia	Unassigned
+ASV_67	0	34	0.486111111111111	Peripherals		peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Pseudomonadales	Pseudomonadaceae	Pseudomonas	Pseudomonas_chlororaphis_subsp._piscium
+ASV_71	0.287749489543907	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Sphingomonadales	Sphingomonadaceae	Sphingopyxis	Sphingopyxis_soli
+ASV_73	1.68864553587628	4	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Unassigned	Unassigned
+ASV_730	-0.191909934487451	6	0	Peripherals		ultra peripheral	Bacteria	Firmicutes	Bacilli	Bacillales	Thermoactinomycetaceae_2	Planifilum	Planifilum_composti
+ASV_74	-1.13757575483215	3	0.298676748582231	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Bradyrhizobiaceae	Bradyrhizobium	Bradyrhizobium_neotropicale
+ASV_75	0.866025403784439	26	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Comamonadaceae	Variovorax	Unassigned
+ASV_76	-0.682221028637269	7	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Xanthomonadaceae	Unassigned	Unassigned
+ASV_77	2.49788082602841	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Steroidobacter_denitrificans
+ASV_79	0.500339418037415	4	0.444444444444444	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Unassigned	Unassigned	Unassigned
+ASV_8	0.538851673341546	3	0.408163265306122	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Streptomycetaceae	Streptomyces	Unassigned
+ASV_80	1.22474487139159	30	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Xanthomonadaceae	Pseudoxanthomonas	Pseudoxanthomonas_wuyuanensis
+ASV_816	0.122273886588803	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Caulobacterales	Hyphomonadaceae	Hyphomonas	Unassigned
+ASV_83	1.11656689156335	6	0.444444444444444	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Pseudoduganella	Pseudoduganella_violaceinigra
+ASV_85	-0.768578715701049	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Massilia	Unassigned
+ASV_86	-0.299362040745304	3	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Unassigned	Unassigned
+ASV_87	-0.299362040745304	3	0.0540123456790124	Peripherals		peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Nocardioidaceae	Nocardioides	Unassigned
+ASV_874	-0.433771618566188	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Phyllobacteriaceae	Mesorhizobium	Unassigned
+ASV_89	0.716175621448705	1	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Sinobacteraceae	Steroidobacter	Steroidobacter_agariperforans
+ASV_92	0	18	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Pseudonocardiaceae	Actinophytocola	Actinophytocola_burenkhanensis
+ASV_93	-0.914785690639585	2	0	Peripherals		ultra peripheral	Bacteria	Proteobacteria	Gammaproteobacteria	Xanthomonadales	Xanthomonadaceae	Lysobacter	Lysobacter_brunescens
+ASV_96	0.22611492930537	4	0.32	Peripherals		peripheral	Bacteria	Proteobacteria	Alphaproteobacteria	Rhizobiales	Hyphomicrobiaceae	Devosia	Devosia_insulae
+ASV_964	-1.08019013019584	8	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Micromonosporaceae	Verrucosispora	Verrucosispora_andamanensis
+ASV_97	-0.674278654602886	2	0.444444444444444	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Unassigned	Unassigned	Unassigned
+ASV_971	0	33	0	Peripherals		ultra peripheral	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	Unassigned	Unassigned	Unassigned
+ASV_98	1.60702822373856	1	0.244897959183674	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Massilia	Massilia_aerilata
+ASV_99	-0.191909934487451	6	0.444444444444444	Peripherals		peripheral	Bacteria	Proteobacteria	Betaproteobacteria	Burkholderiales	Oxalobacteraceae	Pseudoduganella	Pseudoduganella_violaceinigra

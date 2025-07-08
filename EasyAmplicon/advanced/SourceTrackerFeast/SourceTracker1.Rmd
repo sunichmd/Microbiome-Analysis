@@ -1,0 +1,137 @@
+# Sourcetracker
+
+## (报错)配对样本一一对应分析
+
+报错原因为单个样本就转成asv的矩阵了，尝试修改源代码可能会解决
+计算最佳alpha报错，训练集不能只有一个分组
+
+```{r}
+metadata = read.table('result/sourcetracker_metadata_MB.txt',sep='\t',h=T,row.names=1,check=F,comment='')
+envs = metadata$Source   ##提取环境信息
+desc = rownames(metadata)    ##提取样本标签
+
+otus = read.table('result/sourcetracker_otu.txt',sep='\t', header=T,row.names=1,check=F,skip=1,comment='')
+otus = t(as.matrix(otus))
+
+metadata1 = subset(metadata,Person=="Mother")
+source('script/SourceTracker1.r')
+
+##每对样本单独分析
+otus = otus[rownames(metadata1),]
+for(train.ix in 1:8){
+  test.ix = train.ix+8
+  #  使用交叉验证计算alpha值 (非常慢!)
+  # tune.results = tune.st(otus[train.ix,], envs[train.ix])
+  # alpha1 = tune.results$best.alpha1
+  # alpha2 = tune.results$best.alpha2
+  #  使用以下代码跳过此步骤：
+  alpha1 = alpha2 = 0.001
+  ##  使用训练集训练sourcetracker
+  set.seed(18);st = sourcetracker(otus[train.ix,], envs[train.ix],
+                                  rarefaction_depth=NULL)
+  ##  计算各来源比例
+  set.seed(18);results = predict(st,otus[test.ix,], alpha1=alpha1, alpha2=alpha2)
+  labels = sprintf('%s %s', envs,desc)
+  pdf(paste0("result/sourcetracker/",desc[test.ix],"_sourcetracker_pie.pdf"))
+  print(plot(results, labels[test.ix], type='pie'))
+  dev.off()
+  write.table(results$proportions,paste0("result/sourcetracker/",labels[test.ix],"_sourcetracker_prop.txt"),sep="\t",quote=F,col.names = NA)
+}
+##  其他展示形式
+plot(results, labels[test.ix], type='bar')
+plot(results, labels[test.ix], type='dist')
+```
+
+### 仅考虑配对样本
+```{r}
+
+metadata_all = read.table('result/sourcetracker_metadata_MB.txt',sep='\t',h=T,row.names=1,check=F,comment='')
+metadata1 = metadata_all[!(metadata_all$Person=="Mother" & metadata_all$Source=="Stool"),]
+metadata1$Stage1 = ifelse(metadata1$Stage==4,3,metadata1$Stage)
+metadata1$Pair = paste0(metadata1$Person_name,"_",metadata1$Stage1)
+
+id_comm = intersect(subset(metadata1,Person=="Mother")[,"Pair"],
+										subset(metadata1,Person!="Mother")[,"Pair"])
+id_comm
+metadata = metadata1[metadata1$Pair %in% id_comm,]
+metadata = metadata[order(metadata$Pair),]
+
+envs = metadata$Person   ##提取环境信息
+desc = rownames(metadata)    ##提取样本标签
+
+otus = read.table('result/sourcetracker_otu.txt',sep='\t', header=T,row.names=1,check=F,skip=1,comment='')
+otus = t(as.matrix(otus))
+
+
+source('script/SourceTracker1.r')
+otus = otus[rownames(metadata),]
+
+train.ix = which(metadata$Person=="Mother");envs[train.ix]# 来源样本
+test.ix = seq_len(nrow(metadata))[!seq_len(nrow(metadata))%in%train.ix];envs[test.ix] # 研究的样本
+
+##  使用交叉验证计算alpha值 (非常慢!)
+# tune.results = tune.st(otus[train.ix,], envs[train.ix])
+# alpha1 = tune.results$best.alpha1
+# alpha2 = tune.results$best.alpha2
+##  使用以下代码跳过此步骤：
+alpha1 = alpha2 = 0.001
+##  使用训练集训练sourcetracker
+set.seed(18);st = sourcetracker(otus[train.ix,], envs[train.ix],
+                                rarefaction_depth=NULL)
+##  计算各来源比例
+set.seed(18);results = predict(st,otus[test.ix,], alpha1=alpha1, alpha2=alpha2)
+
+# 输出pdf格式的文件
+pdf("result/sourcetracker/infant-mother-sourcetracker_pair_pie.pdf")     
+labels = sprintf('%s %s', envs,desc)
+plot(results, labels[test.ix], type='pie')
+dev.off()
+write.table(results$proportions,paste0("result/sourcetracker/infant-mother-sourcetracker_pair_prop.txt"),sep="\t",quote=F,col.names = NA)
+
+##  其他展示形式
+plot(results, labels[test.ix], type='bar')
+plot(results, labels[test.ix], type='dist')
+```
+## 所有样本均考虑
+```{r}
+metadata_all = read.table('result/sourcetracker_metadata_MB.txt',sep='\t',h=T,row.names=1,check=F,comment='')
+metadata1 = metadata_all[!(metadata_all$Person=="Mother" & metadata_all$Source=="Stool"),]
+
+metadata = metadata1
+
+envs = metadata$Person   ##提取环境信息
+desc = rownames(metadata)    ##提取样本标签
+
+otus = read.table('result/sourcetracker_otu.txt',sep='\t', header=T,row.names=1,check=F,skip=1,comment='')
+otus = t(as.matrix(otus))
+
+
+source('script/SourceTracker1.r')
+otus = otus[rownames(metadata),]
+
+train.ix = which(metadata$Person=="Mother");envs[train.ix]# 来源样本
+test.ix = seq_len(nrow(metadata))[!seq_len(nrow(metadata))%in%train.ix];envs[test.ix] # 研究的样本
+
+##  使用交叉验证计算alpha值 (非常慢!)
+# tune.results = tune.st(otus[train.ix,], envs[train.ix])
+# alpha1 = tune.results$best.alpha1
+# alpha2 = tune.results$best.alpha2
+##  使用以下代码跳过此步骤：
+alpha1 = alpha2 = 0.001
+##  使用训练集训练sourcetracker
+set.seed(18);st = sourcetracker(otus[train.ix,], envs[train.ix],
+                                rarefaction_depth=NULL)
+##  计算各来源比例
+set.seed(18);results = predict(st,otus[test.ix,], alpha1=alpha1, alpha2=alpha2)
+
+# 输出pdf格式的文件
+pdf("result/sourcetracker/infant-mother-sourcetracker_pie.pdf")     
+labels = sprintf('%s %s', envs,desc)
+plot(results, labels[test.ix], type='pie')
+dev.off()
+write.table(results$proportions,paste0("result/sourcetracker/infant-mother-sourcetracker_prop.txt"),sep="\t",quote=F,col.names = NA)
+
+##  其他展示形式
+plot(results, labels[test.ix], type='bar')
+plot(results, labels[test.ix], type='dist')
+```

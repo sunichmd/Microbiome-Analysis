@@ -1,0 +1,88 @@
+# LMM模型评估分组对物种丰度影响
+
+```{r}
+library(lme4)
+library(lmerTest)
+library(dplyr)
+library(tidyr)
+```
+
+```{r,echo=F}
+## 读入原始OTU表
+metadata_file="metadata_final.txt" # metadata里可以放只要分析的样本
+file2="KEGG.Pathway.raw.txt"
+cor_method = "spearman"
+
+# 可以用tax文件夹里的sum_g.txt 名字就不会太长
+otu_all = read.table("tax_6Genus.txt", header=T, sep="\t", quote = "", row.names=1, comment.char="")
+
+# 是否要进行标准化！！！注意读入数据是otutab表则需要标准化，读入物种表则不需要
+if(F){
+  otu = otu_all/colSums(otu_all,na=T) * 100
+}else{
+  otu = otu_all
+}
+
+otu = as.data.frame(t(otu))
+
+metadata<- read.table(metadata_file,header = T,sep="\t", quote = "", row.names=1, comment.char="")
+
+common_sample =  Reduce(intersect,list(rownames(metadata),
+                                       rownames(otu)))
+
+metadata = metadata[common_sample,]
+
+otu = otu[common_sample,]
+otu = otu[,!(colSums(otu)==0)]
+
+tax_ana = merge(otu,metadata,by=0)
+colnames(tax_ana)
+# ~前面放感兴趣的物种名，基于上一条colnames(tax_ana)结果，对于这个数据物种名太长以及包含特殊字符，需要用反引号引起来
+# ~后面放感兴趣的分组，基于colnames(tax_ana)结果
+# 1 | 随机效应 -- 可放样本列、病人信息、批次信息等
+model <- lmer(`Bacteria|Synergistota|Synergistia|Synergistales|Dethiosulfovibrionaceae|Jonquetella` ~ Stent * Timeline + (1 | batch_effect), data = tax_ana)
+
+summary(model)
+
+# 提取p值和计算FDR
+pvals <- summary(model)$coefficients[, "Pr(>|t|)"]
+
+# 这里仅示范对固定效应p值做FDR校正（根据需要调整）
+pvals_adj <- p.adjust(pvals, method = "fdr")
+
+# 打印结果
+data.frame(
+  Term = names(pvals),
+  P_value = pvals,
+  FDR = pvals_adj
+)
+```
+
+```{r}
+library(ggplot2)
+unique(tax_ana$Timeline)
+# 下面这个 levels = c("2w","3months","9months","1year_up","controll","Presurgery") 顺序很重要，需要依据自己情况调整，决定了后面图形的x轴的顺序。
+tax_ana$Timeline = factor(tax_ana$Timeline,
+                       levels = c("2w","3months","9months","1year_up","controll","Presurgery"))
+p = ggplot(tax_ana, aes(x = Timeline, y = `Bacteria|Synergistota|Synergistia|Synergistales|Dethiosulfovibrionaceae|Jonquetella`, color = Stent, group = Stent)) +
+  #stat_summary(fun = mean, geom = "line", size = 1) + 不展示原有曲线曲线 
+  stat_summary(fun = mean, geom = "point", size = 3) +
+  theme_minimal() +
+  labs(title = "Species abundance over time",
+       x = "Timepoint",
+       y = "Mean abundance") +
+  # 加入拟合曲线 + 置信区间
+  geom_smooth(
+    method = "loess",        # 或 method = "lm"（线性）
+    se = TRUE,               # 是否显示置信区间
+    span = 0.8,              # loess 平滑程度，0.5~1 常用
+    aes(group = Stent,fill = Stent),      # 按分组拟合
+    size = 0.8,
+    alpha = 0.2              # 置信区间透明度
+  )
+
+print(p)
+#  p值可基于以上结果自己在图中加上
+ggsave("tax_line.pdf",p)
+```
+

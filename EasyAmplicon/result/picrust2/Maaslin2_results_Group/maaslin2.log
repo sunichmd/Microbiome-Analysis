@@ -1,0 +1,429 @@
+2025-04-04 17:13:21.670685 INFO::Writing function arguments to log file
+2025-04-04 17:13:21.674997 DEBUG::Function arguments
+2025-04-04 17:13:21.676019 DEBUG::Output folder: Maaslin2_results_Group
+2025-04-04 17:13:21.67672 DEBUG::Min Abundance: 0.000000
+2025-04-04 17:13:21.677398 DEBUG::Min Prevalence: 0.100000
+2025-04-04 17:13:21.678053 DEBUG::Normalization: TSS
+2025-04-04 17:13:21.678657 DEBUG::Transform: AST
+2025-04-04 17:13:21.679251 DEBUG::Analysis method: LM
+2025-04-04 17:13:21.679857 DEBUG::Max significance: 0.250000
+2025-04-04 17:13:21.680454 DEBUG::Random effects:
+2025-04-04 17:13:21.681044 DEBUG::Fixed effects: Group
+2025-04-04 17:13:21.681624 DEBUG::Correction method: BH
+2025-04-04 17:13:21.682206 DEBUG::Standardize: TRUE
+2025-04-04 17:13:21.683518 DEBUG::Cores: 1
+2025-04-04 17:13:21.684181 INFO::Verifying options selected are valid
+2025-04-04 17:13:21.686422 INFO::Determining format of input files
+2025-04-04 17:13:21.688127 INFO::Input format is data samples as rows and metadata samples as rows
+2025-04-04 17:13:21.692564 DEBUG::A total of 12 samples were found in both the data and metadata
+2025-04-04 17:13:21.693339 DEBUG::Reordering data/metadata to use same sample ordering
+2025-04-04 17:13:21.695571 INFO::Formula for fixed effects: expr ~  Group
+2025-04-04 17:13:21.697952 INFO::Filter data based on min abundance and min prevalence
+2025-04-04 17:13:21.699735 INFO::Total samples in data: 12
+2025-04-04 17:13:21.701353 INFO::Min samples required with min abundance for a feature not to be filtered: 1.200000
+2025-04-04 17:13:21.708032 INFO::Total filtered features: 0
+2025-04-04 17:13:21.710343 INFO::Filtered feature names from abundance and prevalence filtering:
+2025-04-04 17:13:21.716052 INFO::Total filtered features with variance filtering: 0
+2025-04-04 17:13:21.717915 INFO::Filtered feature names from variance filtering:
+2025-04-04 17:13:21.720587 INFO::Running selected normalization method: TSS
+2025-04-04 17:13:21.728015 INFO::Applying z-score to standardize continuous metadata
+2025-04-04 17:13:21.746394 INFO::Running selected transform method: AST
+2025-04-04 17:13:21.751864 INFO::Running selected analysis method: LM
+2025-04-04 17:13:21.759078 INFO::Fitting model to feature number 1, ko05340
+2025-04-04 17:13:21.763366 INFO::Fitting model to feature number 2, ko00564
+2025-04-04 17:13:21.76703 INFO::Fitting model to feature number 3, ko00680
+2025-04-04 17:13:21.773021 INFO::Fitting model to feature number 4, ko00562
+2025-04-04 17:13:21.777723 INFO::Fitting model to feature number 5, ko03030
+2025-04-04 17:13:21.782785 INFO::Fitting model to feature number 6, ko00561
+2025-04-04 17:13:21.791976 INFO::Fitting model to feature number 7, ko00440
+2025-04-04 17:13:21.796778 INFO::Fitting model to feature number 8, ko00250
+2025-04-04 17:13:21.800556 INFO::Fitting model to feature number 9, ko04062
+2025-04-04 17:13:21.806674 INFO::Fitting model to feature number 10, ko00740
+2025-04-04 17:13:21.811422 INFO::Fitting model to feature number 11, ko04664
+2025-04-04 17:13:21.815175 INFO::Fitting model to feature number 12, ko04940
+2025-04-04 17:13:21.820671 INFO::Fitting model to feature number 13, ko00010
+2025-04-04 17:13:21.826097 INFO::Fitting model to feature number 14, ko05412
+2025-04-04 17:13:21.83036 INFO::Fitting model to feature number 15, ko00195
+2025-04-04 17:13:21.836296 INFO::Fitting model to feature number 16, ko04650
+2025-04-04 17:13:21.843216 INFO::Fitting model to feature number 17, ko03450
+2025-04-04 17:13:21.849015 INFO::Fitting model to feature number 18, ko00760
+2025-04-04 17:13:21.854323 INFO::Fitting model to feature number 19, ko00920
+2025-04-04 17:13:21.858876 INFO::Fitting model to feature number 20, ko00311
+2025-04-04 17:13:21.864216 INFO::Fitting model to feature number 21, ko00310
+2025-04-04 17:13:21.869897 INFO::Fitting model to feature number 22, ko04146
+2025-04-04 17:13:21.875225 INFO::Fitting model to feature number 23, ko00600
+2025-04-04 17:13:21.881655 INFO::Fitting model to feature number 24, ko04141
+2025-04-04 17:13:21.889824 INFO::Fitting model to feature number 25, ko04142
+2025-04-04 17:13:21.893727 INFO::Fitting model to feature number 26, ko00604
+2025-04-04 17:13:21.897472 INFO::Fitting model to feature number 27, ko04260
+2025-04-04 17:13:21.937236 INFO::Fitting model to feature number 28, ko05142
+2025-04-04 17:13:21.945076 INFO::Fitting model to feature number 29, ko04540
+2025-04-04 17:13:21.949861 INFO::Fitting model to feature number 30, ko04712
+2025-04-04 17:13:21.956229 INFO::Fitting model to feature number 31, ko00909
+2025-04-04 17:13:21.960634 INFO::Fitting model to feature number 32, ko00513
+2025-04-04 17:13:21.965319 INFO::Fitting model to feature number 33, ko04973
+2025-04-04 17:13:21.970988 INFO::Fitting model to feature number 34, ko00510
+2025-04-04 17:13:21.97642 INFO::Fitting model to feature number 35, ko05110
+2025-04-04 17:13:21.981637 INFO::Fitting model to feature number 36, ko04974
+2025-04-04 17:13:21.989981 INFO::Fitting model to feature number 37, ko04976
+2025-04-04 17:13:21.996025 INFO::Fitting model to feature number 38, ko00450
+2025-04-04 17:13:22.001152 INFO::Fitting model to feature number 39, ko01051
+2025-04-04 17:13:22.009646 INFO::Fitting model to feature number 40, ko00565
+2025-04-04 17:13:22.015936 INFO::Fitting model to feature number 41, ko00524
+2025-04-04 17:13:22.022799 INFO::Fitting model to feature number 42, ko00300
+2025-04-04 17:13:22.040081 INFO::Fitting model to feature number 43, ko00905
+2025-04-04 17:13:22.04683 INFO::Fitting model to feature number 44, ko05222
+2025-04-04 17:13:22.052956 INFO::Fitting model to feature number 45, ko00514
+2025-04-04 17:13:22.061643 INFO::Fitting model to feature number 46, ko05416
+2025-04-04 17:13:22.067599 INFO::Fitting model to feature number 47, ko00260
+2025-04-04 17:13:22.071682 INFO::Fitting model to feature number 48, ko00190
+2025-04-04 17:13:22.078622 INFO::Fitting model to feature number 49, ko03440
+2025-04-04 17:13:22.083971 INFO::Fitting model to feature number 50, ko00750
+2025-04-04 17:13:22.089862 INFO::Fitting model to feature number 51, ko00950
+2025-04-04 17:13:22.095144 INFO::Fitting model to feature number 52, ko05140
+2025-04-04 17:13:22.098952 INFO::Fitting model to feature number 53, ko00592
+2025-04-04 17:13:22.102794 INFO::Fitting model to feature number 54, ko00591
+2025-04-04 17:13:22.108708 INFO::Fitting model to feature number 55, ko00590
+2025-04-04 17:13:22.113816 INFO::Fitting model to feature number 56, ko00062
+2025-04-04 17:13:22.117965 INFO::Fitting model to feature number 57, ko00061
+2025-04-04 17:13:22.126773 INFO::Fitting model to feature number 58, ko04662
+2025-04-04 17:13:22.133316 INFO::Fitting model to feature number 59, ko03070
+2025-04-04 17:13:22.140631 INFO::Fitting model to feature number 60, ko00253
+2025-04-04 17:13:22.149491 INFO::Fitting model to feature number 61, ko03060
+2025-04-04 17:13:22.155672 INFO::Fitting model to feature number 62, ko04370
+2025-04-04 17:13:22.162594 INFO::Fitting model to feature number 63, ko04740
+2025-04-04 17:13:22.168572 INFO::Fitting model to feature number 64, ko00380
+2025-04-04 17:13:22.173993 INFO::Fitting model to feature number 65, ko00500
+2025-04-04 17:13:22.180127 INFO::Fitting model to feature number 66, ko05120
+2025-04-04 17:13:22.186916 INFO::Fitting model to feature number 67, ko04666
+2025-04-04 17:13:22.194792 INFO::Fitting model to feature number 68, ko05322
+2025-04-04 17:13:22.200861 INFO::Fitting model to feature number 69, ko04964
+2025-04-04 17:13:22.210252 INFO::Fitting model to feature number 70, ko04960
+2025-04-04 17:13:22.216821 INFO::Fitting model to feature number 71, ko04660
+2025-04-04 17:13:22.222833 INFO::Fitting model to feature number 72, ko00625
+2025-04-04 17:13:22.231863 INFO::Fitting model to feature number 73, ko00624
+2025-04-04 17:13:22.238679 INFO::Fitting model to feature number 74, ko00627
+2025-04-04 17:13:22.245069 INFO::Fitting model to feature number 75, ko00626
+2025-04-04 17:13:22.250261 INFO::Fitting model to feature number 76, ko00621
+2025-04-04 17:13:22.256403 INFO::Fitting model to feature number 77, ko00620
+2025-04-04 17:13:22.262319 INFO::Fitting model to feature number 78, ko00623
+2025-04-04 17:13:22.26961 INFO::Fitting model to feature number 79, ko00622
+2025-04-04 17:13:22.276582 INFO::Fitting model to feature number 80, ko00270
+2025-04-04 17:13:22.280893 INFO::Fitting model to feature number 81, ko04380
+2025-04-04 17:13:22.311743 INFO::Fitting model to feature number 82, ko00940
+2025-04-04 17:13:22.318303 INFO::Fitting model to feature number 83, ko00941
+2025-04-04 17:13:22.324978 INFO::Fitting model to feature number 84, ko01053
+2025-04-04 17:13:22.331571 INFO::Fitting model to feature number 85, ko00943
+2025-04-04 17:13:22.336046 INFO::Fitting model to feature number 86, ko00100
+2025-04-04 17:13:22.341303 INFO::Fitting model to feature number 87, ko00945
+2025-04-04 17:13:22.346474 INFO::Fitting model to feature number 88, ko01057
+2025-04-04 17:13:22.350286 INFO::Fitting model to feature number 89, ko01056
+2025-04-04 17:13:22.355509 INFO::Fitting model to feature number 90, ko05016
+2025-04-04 17:13:22.363056 INFO::Fitting model to feature number 91, ko04145
+2025-04-04 17:13:22.367261 INFO::Fitting model to feature number 92, ko00071
+2025-04-04 17:13:22.374273 INFO::Fitting model to feature number 93, ko00072
+2025-04-04 17:13:22.380008 INFO::Fitting model to feature number 94, ko04360
+2025-04-04 17:13:22.384129 INFO::Fitting model to feature number 95, ko05219
+2025-04-04 17:13:22.389444 INFO::Fitting model to feature number 96, ko05215
+2025-04-04 17:13:22.395293 INFO::Fitting model to feature number 97, ko05214
+2025-04-04 17:13:22.399547 INFO::Fitting model to feature number 98, ko05213
+2025-04-04 17:13:22.403783 INFO::Fitting model to feature number 99, ko05211
+2025-04-04 17:13:22.411468 INFO::Fitting model to feature number 100, ko05210
+2025-04-04 17:13:22.418082 INFO::Fitting model to feature number 101, ko01055
+2025-04-04 17:13:22.423684 INFO::Fitting model to feature number 102, ko00902
+2025-04-04 17:13:22.43008 INFO::Fitting model to feature number 103, ko04910
+2025-04-04 17:13:22.434067 INFO::Fitting model to feature number 104, ko00531
+2025-04-04 17:13:22.438272 INFO::Fitting model to feature number 105, ko04916
+2025-04-04 17:13:22.444445 INFO::Fitting model to feature number 106, ko00360
+2025-04-04 17:13:22.448483 INFO::Fitting model to feature number 107, ko00633
+2025-04-04 17:13:22.452549 INFO::Fitting model to feature number 108, ko00630
+2025-04-04 17:13:22.459107 INFO::Fitting model to feature number 109, ko00363
+2025-04-04 17:13:22.465936 INFO::Fitting model to feature number 110, ko00364
+2025-04-04 17:13:22.472824 INFO::Fitting model to feature number 111, ko05130
+2025-04-04 17:13:22.479942 INFO::Fitting model to feature number 112, ko04115
+2025-04-04 17:13:22.486512 INFO::Fitting model to feature number 113, ko04114
+2025-04-04 17:13:22.493191 INFO::Fitting model to feature number 114, ko00121
+2025-04-04 17:13:22.500881 INFO::Fitting model to feature number 115, ko04914
+2025-04-04 17:13:22.505882 INFO::Fitting model to feature number 116, ko00430
+2025-04-04 17:13:22.511808 INFO::Fitting model to feature number 117, ko02010
+2025-04-04 17:13:22.518423 INFO::Fitting model to feature number 118, ko00130
+2025-04-04 17:13:22.524962 INFO::Fitting model to feature number 119, ko04330
+2025-04-04 17:13:22.529143 INFO::Fitting model to feature number 120, ko03050
+2025-04-04 17:13:22.536344 INFO::Fitting model to feature number 121, ko00361
+2025-04-04 17:13:22.542445 INFO::Fitting model to feature number 122, ko00040
+2025-04-04 17:13:22.546819 INFO::Fitting model to feature number 123, ko00730
+2025-04-04 17:13:22.552102 INFO::Fitting model to feature number 124, ko00362
+2025-04-04 17:13:22.556615 INFO::Fitting model to feature number 125, ko01040
+2025-04-04 17:13:22.560787 INFO::Fitting model to feature number 126, ko00603
+2025-04-04 17:13:22.566701 INFO::Fitting model to feature number 127, ko03018
+2025-04-04 17:13:22.570722 INFO::Fitting model to feature number 128, ko04270
+2025-04-04 17:13:22.576214 INFO::Fitting model to feature number 129, ko00281
+2025-04-04 17:13:22.581206 INFO::Fitting model to feature number 130, ko00280
+2025-04-04 17:13:22.585276 INFO::Fitting model to feature number 131, ko03013
+2025-04-04 17:13:22.590907 INFO::Fitting model to feature number 132, ko04626
+2025-04-04 17:13:22.596129 INFO::Fitting model to feature number 133, ko05200
+2025-04-04 17:13:22.599876 INFO::Fitting model to feature number 134, ko03015
+2025-04-04 17:13:22.603594 INFO::Fitting model to feature number 135, ko00312
+2025-04-04 17:13:22.608853 INFO::Fitting model to feature number 136, ko05020
+2025-04-04 17:13:22.612317 INFO::Fitting model to feature number 137, ko05143
+2025-04-04 17:13:22.615829 INFO::Fitting model to feature number 138, ko00523
+2025-04-04 17:13:22.62148 INFO::Fitting model to feature number 139, ko00520
+2025-04-04 17:13:22.625385 INFO::Fitting model to feature number 140, ko00521
+2025-04-04 17:13:22.629526 INFO::Fitting model to feature number 141, ko05146
+2025-04-04 17:13:22.634824 INFO::Fitting model to feature number 142, ko05145
+2025-04-04 17:13:22.640975 INFO::Fitting model to feature number 143, ko05144
+2025-04-04 17:13:22.644972 INFO::Fitting model to feature number 144, ko00052
+2025-04-04 17:13:22.650066 INFO::Fitting model to feature number 145, ko00053
+2025-04-04 17:13:22.654211 INFO::Fitting model to feature number 146, ko00051
+2025-04-04 17:13:22.660425 INFO::Fitting model to feature number 147, ko00401
+2025-04-04 17:13:22.669014 INFO::Fitting model to feature number 148, ko00400
+2025-04-04 17:13:22.67839 INFO::Fitting model to feature number 149, ko04020
+2025-04-04 17:13:22.687001 INFO::Fitting model to feature number 150, ko00350
+2025-04-04 17:13:22.7243 INFO::Fitting model to feature number 151, ko00480
+2025-04-04 17:13:22.730294 INFO::Fitting model to feature number 152, ko00643
+2025-04-04 17:13:22.734958 INFO::Fitting model to feature number 153, ko00642
+2025-04-04 17:13:22.743792 INFO::Fitting model to feature number 154, ko00640
+2025-04-04 17:13:22.749347 INFO::Fitting model to feature number 155, ko00720
+2025-04-04 17:13:22.755133 INFO::Fitting model to feature number 156, ko00960
+2025-04-04 17:13:22.76211 INFO::Fitting model to feature number 157, ko02020
+2025-04-04 17:13:22.768379 INFO::Fitting model to feature number 158, ko00120
+2025-04-04 17:13:22.775119 INFO::Fitting model to feature number 159, ko00965
+2025-04-04 17:13:22.780564 INFO::Fitting model to feature number 160, ko03008
+2025-04-04 17:13:22.784487 INFO::Fitting model to feature number 161, ko05414
+2025-04-04 17:13:22.788451 INFO::Fitting model to feature number 162, ko00290
+2025-04-04 17:13:22.793468 INFO::Fitting model to feature number 163, ko04614
+2025-04-04 17:13:22.798825 INFO::Fitting model to feature number 164, ko03410
+2025-04-04 17:13:22.805055 INFO::Fitting model to feature number 165, ko05010
+2025-04-04 17:13:22.811391 INFO::Fitting model to feature number 166, ko05012
+2025-04-04 17:13:22.815649 INFO::Fitting model to feature number 167, ko00980
+2025-04-04 17:13:22.822123 INFO::Fitting model to feature number 168, ko00410
+2025-04-04 17:13:22.831294 INFO::Fitting model to feature number 169, ko00983
+2025-04-04 17:13:22.836225 INFO::Fitting model to feature number 170, ko05150
+2025-04-04 17:13:22.841142 INFO::Fitting model to feature number 171, ko00791
+2025-04-04 17:13:22.846321 INFO::Fitting model to feature number 172, ko00790
+2025-04-04 17:13:22.850452 INFO::Fitting model to feature number 173, ko05131
+2025-04-04 17:13:22.854467 INFO::Fitting model to feature number 174, ko00020
+2025-04-04 17:13:22.860021 INFO::Fitting model to feature number 175, ko00710
+2025-04-04 17:13:22.864034 INFO::Fitting model to feature number 176, ko00196
+2025-04-04 17:13:22.868621 INFO::Fitting model to feature number 177, ko02060
+2025-04-04 17:13:22.875984 INFO::Fitting model to feature number 178, ko00340
+2025-04-04 17:13:22.881476 INFO::Fitting model to feature number 179, ko00785
+2025-04-04 17:13:22.886389 INFO::Fitting model to feature number 180, ko00550
+2025-04-04 17:13:22.891963 INFO::Fitting model to feature number 181, ko00650
+2025-04-04 17:13:22.896561 INFO::Fitting model to feature number 182, ko05223
+2025-04-04 17:13:22.900616 INFO::Fitting model to feature number 183, ko05220
+2025-04-04 17:13:22.906031 INFO::Fitting model to feature number 184, ko05221
+2025-04-04 17:13:22.911118 INFO::Fitting model to feature number 185, ko02030
+2025-04-04 17:13:22.917372 INFO::Fitting model to feature number 186, ko03320
+2025-04-04 17:13:22.923961 INFO::Fitting model to feature number 187, ko04744
+2025-04-04 17:13:22.928322 INFO::Fitting model to feature number 188, ko04745
+2025-04-04 17:13:22.93283 INFO::Fitting model to feature number 189, ko00522
+2025-04-04 17:13:22.939319 INFO::Fitting model to feature number 190, ko04612
+2025-04-04 17:13:22.943253 INFO::Fitting model to feature number 191, ko04621
+2025-04-04 17:13:22.946903 INFO::Fitting model to feature number 192, ko04622
+2025-04-04 17:13:22.952696 INFO::Fitting model to feature number 193, ko00910
+2025-04-04 17:13:22.959153 INFO::Fitting model to feature number 194, ko04971
+2025-04-04 17:13:22.964723 INFO::Fitting model to feature number 195, ko00460
+2025-04-04 17:13:22.971263 INFO::Fitting model to feature number 196, ko04970
+2025-04-04 17:13:22.977735 INFO::Fitting model to feature number 197, ko00830
+2025-04-04 17:13:22.984202 INFO::Fitting model to feature number 198, ko00780
+2025-04-04 17:13:22.991036 INFO::Fitting model to feature number 199, ko00511
+2025-04-04 17:13:22.99484 INFO::Fitting model to feature number 200, ko00970
+2025-04-04 17:13:22.998643 INFO::Fitting model to feature number 201, ko00030
+2025-04-04 17:13:23.004049 INFO::Fitting model to feature number 202, ko04972
+2025-04-04 17:13:23.010327 INFO::Fitting model to feature number 203, ko00232
+2025-04-04 17:13:23.016316 INFO::Fitting model to feature number 204, ko00230
+2025-04-04 17:13:23.02453 INFO::Fitting model to feature number 205, ko04122
+2025-04-04 17:13:23.030342 INFO::Fitting model to feature number 206, ko04120
+2025-04-04 17:13:23.036764 INFO::Fitting model to feature number 207, ko00540
+2025-04-04 17:13:23.042802 INFO::Fitting model to feature number 208, ko05014
+2025-04-04 17:13:23.047123 INFO::Fitting model to feature number 209, ko00660
+2025-04-04 17:13:23.051304 INFO::Fitting model to feature number 210, ko03020
+2025-04-04 17:13:23.057201 INFO::Fitting model to feature number 211, ko04512
+2025-04-04 17:13:23.06135 INFO::Fitting model to feature number 212, ko00982
+2025-04-04 17:13:23.065657 INFO::Fitting model to feature number 213, ko04630
+2025-04-04 17:13:23.071666 INFO::Fitting model to feature number 214, ko03010
+2025-04-04 17:13:23.075681 INFO::Fitting model to feature number 215, ko00140
+2025-04-04 17:13:23.079771 INFO::Fitting model to feature number 216, ko05100
+2025-04-04 17:13:23.085776 INFO::Fitting model to feature number 217, ko00860
+2025-04-04 17:13:23.091352 INFO::Fitting model to feature number 218, ko05410
+2025-04-04 17:13:23.095209 INFO::Fitting model to feature number 219, ko00330
+2025-04-04 17:13:23.100276 INFO::Fitting model to feature number 220, ko04080
+2025-04-04 17:13:23.104342 INFO::Fitting model to feature number 221, ko04514
+2025-04-04 17:13:23.108361 INFO::Fitting model to feature number 222, ko00908
+2025-04-04 17:13:23.11359 INFO::Fitting model to feature number 223, ko04930
+2025-04-04 17:13:23.117703 INFO::Fitting model to feature number 224, ko04320
+2025-04-04 17:13:23.123326 INFO::Fitting model to feature number 225, ko03430
+2025-04-04 17:13:23.13131 INFO::Fitting model to feature number 226, ko00906
+2025-04-04 17:13:23.136369 INFO::Fitting model to feature number 227, ko00900
+2025-04-04 17:13:23.142916 INFO::Fitting model to feature number 228, ko00901
+2025-04-04 17:13:23.15036 INFO::Fitting model to feature number 229, ko04520
+2025-04-04 17:13:23.156242 INFO::Fitting model to feature number 230, ko00903
+2025-04-04 17:13:23.160225 INFO::Fitting model to feature number 231, ko00471
+2025-04-04 17:13:23.165961 INFO::Fitting model to feature number 232, ko00472
+2025-04-04 17:13:23.171038 INFO::Fitting model to feature number 233, ko00473
+2025-04-04 17:13:23.176145 INFO::Fitting model to feature number 234, ko05111
+2025-04-04 17:13:23.182793 INFO::Fitting model to feature number 235, ko04510
+2025-04-04 17:13:23.188911 INFO::Fitting model to feature number 236, ko04810
+2025-04-04 17:13:23.19281 INFO::Fitting model to feature number 237, ko04210
+2025-04-04 17:13:23.201809 INFO::Fitting model to feature number 238, ko00240
+2025-04-04 17:13:23.20764 INFO::Fitting model to feature number 239, ko04012
+2025-04-04 17:13:23.211933 INFO::Fitting model to feature number 240, ko04013
+2025-04-04 17:13:23.217759 INFO::Fitting model to feature number 241, ko04010
+2025-04-04 17:13:23.222239 INFO::Fitting model to feature number 242, ko04011
+2025-04-04 17:13:23.226593 INFO::Fitting model to feature number 243, ko00944
+2025-04-04 17:13:23.234993 INFO::Fitting model to feature number 244, ko04113
+2025-04-04 17:13:23.241913 INFO::Fitting model to feature number 245, ko04070
+2025-04-04 17:13:23.247532 INFO::Fitting model to feature number 246, ko04640
+2025-04-04 17:13:23.252639 INFO::Fitting model to feature number 247, ko04310
+2025-04-04 17:13:23.257536 INFO::Fitting model to feature number 248, ko03420
+2025-04-04 17:13:23.261562 INFO::Fitting model to feature number 249, ko00770
+2025-04-04 17:13:23.266557 INFO::Fitting model to feature number 250, ko02040
+2025-04-04 17:13:23.271131 INFO::Fitting model to feature number 251, ko04912
+2025-04-04 17:13:23.277691 INFO::Fitting model to feature number 252, ko00670
+2025-04-04 17:13:23.285804 INFO::Fitting model to feature number 253, ko04920
+2025-04-04 17:13:23.292011 INFO::Fitting model to feature number 254, ko05160
+2025-04-04 17:13:23.295865 INFO::Fitting model to feature number 255, ko04144
+2025-04-04 17:13:23.300821 INFO::Fitting model to feature number 256, ko00930
+2025-04-04 17:13:23.304642 INFO::Fitting model to feature number 257, ko04112
+2025-04-04 17:13:23.308641 INFO::Fitting model to feature number 258, ko04720
+2025-04-04 17:13:23.314351 INFO::Fitting model to feature number 259, ko04722
+2025-04-04 17:13:23.318225 INFO::Fitting model to feature number 260, ko04075
+2025-04-04 17:13:23.367739 INFO::Counting total values for each feature
+2025-04-04 17:13:23.385756 INFO::Writing filtered data to file Maaslin2_results_Group/features/filtered_data.tsv
+2025-04-04 17:13:23.408345 INFO::Writing filtered, normalized data to file Maaslin2_results_Group/features/filtered_data_norm.tsv
+2025-04-04 17:13:23.431393 INFO::Writing filtered, normalized, transformed data to file Maaslin2_results_Group/features/filtered_data_norm_transformed.tsv
+2025-04-04 17:13:23.448834 WARNING::Deleting existing residuals file: Maaslin2_results_Group/fits/residuals.rds
+2025-04-04 17:13:23.454149 INFO::Writing residuals to file Maaslin2_results_Group/fits/residuals.rds
+2025-04-04 17:13:23.460675 WARNING::Deleting existing fitted file: Maaslin2_results_Group/fits/fitted.rds
+2025-04-04 17:13:23.465359 INFO::Writing fitted values to file Maaslin2_results_Group/fits/fitted.rds
+2025-04-04 17:13:23.470687 INFO::Writing all results to file (ordered by increasing q-values): Maaslin2_results_Group/all_results.tsv
+2025-04-04 17:13:23.482412 INFO::Writing the significant results (those which are less than or equal to the threshold of 0.250000 ) to file (ordered by increasing q-values): Maaslin2_results_Group/significant_results.tsv
+2025-04-04 17:13:23.487661 INFO::Writing heatmap of significant results to file: Maaslin2_results_Group/heatmap.pdf
+2025-04-04 17:13:23.501313 INFO::Writing association plots (one for each significant association) to output folder: Maaslin2_results_Group
+2025-04-04 17:13:23.506433 INFO::Plotting associations from most to least significant, grouped by metadata
+2025-04-04 17:13:23.508566 INFO::Plotting data for metadata number 1, Group
+2025-04-04 17:13:23.511743 INFO::Creating boxplot for categorical data, Group vs ko00785
+2025-04-04 17:13:23.678998 INFO::Creating boxplot for categorical data, Group vs ko00195
+2025-04-04 17:13:23.828894 INFO::Creating boxplot for categorical data, Group vs ko00196
+2025-04-04 17:13:23.97274 INFO::Creating boxplot for categorical data, Group vs ko03008
+2025-04-04 17:13:24.107022 INFO::Creating boxplot for categorical data, Group vs ko04614
+2025-04-04 17:13:24.260309 INFO::Creating boxplot for categorical data, Group vs ko00550
+2025-04-04 17:13:24.444678 INFO::Creating boxplot for categorical data, Group vs ko04330
+2025-04-04 17:13:24.595829 INFO::Creating boxplot for categorical data, Group vs ko04930
+2025-04-04 17:13:24.749048 INFO::Creating boxplot for categorical data, Group vs ko04310
+2025-04-04 17:13:24.893163 INFO::Creating boxplot for categorical data, Group vs ko05220
+2025-04-04 17:13:25.04971 INFO::Creating boxplot for categorical data, Group vs ko00190
+2025-04-04 17:13:25.192982 INFO::Creating boxplot for categorical data, Group vs ko00130
+2025-04-04 17:13:25.369758 INFO::Creating boxplot for categorical data, Group vs ko05215
+2025-04-04 17:13:25.516565 INFO::Creating boxplot for categorical data, Group vs ko04914
+2025-04-04 17:13:25.684404 INFO::Creating boxplot for categorical data, Group vs ko00710
+2025-04-04 17:13:25.81481 INFO::Creating boxplot for categorical data, Group vs ko04612
+2025-04-04 17:13:25.95292 INFO::Creating boxplot for categorical data, Group vs ko04621
+2025-04-04 17:13:26.102742 INFO::Creating boxplot for categorical data, Group vs ko00944
+2025-04-04 17:13:26.266876 INFO::Creating boxplot for categorical data, Group vs ko05143
+2025-04-04 17:13:26.418657 INFO::Creating boxplot for categorical data, Group vs ko00906
+2025-04-04 17:13:26.578077 INFO::Creating boxplot for categorical data, Group vs ko00364
+2025-04-04 17:13:26.720583 INFO::Creating boxplot for categorical data, Group vs ko00908
+2025-04-04 17:13:26.904866 INFO::Creating boxplot for categorical data, Group vs ko04712
+2025-04-04 17:13:27.05042 INFO::Creating boxplot for categorical data, Group vs ko00523
+2025-04-04 17:13:27.203818 INFO::Creating boxplot for categorical data, Group vs ko05150
+2025-04-04 17:13:27.357109 INFO::Creating boxplot for categorical data, Group vs ko03430
+2025-04-04 17:13:27.541585 INFO::Creating boxplot for categorical data, Group vs ko05142
+2025-04-04 17:13:27.676387 INFO::Creating boxplot for categorical data, Group vs ko03030
+2025-04-04 17:13:27.814821 INFO::Creating boxplot for categorical data, Group vs ko00643
+2025-04-04 17:13:27.954431 INFO::Creating boxplot for categorical data, Group vs ko00230
+2025-04-04 17:13:28.122235 INFO::Creating boxplot for categorical data, Group vs ko03440
+2025-04-04 17:13:28.266113 INFO::Creating boxplot for categorical data, Group vs ko04622
+2025-04-04 17:13:28.419761 INFO::Creating boxplot for categorical data, Group vs ko03010
+2025-04-04 17:13:28.558004 INFO::Creating boxplot for categorical data, Group vs ko04112
+2025-04-04 17:13:28.695795 INFO::Creating boxplot for categorical data, Group vs ko00860
+2025-04-04 17:13:28.843397 INFO::Creating boxplot for categorical data, Group vs ko00400
+2025-04-04 17:13:28.982728 INFO::Creating boxplot for categorical data, Group vs ko00901
+2025-04-04 17:13:29.141281 INFO::Creating boxplot for categorical data, Group vs ko00630
+2025-04-04 17:13:29.360091 INFO::Creating boxplot for categorical data, Group vs ko05211
+2025-04-04 17:13:29.534971 INFO::Creating boxplot for categorical data, Group vs ko05340
+2025-04-04 17:13:29.711359 INFO::Creating boxplot for categorical data, Group vs ko00250
+2025-04-04 17:13:29.87061 INFO::Creating boxplot for categorical data, Group vs ko04960
+2025-04-04 17:13:30.017685 INFO::Creating boxplot for categorical data, Group vs ko00624
+2025-04-04 17:13:30.183703 INFO::Creating boxplot for categorical data, Group vs ko00240
+2025-04-04 17:13:30.338825 INFO::Creating boxplot for categorical data, Group vs ko02060
+2025-04-04 17:13:30.506141 INFO::Creating boxplot for categorical data, Group vs ko00970
+2025-04-04 17:13:30.669472 INFO::Creating boxplot for categorical data, Group vs ko04122
+2025-04-04 17:13:30.861851 INFO::Creating boxplot for categorical data, Group vs ko03060
+2025-04-04 17:13:31.023035 INFO::Creating boxplot for categorical data, Group vs ko00100
+2025-04-04 17:13:31.167225 INFO::Creating boxplot for categorical data, Group vs ko00909
+2025-04-04 17:13:31.32666 INFO::Creating boxplot for categorical data, Group vs ko03013
+2025-04-04 17:13:31.479026 INFO::Creating boxplot for categorical data, Group vs ko05410
+2025-04-04 17:13:31.618363 INFO::Creating boxplot for categorical data, Group vs ko05219
+2025-04-04 17:13:31.763349 INFO::Creating boxplot for categorical data, Group vs ko00965
+2025-04-04 17:13:31.954799 INFO::Creating boxplot for categorical data, Group vs ko05222
+2025-04-04 17:13:32.137087 INFO::Creating boxplot for categorical data, Group vs ko05416
+2025-04-04 17:13:32.270772 INFO::Creating boxplot for categorical data, Group vs ko05210
+2025-04-04 17:13:32.431915 INFO::Creating boxplot for categorical data, Group vs ko04115
+2025-04-04 17:13:32.563287 INFO::Creating boxplot for categorical data, Group vs ko00361
+2025-04-04 17:13:32.701818 INFO::Creating boxplot for categorical data, Group vs ko00281
+2025-04-04 17:13:32.83922 INFO::Creating boxplot for categorical data, Group vs ko05145
+2025-04-04 17:13:32.974927 INFO::Creating boxplot for categorical data, Group vs ko00053
+2025-04-04 17:13:33.114674 INFO::Creating boxplot for categorical data, Group vs ko00030
+2025-04-04 17:13:33.276145 INFO::Creating boxplot for categorical data, Group vs ko04080
+2025-04-04 17:13:33.413758 INFO::Creating boxplot for categorical data, Group vs ko00900
+2025-04-04 17:13:33.572975 INFO::Creating boxplot for categorical data, Group vs ko01055
+2025-04-04 17:13:33.70097 INFO::Creating boxplot for categorical data, Group vs ko00312
+2025-04-04 17:13:33.835477 INFO::Creating boxplot for categorical data, Group vs ko02030
+2025-04-04 17:13:34.030028 INFO::Creating boxplot for categorical data, Group vs ko00121
+2025-04-04 17:13:34.166796 INFO::Creating boxplot for categorical data, Group vs ko05014
+2025-04-04 17:13:34.317119 INFO::Creating boxplot for categorical data, Group vs ko01056
+2025-04-04 17:13:34.479649 INFO::Creating boxplot for categorical data, Group vs ko00040
+2025-04-04 17:13:34.619028 INFO::Creating boxplot for categorical data, Group vs ko00623
+2025-04-04 17:13:34.756456 INFO::Creating boxplot for categorical data, Group vs ko04910
+2025-04-04 17:13:34.890941 INFO::Creating boxplot for categorical data, Group vs ko04210
+2025-04-04 17:13:35.03435 INFO::Creating boxplot for categorical data, Group vs ko00625
+2025-04-04 17:13:35.17216 INFO::Creating boxplot for categorical data, Group vs ko04972
+2025-04-04 17:13:35.328892 INFO::Creating boxplot for categorical data, Group vs ko02040
+2025-04-04 17:13:35.467324 INFO::Creating boxplot for categorical data, Group vs ko00620
+2025-04-04 17:13:35.632255 INFO::Creating boxplot for categorical data, Group vs ko00680
+2025-04-04 17:13:35.816335 INFO::Creating boxplot for categorical data, Group vs ko04973
+2025-04-04 17:13:35.966137 INFO::Creating boxplot for categorical data, Group vs ko00591
+2025-04-04 17:13:36.146302 INFO::Creating boxplot for categorical data, Group vs ko05322
+2025-04-04 17:13:36.290405 INFO::Creating boxplot for categorical data, Group vs ko02020
+2025-04-04 17:13:36.439697 INFO::Creating boxplot for categorical data, Group vs ko00290
+2025-04-04 17:13:36.609658 INFO::Creating boxplot for categorical data, Group vs ko05012
+2025-04-04 17:13:36.775121 INFO::Creating boxplot for categorical data, Group vs ko03320
+2025-04-04 17:13:36.936609 INFO::Creating boxplot for categorical data, Group vs ko03020
+2025-04-04 17:13:37.134099 INFO::Creating boxplot for categorical data, Group vs ko00982
+2025-04-04 17:13:37.276459 INFO::Creating boxplot for categorical data, Group vs ko04011
+2025-04-04 17:13:37.414252 INFO::Creating boxplot for categorical data, Group vs ko04113
+2025-04-04 17:13:37.547147 INFO::Creating boxplot for categorical data, Group vs ko04920
+2025-04-04 17:13:37.704709 INFO::Creating boxplot for categorical data, Group vs ko04075
+2025-04-04 17:13:37.837315 INFO::Creating boxplot for categorical data, Group vs ko00513
+2025-04-04 17:13:37.987938 INFO::Creating boxplot for categorical data, Group vs ko04146
+2025-04-04 17:13:38.167265 INFO::Creating boxplot for categorical data, Group vs ko00590
+2025-04-04 17:13:38.334693 INFO::Creating boxplot for categorical data, Group vs ko00980
+2025-04-04 17:13:38.470912 INFO::Creating boxplot for categorical data, Group vs ko00521
+2025-04-04 17:13:38.61549 INFO::Creating boxplot for categorical data, Group vs ko00340
+2025-04-04 17:13:38.74572 INFO::Creating boxplot for categorical data, Group vs ko02010
+2025-04-04 17:13:38.875923 INFO::Creating boxplot for categorical data, Group vs ko05200
+2025-04-04 17:13:39.011693 INFO::Creating boxplot for categorical data, Group vs ko00471
+2025-04-04 17:13:39.146904 INFO::Creating boxplot for categorical data, Group vs ko00010
+2025-04-04 17:13:39.283785 INFO::Creating boxplot for categorical data, Group vs ko03050
+2025-04-04 17:13:39.473674 INFO::Creating boxplot for categorical data, Group vs ko04144
+2025-04-04 17:13:39.61357 INFO::Creating boxplot for categorical data, Group vs ko05010
+2025-04-04 17:13:39.755591 INFO::Creating boxplot for categorical data, Group vs ko00480
+2025-04-04 17:13:39.888883 INFO::Creating boxplot for categorical data, Group vs ko00020
+2025-04-04 17:13:40.09351 INFO::Creating boxplot for categorical data, Group vs ko00410
+2025-04-04 17:13:40.260406 INFO::Creating boxplot for categorical data, Group vs ko03070
+2025-04-04 17:13:40.417512 INFO::Creating boxplot for categorical data, Group vs ko00622
+2025-04-04 17:13:40.558653 INFO::Creating boxplot for categorical data, Group vs ko00660
+2025-04-04 17:13:40.730627 INFO::Creating boxplot for categorical data, Group vs ko04260
+2025-04-04 17:13:40.884881 INFO::Creating boxplot for categorical data, Group vs ko00330
+2025-04-04 17:13:41.0269 INFO::Creating boxplot for categorical data, Group vs ko00473
+2025-04-04 17:13:41.182879 INFO::Creating boxplot for categorical data, Group vs ko03420
+2025-04-04 17:13:41.318882 INFO::Creating boxplot for categorical data, Group vs ko00061
+2025-04-04 17:13:41.469678 INFO::Creating boxplot for categorical data, Group vs ko04974
+2025-04-04 17:13:41.619811 INFO::Creating boxplot for categorical data, Group vs ko00380
+2025-04-04 17:13:41.780301 INFO::Creating boxplot for categorical data, Group vs ko03018
+2025-04-04 17:13:41.944847 INFO::Creating boxplot for categorical data, Group vs ko00232
+2025-04-04 17:13:42.151028 INFO::Creating boxplot for categorical data, Group vs ko03450
+2025-04-04 17:13:42.28473 INFO::Creating boxplot for categorical data, Group vs ko04964
+2025-04-04 17:13:42.420512 INFO::Creating boxplot for categorical data, Group vs ko00440

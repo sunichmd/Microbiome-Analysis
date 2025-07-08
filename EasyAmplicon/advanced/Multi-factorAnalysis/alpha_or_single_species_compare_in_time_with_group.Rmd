@@ -1,0 +1,171 @@
+# 多分组对单物种、alpha多样性丰度影响
+
+如以后进行封装可注意：
+
+1. 设置wilcox or ttest 2. 设置是否配对；配对的话注意样本需要调整数据 3. 多个分组下分开按多个分组计算 4. 多个时间点自动生成compareL = list(c("0m","6m"),c("6m","12m"))
+
+## 箱线图比较alpha/单物种 在不同分组下；不同时间点两两差异
+```{r}
+compareL = list(c("0m","6m"),c("6m","12m"))
+for(name in c("faith_pd","shannon_entropy","pielou_evenness","observed_features")){
+  
+		pairdata = read.table(paste0("result/alpha/alpha.txt"),header=T,sep='\t',row.names = 1)
+		metadata = read.table(paste0("result/metadata.txt"),header=T,sep='\t',row.names = 1)
+		
+		pairdata = pairdata[rownames(metadata),]
+		pairdata$Group = metadata[rownames(pairdata),"Group1"]
+		pairdata$Time = metadata[rownames(pairdata),"Time"]
+		metadata$pair = metadata$Person
+		pairdata$pair = metadata[rownames(pairdata),"pair"]
+		
+		data = pairdata[,c(name,"Group","pair","Time")]
+		compareL = list(c("0m","6m"),c("6m","12m"))
+		p_time = list()
+		
+		data = data[order(data$pair),]
+		data = data[!(data$pair %in% c("FF4","FF6")),]
+		
+		for(j in c("FF","FA","AA")){
+		  if(j == "FF"){col = c1}
+		  if(j == "FA"){col = c2}
+		  if(j == "AA"){col = c3}
+			p = ggboxplot(subset(data,Group==j), x="Time", y=name, fill = "Time",
+										palette = col,add="jitter")
+			p
+			p_time[[paste0(i,j)]] = p + 
+			  stat_compare_means(comparisons=compareL,paired = T,method ="wilcox") +
+				theme(plot.title = element_text(hjust = 0.5)) +
+				labs(title = j,x=NULL,y=paste(name)) + 
+			  stat_compare_means(method ="anova",label.y = max(data[[name]]+(max(data[[name]])-min(data[[name]]))*0.03),label.x = 2)
+			p_time[[paste0(i,j)]]
+			ggsave(paste0("result/alpha/pair_boxplot_",j,"_",name,"_wilcox.pdf"),p_time[[paste0(i,j)]],height = 6,width=7)
+		}
+}
+
+p1 = ggarrange(p_time[[paste0(i,"FF")]],p_time[[paste0(i,"FA")]],p_time[[paste0(i,"AA")]],nrow = 1)
+p1
+
+for i in result/alpha/pair_boxplot*.pdf;do start $i;done
+```
+## T-Test配对分析 Alpha多样性
+
+```{r}
+library(vegan)
+library(cowplot)
+library(ggplot2)
+library(tidyverse)
+library(ggpubr)
+library(stringr)
+library(ggrepel)
+#pairdata = read.table("3_amplicon_diversity/alpha/alpha_otu.txt.metadata.txt")
+pairdata = read.table("alpha_otu.txt",header=T,sep='\t',row.names = 1)
+metadata = read.table("../metadata.txt",header=T,sep='\t',row.names = 1)
+a = colnames(pairdata)
+pairdata$Group = metadata[rownames(pairdata),"Group1"]
+metadata$pair = str_split(metadata[,1],"_",simplify = T)[,1]
+pairdata$pair = str_split(metadata[rownames(pairdata),1],"_",simplify = T)[,1]
+```
+
+### Alpha多样性指标 – `r a[1]`
+
+```{r}
+data = pairdata[,c(a[1],"Group","pair")]
+p = ggpaired(data, x = 'Group', y = a[1],id='pair',
+         color = 'Group', palette = "jco", 
+         line.color = "gray", line.size = 0.4,
+         short.panel.labs = FALSE,
+         method = "t.test",paired = TRUE) +
+  stat_compare_means(method = "t.test",paired = TRUE)
+print(p)
+ggsave(paste0("otu_",a[1],"pair_t.pdf"),p)
+
+```
+`r a[1]`指数分布配对箱线图。箱线图展示每组的Alpha多样性`r a[1]`指数分布（每个点代表一个样品的多样性指数）。箱体内水平线表示中位数，箱体上边缘线和下边缘线分别代表第三四分位数和第一四分位数，箱体上下各画一条线段延伸至非异常值的最远点，其表示该组数据Alpha多样性正常值的分布区间。并且通过配对T-test分析比较组间的Alpha多样性是否差异显著。  [[原图PDF]](3_amplicon_diversity/alpha/otu_`r a[1]`pair_t.pdf)
+
+## 线图比较alpha/单物种 在不同分组下；不同时间点两两差异
+```{r}
+library(lme4)
+library(lmerTest)
+library(dplyr)
+library(tidyr)
+```
+
+```{r,echo=F}
+## 读入原始OTU表
+metadata_file="metadata_final_LMM.txt" # metadata里可以放只要分析的样本
+file2="KEGG.Pathway.raw.txt"
+cor_method = "spearman"
+
+# 可以用tax文件夹里的sum_g.txt 名字就不会太长
+otu_all = read.table("sum_g.txt", header=T, sep="\t", quote = "", row.names=1, comment.char="")
+
+# 是否要进行标准化！！！注意读入数据是otutab表则需要标准化，读入物种表则不需要
+if(F){
+  otu = otu_all/colSums(otu_all,na=T) * 100
+}else{
+  otu = otu_all
+}
+
+otu = as.data.frame(t(otu))
+
+metadata<- read.table(metadata_file,header = T,sep="\t", quote = "", row.names=1, comment.char="")
+
+common_sample =  Reduce(intersect,list(rownames(metadata),
+                                       rownames(otu)))
+
+metadata = metadata[common_sample,]
+
+otu = otu[common_sample,]
+otu = otu[,!(colSums(otu)==0)]
+
+tax_ana = merge(otu,metadata,by=0)
+colnames(tax_ana)
+# ~前面放感兴趣的物种名，基于上一条colnames(tax_ana)结果，对于这个数据物种名太长以及包含特殊字符，需要用反引号引起来
+# ~后面放感兴趣的分组，基于colnames(tax_ana)结果
+# 1 | 随机效应 -- 可放样本列、病人信息、批次信息等
+model <- lmer(Lactobacillus ~ Neovagina_type * Timeline + (1 | batch_effect), data = tax_ana)
+
+summary(model)
+
+library(emmeans)
+summary(emmeans(model, pairwise ~ Neovagina_type * Timeline))
+```
+
+```{r}
+library(ggplot2)
+unique(tax_ana$Timeline)
+# 下面这个 levels = c("0d",2w","2months","3_7months","2year_up") 顺序很重要，需要依据自己情况调整，决定了后面图形的x轴的顺序。
+tax_ana$Timeline = factor(tax_ana$Timeline,
+                       levels = c("0d","2w","2months","3_7months","2year_up"))
+p = ggplot(tax_ana, aes(x = Timeline, y = Lactobacillus`, color = Neovagina_type, group = Neovagina_type)) +
+  #stat_summary(fun = mean, geom = "line", size = 1) + 不展示原有曲线曲线 
+  stat_summary(fun = mean, geom = "point", size = 3) +
+  theme_minimal() +
+  labs(title = "Species abundance over time",
+       x = "Timepoint",
+       y = "Mean abundance") +
+  # 加入拟合曲线 + 置信区间
+  geom_smooth(
+    method = "loess",        # 或 method = "lm"（线性）
+    se = TRUE,               # 是否显示置信区间
+    span = 0.8,              # loess 平滑程度，0.5~1 常用
+    aes(group = Neovagina_type,fill = Neovagina_type),      # 按分组拟合
+    size = 0.8,
+    alpha = 0.2              # 置信区间透明度
+  ) + 
+  ylim(0, 1) # 设置y轴范围
+print(p)
+
+p = ggplot(tax_ana, aes(x = Timeline, y = `Lactobacillus`, color = Neovagina_type, group = Neovagina_type)) +
+  stat_summary(fun = mean, geom = "line", size = 1) +
+  stat_summary(fun = mean, geom = "point", size = 3) +
+  theme_minimal() +
+  labs(title = "Species abundance over time",
+       x = "Timepoint",
+       y = "Mean abundance")
+
+print(p)
+#  p值可基于以上结果自己在图中加上
+ggsave("tax_line.pdf",p)
+```
+
