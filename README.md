@@ -98,8 +98,3 @@
  - 添加alpha_calculate_pd.R；R计算7种alpha多样性【pd多样性计算需提供进化树】
 
 > 本项目所有衍生流程保留原始作者署名与协议，并明确标注改动内容，旨在促进微生物组数据处理的复用性与模块化。
-
-This project is a derivative of EasyAmplicon, EasyMetagenome, and EasyMicrobiome by Yongxin Liu, originally distributed under the GNU General Public License v3.0.
-All modifications to the original code are also distributed under the same license.
-=======
->>>>>>> 1114af2cc93995c9647546431d51a5ac3c660e58
