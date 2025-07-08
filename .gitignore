@@ -1,2 +1,6 @@
 ./EasyAmplicon/qiime2/gg_2024.09.backbone.full-length.nb.qza
 ./EasyAmplicon/qiime2/silva-138-99-qiime24.10-nb-classifier.qza
+./EasyMicrobiome/usearch/greengene2_2022.10.seqs.usearch.zip
+./EasyMicrobiome/usearch/greengene2_2022.10_raw_data.zip
+./EasyMicrobiome/usearch/silva-138-99-seqs.usearch.zip
+./EasyMicrobiome/usearch/silva_138_raw_data_from_qiime2.zip

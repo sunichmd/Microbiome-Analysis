@@ -8,8 +8,8 @@
 
 ### Qiime2 流程修改
 - qiime2数据库文件更新
- - 添加数据库：符合2024.10版qiime2的silva数据库
- - 添加数据库：greenggene2_24_09数据库
+ - 添加数据库：符合2024.10版qiime2的silva数据库，下载链接：https://figshare.com/ndownloader/files/56053826
+ - 添加数据库：greenggene2_24_09数据库，下载链接：https://figshare.com/ndownloader/files/56053796
  - 添加数据库：口腔微生物数据库HOMD v15.23数据库
 - pipeline_qiime2.sh 进行优化为pipeline_qiime2_4ana.sh
  - 添加设置：export UNIFRAC_MAX_CPU=basic  #CPU不支持 AVX2的解决方法
@@ -22,7 +22,7 @@
 
 ### Usearch+Vsearch 流程（window系统和Linux系统）
 - pipeline.sh 进行优化为pipeline_4ana.sh
- - 增加可选的数据库：silva-138-99-seqs.usearch.fa greengene2_2022.10.seqs.usearch.fna
+ - 增加可选的数据库：silva-138-99-seqs.usearch.fa（下载链接：https://figshare.com/ndownloader/files/56056067） greengene2_2022.10.seqs.usearch.fna（下载链接：https://figshare.com/ndownloader/files/56056076）
  - 使用${db}/script/alpha_boxplot1.R；调整alpha统计结果输出以及支持修改图中分组顺序
  - 使用${db}/script/beta_pcoa2.R：输出pcoa+boxplot 展示分组是否在不同pc上存在差异
  - 使用${db}/script/tax_stackplot1.R：输出画图所用数据，支持修改图中分组顺序以及支持输入第二分组对图形进行分面绘制
