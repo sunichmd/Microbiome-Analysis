@@ -1,100 +1,118 @@
-# Microbiome-Analysis
+## Microbiome Analysis Project (English Version)
 
-本项目整理并优化了多个微生物组分析流程，主要包括：
+This project consolidates and optimizes multiple workflows for microbiome data analysis, mainly covering:
 
-## EasyAmplicon
 
-本流程基于 [YongxinLiu/EasyAmplicon](https://github.com/YongxinLiu/EasyAmplicon) 仓库（版本：2025年4月）进行修改与优化。原项目使用 GPL v3 协议发布，本项目遵循相同协议，并在其基础上加入了更丰富的绘图与结果输出模块。
 
-### Qiime2 流程修改
-- qiime2数据库文件更新
- - 添加数据库：符合2024.10版qiime2的silva数据库，下载链接：https://figshare.com/ndownloader/files/56053826
- - 添加数据库：greenggene2_24_09数据库，下载链接：https://figshare.com/ndownloader/files/56053796
- - 添加数据库：口腔微生物数据库HOMD v15.23数据库
-- pipeline_qiime2.sh 进行优化为pipeline_qiime2_4ana.sh
- - 添加设置：export UNIFRAC_MAX_CPU=basic  #CPU不支持 AVX2的解决方法
- - 更新代码：物种注释数据库训练代码
- - 添加代码：整理qiime2结果变为常见人类可读文件格式
- - 添加代码：基于R对qiime2结果进行可视化代码
- - 添加代码：整理数据为lefse输入数据格式；实现lefse分析
- - 添加代码：qiime2 longitudinal对alpha多样性、beta多样性和物种丰度的分析
- - 添加代码：alpha.txt beta.txt 转为qza格式
+### EasyAmplicon
 
-### Usearch+Vsearch 流程（window系统和Linux系统）
-- pipeline.sh 进行优化为pipeline_4ana.sh
- - 增加可选的数据库：silva-138-99-seqs.usearch.fa（下载链接：https://figshare.com/ndownloader/files/56056067） greengene2_2022.10.seqs.usearch.fna（下载链接：https://figshare.com/ndownloader/files/56056076）
- - 使用${db}/script/alpha_boxplot1.R；调整alpha统计结果输出以及支持修改图中分组顺序
- - 使用${db}/script/beta_pcoa2.R：输出pcoa+boxplot 展示分组是否在不同pc上存在差异
- - 使用${db}/script/tax_stackplot1.R：输出画图所用数据，支持修改图中分组顺序以及支持输入第二分组对图形进行分面绘制
- - 使用${db}/script/tax_circlize_xlim90.R：图形X轴文字旋转90度另外可指定输出结果位置
- - 使用${db}/script/compare_volcano1.R: 解决颜色容易错误分配以及部分结果展示不全的问题
- - 使用${db}/script/compare_heatmap1.sh：设置输入行的注释信息非必须
- - 附录增加2.1：可以解决样本序列文件为fasta文件的情况
+This workflow is modified from the [YongxinLiu/EasyAmplicon](https://github.com/YongxinLiu/EasyAmplicon) repository (version: April 2025).
+The original project was released under the GPL v3 license, which is also adopted here. On top of that, this version introduces enhanced visualization and output modules.
 
-### Vsearch流程（Mac系统）
-- 更新了pipeline.sh
- - 修改cat -A为cat -vet 兼容Mac系统
- - 添加R计算alpha稀释曲线
- - 添加R计算beta多样性结果
+#### Updates to Qiime2 Pipeline
 
-### 通用分析
-- 添加advanced/BatchCorrect文件夹：
- - 评估批次影响
- - 4种批次矫正的方法：MMUPHin、removeBatchEffect、ComBat、Percentile Normalisation
-- 修改advanced/SourceTrackerFeast文件夹：
- - 增加SourceTracker1.r修正SourceTracker.r报错（由于一些R包更新数据类型的报错）
-- 修改advanced/SourceTrackerFeast文件夹：
- - 增加FEAST1.Rmd 时间个体样本一一对应溯源分析
-- 添加advanced/Multi-factorAnalysis文件夹：
- - 分析多因素情况下alpha多样性变化
- - 分析多因素情况下beta多样性变化
- - 分析多因素情况下物种丰度变化
- - 对于时间+分组分类可考虑qiime的longitudinal分析
-- 修改advanced/RandomForestClassification文件夹：
- - 增加RF_classification_onegroup.Rmd调整设置随机抽样数据作为测试集和验证集，增加AUC曲线；绘制所有样本热图
-- 添加advanced/Net_SingleMulti_Vis文件夹：
- - 添加One_cmd_calculate_net_onefile_twofile.Rmd，实现一行代码计算单文件或两个文件相关性网络并可视化
-  - 计算每组相关性网络
-  - 可视化网络
-  - 计算zipi
-  - 计算网络属性+可视化网络边数
-  - 可进行网络模块分析
-  - 网络稳定性评估
-  - 基于qgraph包实现类graph的布局
-  - 整理结果可导入graphi可视化
-  - 整理结果可导入cytoscape可视化
-  - 可用R调用cytoscape可视化
-  - 统计核心物种
- - sparcc_vis_as_cellParper.Rmd，基于sparcc计算网络并且在R进行可视化（复现cell文章）
- - cor_2file.Rmd 计算简单相关性网络；生成可交互结果
-- 添加Phytopathogen_Bac_predict文件夹：实现细菌的致病性功能预测以及差异分析
-- 添加advanced/calulate_core_otu_by_usearch_treeplot.Rmd：基于Usearch计算核心物种并绘制进化树
-- 添加advanced/adonis_lost_variable_solution.Rmd：解决adnois分析中无法评估一些变量影响
-- 添加advanced/calulate_each_tax_raw_count.Rmd：计算物种水平数据的alpha多样性和beta多样性
-- 添加advanced/PCoA_density_compare_multi-factor.Rmd：绘制PCOA图+密度曲线以及比较不同分组在PCo上是否存在差异
-- 添加advanced/Fungi_function_predict.Rmd：真菌功能注释
-- 添加advanced/calculate_Bray-Curtis_dissimilarities.Rmd：计算Bray-Curtis dissimilarities
-- 添加advanced/Other_ana.Rmd（不常用分析）
- - adonism分析
- - R实现lefse分析
- - 绘制三元图（只适合三组数据）
- - NMDS展示beta多样性差异
- - 整理greengene2数据库为usearch注释可用
- - 计算相对丰度的alpha多样性
- - 计算物种累积曲线评估样本个数是否达到饱和
- - 物种相对丰度冲击图
- - svd分析
-## EasyMetagenome
+* **Database Updates**
 
-本流程基于 [YongxinLiu/EasyMetagenome](https://github.com/YongxinLiu/EasyMetagenome) 仓库（版本：2024年12月）进行修改优化，主要针对文件结构与兼容性进行了整理。
+  * Added `silva` database (Qiime2 v2024.10 compatible): [Download link](https://figshare.com/ndownloader/files/56053826)
+  * Added `greengene2_24_09` database: [Download link](https://figshare.com/ndownloader/files/56053796)
+  * Added `HOMD v15.23` database for oral microbiome
 
-## EasyMicrobiome
+* **Pipeline Optimization (pipeline_qiime2_4ana.sh)**
 
-本流程基于 [YongxinLiu/EasyMicrobiome](https://github.com/YongxinLiu/EasyMicrobiome) 仓库（版本：2024年12月）修改，并重构部分参数与默认模块以适配批量运行需求。
+  * Added: `export UNIFRAC_MAX_CPU=basic` to handle AVX2-incompatible CPUs
+  * Updated: taxonomy classifier training script
+  * Added: conversion of Qiime2 output into human-readable tables
+  * Added: R-based visualization scripts for Qiime2 results
+  * Added: LEfSe-compatible format conversion + LEfSe analysis
+  * Added: longitudinal analysis (alpha/beta diversity, taxa abundance)
+  * Added: alpha.txt and beta.txt conversion into `.qza` format
 
-更新内容：
-- usearch文件夹增加 greengene2数据库（基于2022.10月更新的数据库整理）、和silva-138数据库（基于qiime2整理好的数据库进行整理）
-- script文件夹
- - 添加alpha_calculate_pd.R；R计算7种alpha多样性【pd多样性计算需提供进化树】
+#### Usearch + Vsearch Pipeline (Windows & Linux)
 
-> 本项目所有衍生流程保留原始作者署名与协议，并明确标注改动内容，旨在促进微生物组数据处理的复用性与模块化。
+* Refined pipeline into `pipeline_4ana.sh`
+
+* Optional reference DBs:
+
+  * `silva-138-99-seqs.usearch.fa`: [Download](https://figshare.com/ndownloader/files/56056067)
+  * `greengene2_2022.10.seqs.usearch.fna`: [Download](https://figshare.com/ndownloader/files/56056076)
+
+* Visualization Scripts:
+
+  * `alpha_boxplot1.R`: customizable alpha diversity plots with grouping
+  * `beta_pcoa2.R`: PCoA + boxplot with group-wise separation tests
+  * `tax_stackplot1.R`: customizable stacked plots with faceting
+  * `tax_circlize_xlim90.R`: circular taxonomic plots with rotated labels
+  * `compare_volcano1.R`: improved volcano plots with correct coloring
+  * `compare_heatmap1.sh`: heatmap with optional row annotation
+  * **Appendix 2.1**: support for `.fasta` input sequence files
+
+#### Vsearch Pipeline (Mac OS)
+
+* Pipeline adjustments:
+
+  * Replace `cat -A` with `cat -vet` for macOS compatibility
+  * Added: R-based rarefaction curve (alpha diversity)
+  * Added: R-based beta diversity analysis
+
+
+### Advanced Analysis Modules
+
+* `BatchCorrect`: Evaluate and correct batch effects using MMUPHin, ComBat, removeBatchEffect, Percentile Normalization
+* `SourceTrackerFeast`: Bug-fixed SourceTracker1.r, added FEAST1.Rmd for individual-level source tracking over time
+* `Multi-factorAnalysis`: Alpha/beta/taxa comparisons under multifactor designs, supports Qiime2 longitudinal mode
+* `RandomForestClassification`: RF classification with group-wise sampling, AUC curve, full-sample heatmap
+* `Net_SingleMulti_Vis`: One-command correlation network analysis and visualization with qgraph/Cytoscape export
+
+  * Single-file or two-file correlation network construction
+  * Group-wise correlation network calculation
+  * Network property metrics (e.g., edge number, density)
+  * ZiPi index calculation
+  * Module (community) detection
+  * Network stability evaluation
+  * Layouts using qgraph-based pseudo-graph structure
+  * Export-ready results for Graphi visualization
+  * Export-ready results for Cytoscape visualization
+  * R-based automated Cytoscape plotting
+  * Core taxa identification and statistics
+* `sparcc_vis_as_cellPaper.Rmd`: Implements SparCC-based correlation network construction and visualization in R, following the layout and styling used in Cell publications.
+* `cor_2file.Rmd`: Computes basic correlation networks between features across two datasets, and generates interactive visual outputs.
+* `Phytopathogen_Bac_predict`: Pathogenic bacteria prediction + differential analysis
+* `calculate_core_otu_by_usearch_treeplot.Rmd`: Core OTU detection + phylogenetic tree
+* `adonis_lost_variable_solution.Rmd`: Fix variable-dropping issues in Adonis models
+* `calculate_each_tax_raw_count.Rmd`: Compute alpha/beta diversity at taxonomic levels
+* `PCoA_density_compare_multi-factor.Rmd`: PCoA density + statistical comparisons
+* `Fungi_function_predict.Rmd`: Fungal functional annotation
+* `calculate_Bray-Curtis_dissimilarities.Rmd`: Bray-Curtis computation
+* `Other_ana.Rmd`: Miscellaneous tools
+
+  * Adonis models
+  * LEfSe in R
+  * Ternary plots (for 3-group data)
+  * NMDS ordination
+  * Format greengene2 for usearch
+  * Relative abundance-based diversity
+  * Taxa accumulation curve
+  * Relative abundance impact plots
+  * SVD analysis
+
+---
+
+### EasyMetagenome
+
+Modified from [YongxinLiu/EasyMetagenome](https://github.com/YongxinLiu/EasyMetagenome) (version: Dec 2024), this version improves file structure and compatibility.
+
+
+### EasyMicrobiome
+
+Based on [YongxinLiu/EasyMicrobiome](https://github.com/YongxinLiu/EasyMicrobiome) (version: Dec 2024), this version has been partially refactored to support batch processing.
+
+#### Key Updates:
+
+* Added greengene2 (2022.10) and silva-138 databases into `usearch` folder
+* Added `alpha_calculate_pd.R` script: computes 7 types of alpha diversity (requires phylogenetic tree for PD index)
+
+---
+
+> All derivative workflows retain original authorship and licenses. Modifications are clearly documented with the goal of improving reusability and modularity in microbiome analysis.
+
+---

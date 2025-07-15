@@ -9,24 +9,6 @@ SSH_URL="git@github.com:sunichmd/${PROJECT_NAME}.git"
 
 echo "项目名称（目录名）：$PROJECT_NAME"
 
-# 输入任意参数即可检查大文件
-if [[ "$1" != "" ]]; then
-    echo "正在扫描大于 100MB 的文件..."
-    BIG_FILES=$(find . -type f -size +100M) # 单个文件不允许超过100M
-fi
-
-if [[ -n "$BIG_FILES" ]]; then
-    echo "检测到以下文件超过 100MB，已自动添加到 .gitignore："
-    echo "$BIG_FILES"
-    echo "$BIG_FILES" >> .gitignore
-    sort -u .gitignore -o .gitignore  # 去重
-	# 删除文件缓存
-	for i in `echo $BIG_FILES`;
-	do
-		git rm --cached $i
-	done
-fi
-
 if [ ! -d ".git" ]; then
     echo "第一次执行，初始化git仓库并推送"
     if [ ! -f "README.md" ]; then
